@@ -13,7 +13,7 @@ class MyApp extends App {
   static async getUser(req) {
     if (req) {
       const session = req.session
-      return session && session.passport && session.passport.user;
+      return session && session.passport && session.passport.user
     }
     try {
       const result = await axios.get(`${hub.baseUrl}/user`)
@@ -42,12 +42,12 @@ class MyApp extends App {
       return { pageProps, user }
     }
 
-    return redirect(ctx.res, '/login')
+    return redirect(ctx.res, '/logout')
   }
 
   render() {
-    const { Component, pageProps, user } = this.props;
-    const props = { ...pageProps, user };
+    const { Component, pageProps, user } = this.props
+    const props = { ...pageProps, user }
 
     return (
       <div>

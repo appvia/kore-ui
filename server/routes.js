@@ -1,29 +1,45 @@
 const Router = require('express').Router
 const app = require('./next')
 const { hubApi } = require('../config')
-const axios = require('axios').default;
+const axios = require('axios').default
 
 const passport = require('passport')
 const router = Router()
 
-router.get('/auth', async (req, res) => {
-  const url = `${hubApi.url}/auth`
+router.get('/login', async (req, res, next) => {
   try {
-    const result = await axios.get(url)
-    console.log('result', result.data);
-  } catch (err) {
-    throw new Error(err.message)
-  }
+    const result = await axios.get(`${hubApi.url}/auth`)
+    const providers = result.data
 
-  return app.render(req, res, '/about', req.query)
+    const configured = providers.filter(p => p.config)
+    if (configured.length) {
+
+      const { Strategy } = require(`passport-${configured[0].id}`)
+      passport.use(new Strategy(configured[0].config,
+        function(accessToken, refreshToken, profile, cb) {
+          // In this example, the user's Facebook profile is supplied as the user
+          // record.  In a production-quality application, the Facebook profile should
+          // be associated with a user record in the application's database, which
+          // allows for account linking and authentication with other identity
+          // providers.
+          console.log('passport', accessToken, refreshToken)
+          return cb(null, profile);
+        }
+      ));
+
+      req.configuredProviders = configured.map(p => ({ id: p.id, displayName: p.displayName }))
+      return app.render(req, res, '/login', req.query)
+    }
+    return res.redirect('/no-auth')
+  } catch (err) {
+    console.error('Error getting auth from API', err)
+    return next(err)
+  }
 })
 
 router.get('/user', (req, res) => {
-  console.log('/user req.sessionID', req.sessionID)
-  console.log('/user req.isAuthenticated()', req.isAuthenticated())
-  const user = req.session.passport && req.session.passport.user
-  console.log('/user user', user)
-  res.json(user || {})
+  const user = (req.session.passport && req.session.passport.user) || {}
+  res.json(user)
 })
 
 router.get('/login/github', passport.authenticate('github'));
@@ -35,7 +51,9 @@ router.get('/login/github/callback', passport.authenticate('github', { failureRe
 
 router.get('/logout', (req, res, next) => {
   req.session.destroy((err) => {
-    if(err) return next(err)
+    if (err){
+      return next(err)
+    }
     req.logout()
     res.redirect('/login')
   })
