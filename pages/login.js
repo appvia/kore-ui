@@ -1,4 +1,3 @@
-import * as React from 'react'
 import { Button, Row, Col, Card } from 'antd'
 
 const LoginPage = () => (
@@ -15,5 +14,12 @@ const LoginPage = () => (
     </Row>
   </div>
 )
+
+LoginPage.getInitialProps = () => {
+  return {
+    title: 'Login',
+    unrestrictedPage: true
+  }
+}
 
 export default LoginPage

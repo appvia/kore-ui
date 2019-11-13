@@ -12,4 +12,8 @@ const AboutPage = () => (
   </div>
 )
 
+AboutPage.getInitialProps = () => ({
+  title: 'About'
+})
+
 export default AboutPage
