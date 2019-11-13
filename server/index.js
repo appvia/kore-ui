@@ -1,14 +1,14 @@
-import express from 'express'
-import passport from 'passport'
-import { Strategy } from 'passport-github'
-import session from 'express-session'
-import cookieParser from 'cookie-parser'
+const express = require('express')
+const passport = require('passport')
+const { Strategy } = require('passport-github')
+const session = require('express-session')
+const cookieParser = require('cookie-parser')
 
-import app from './next'
-import * as config from '../config'
-import router from './routes'
+const app = require('./next')
+const { server } = require('../config')
+const router = require('./routes')
 
-const port = config.server.port
+const port = server.port
 
 passport.use(new Strategy({
     clientID: '148f318b091305adc9da',
@@ -58,12 +58,12 @@ app.prepare().then(() => {
 
   server.use(router)
 
-  server.all('*', (req: express.Request, res: express.Response) => {
+  server.all('*', (req, res) => {
     const handle = app.getRequestHandler()
     return handle(req, res)
   })
 
-  server.listen(port, (err: any) => {
+  server.listen(port, err => {
     if (err) {
       throw err
     }

@@ -1,7 +1,6 @@
-import { NextApiRequest, NextApiResponse } from 'next'
 import { sampleUserData } from '../../../utils/sample-data'
 
-export default (_: NextApiRequest, res: NextApiResponse) => {
+export default (_, res) => {
   try {
     if (!Array.isArray(sampleUserData)) {
       throw new Error('Cannot find user data')

@@ -6,12 +6,7 @@ import { Layout as AntLayout, Menu } from 'antd'
 
 const { Header, Footer, Content } = AntLayout
 
-type Props = {
-  title?: string
-  user?: any
-}
-
-const Layout: React.FunctionComponent<Props> = ({
+const Layout = ({
   children,
   title = 'This is the default title',
   user

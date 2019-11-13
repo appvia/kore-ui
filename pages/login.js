@@ -1,7 +1,7 @@
 import * as React from 'react'
 import { Button, Row, Col, Card } from 'antd'
 
-const LoginPage: React.FunctionComponent = () => (
+const LoginPage = () => (
   <div style={{ background: '#fff', padding: 24, minHeight: 280 }}>
     <Row type="flex" justify="center">
       <Col span={8}>

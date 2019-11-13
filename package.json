@@ -3,11 +3,8 @@
   "version": "1.0.0",
   "scripts": {
     "dev": "nodemon",
-    "build": "npm run build-next && npm run build-server",
-    "build-next": "next build",
-    "build-server": "tsc --project tsconfig.server.json",
-    "start": "node dist/index.js",
-    "type-check": "tsc"
+    "build": "next build",
+    "start": "node server/index.js"
   },
   "dependencies": {
     "@zeit/next-css": "^1.0.1",
