@@ -1,7 +1,7 @@
 import { Button, Row, Col, Card, Typography } from 'antd'
 const { Title } = Typography;
 
-const NoAuthPage = () => (
+const SetupAuthIndexPage = () => (
   <div style={{ background: '#fff', padding: 24, minHeight: 280 }}>
     <Row type="flex" justify="center">
       <Col span={24}>
@@ -18,11 +18,11 @@ const NoAuthPage = () => (
   </div>
 )
 
-NoAuthPage.getInitialProps = async () => {
+SetupAuthIndexPage.getInitialProps = async () => {
   return {
     title: 'No authentication provider configured',
     unrestrictedPage: true
   }
 }
 
-export default NoAuthPage
+export default SetupAuthIndexPage

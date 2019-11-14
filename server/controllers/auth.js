@@ -1,27 +1,18 @@
 const Router = require('express').Router
 const passport = require('passport')
 const app = require('../next')
-const axios = require('axios').default
-const { hubApi } = require('../../config')
 
-function getLogin() {
+function getLogin(authService) {
   return async (req, res, next) => {
     try {
-      const result = await axios.get(`${hubApi.url}/auth`)
-      const providers = result.data
-
-      const configured = providers.filter(p => p.config)
-      if (configured.length) {
-        const provider = configured[0].id
-        const config = configured[0].config
-        require('../lib/passport')(provider)(config)
-
-        req.configuredProviders = configured.map(p => ({ id: p.id, displayName: p.displayName }))
-        return app.render(req, res, '/login', req.query)
+      const authProvider = await authService.getConfiguredAuthProvider()
+      if (!authProvider) {
+        return res.redirect('/setup/auth')
       }
-      return res.redirect('/no-auth')
+      require('../lib/passport')(authProvider.id)(authProvider.config)
+      req.authProvider = authProvider
+      return app.render(req, res, '/login', req.query)
     } catch (err) {
-      console.error('Error getting auth from API', err)
       return next(err)
     }
   }
@@ -48,9 +39,9 @@ function getLoginGithubCallback() {
   }
 }
 
-function initRouter() {
+function initRouter({ authService }) {
   const router = Router()
-  router.get('/login', getLogin())
+  router.get('/login', getLogin(authService))
   router.get('/logout', getLogout())
   router.get('/login/github', passport.authenticate('github'))
   router.get('/login/github/callback', passport.authenticate('github', { failureRedirect: '/login' }), getLoginGithubCallback())
