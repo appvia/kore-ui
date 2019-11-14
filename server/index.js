@@ -2,6 +2,7 @@ const express = require('express')
 const passport = require('passport')
 const session = require('express-session')
 const cookieParser = require('cookie-parser')
+const bodyParser = require('body-parser')
 const app = require('./next')
 const { server } = require('../config')
 const router = require('./routes')
@@ -29,10 +30,11 @@ app.prepare().then(() => {
   const server = express()
 
   server.use(cookieParser())
+  server.use(bodyParser.urlencoded({ extended: true }));
   server.use(session({
-    secret: 'supersecret',
+    secret: 'sessionsecret',
     resave: true,
-    saveUninitialized: true
+    saveUninitialized: false
   }));
 
   server.use(passport.initialize())

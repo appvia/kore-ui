@@ -45,8 +45,9 @@ router.get('/user', (req, res) => {
 router.get('/login/github', passport.authenticate('github'));
 
 router.get('/login/github/callback', passport.authenticate('github', { failureRedirect: '/login' }), (req, res) => {
-  console.log('/login/github/callback req.sessionID', req.sessionID)
-  res.redirect('/')
+  req.session.save(function(){
+    res.redirect('/')
+  })
 })
 
 router.get('/logout', (req, res, next) => {
@@ -54,6 +55,7 @@ router.get('/logout', (req, res, next) => {
     if (err){
       return next(err)
     }
+    res.clearCookie('connect.sid')
     req.logout()
     res.redirect('/login')
   })
