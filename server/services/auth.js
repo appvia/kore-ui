@@ -1,4 +1,4 @@
-const axios = require('axios').default
+const axios = require('axios')
 
 class AuthService {
   constructor(hubApi) {
@@ -16,6 +16,15 @@ class AuthService {
       return null
     } catch (err) {
       console.error('Error getting auth providers from API', err)
+      return Promise.reject(err)
+    }
+  }
+
+  async setConfiguredAuthProvider(data) {
+    try {
+      await axios.put(`${this.hubApi.url}/auth/configure`, data)
+    } catch (err) {
+      console.error('Error setting configured auth provider from API', err)
       return Promise.reject(err)
     }
   }

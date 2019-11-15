@@ -1,13 +1,16 @@
 import Router from 'next/router'
 
-const redirect = (res, path) => {
+const redirect = (res, path, forceSSR = false) => {
   if(res) {
     res.redirect(path)
     res.end()
     return {}
   }
-
-  Router.push(path)
+  if (forceSSR) {
+    window.location.pathname = path
+  } else {
+    Router.push(path)
+  }
   return {}
 }
 

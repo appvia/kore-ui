@@ -39,12 +39,24 @@ function getLoginGithubCallback() {
   }
 }
 
+function postConfigureAuthProvider(authService) {
+  return async (req, res) => {
+    try {
+      await authService.setConfiguredAuthProvider(req.body)
+      res.send()
+    } catch (err) {
+      res.status(500).send()
+    }
+  }
+}
+
 function initRouter({ authService }) {
   const router = Router()
   router.get('/login', getLogin(authService))
   router.get('/logout', getLogout())
   router.get('/login/github', passport.authenticate('github'))
   router.get('/login/github/callback', passport.authenticate('github', { failureRedirect: '/login' }), getLoginGithubCallback())
+  router.post('/auth/configure', postConfigureAuthProvider(authService))
   return router
 }
 

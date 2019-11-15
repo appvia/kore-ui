@@ -1,7 +1,7 @@
-import React from "react";
-import App from "next/app";
-import Head from "next/head";
-const axios = require('axios').default;
+import React from "react"
+import App from "next/app"
+import Head from "next/head"
+import axios from 'axios'
 
 import { Layout as AntLayout } from 'antd'
 const { Header, Footer, Content } = AntLayout
@@ -42,7 +42,7 @@ class MyApp extends App {
       return { pageProps, user }
     }
 
-    return redirect(ctx.res, '/logout')
+    return redirect(ctx.res, '/logout', true)
   }
 
   render() {
@@ -56,12 +56,12 @@ class MyApp extends App {
           <meta charSet="utf-8"/>
           <meta name="viewport" content="initial-scale=1.0, width=device-width"/>
         </Head>
-        <AntLayout>
-          <Header>
+        <AntLayout style={{background: '#fff'}}>
+          <Header style={{ backgroundColor: '#385E89' }}>
             <div style={{color: '#FFF', float: 'left', fontSize: '18px', marginLeft: '-25px'}}>Appvia Hub</div>
             <User user={props.user}/>
           </Header>
-          <Content style={{padding: '0 50px'}}>
+          <Content>
             <div style={{background: '#fff', padding: 24, minHeight: 280}}>
               <Component {...props} />
             </div>

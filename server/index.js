@@ -14,6 +14,7 @@ app.prepare().then(() => {
 
   server.use(cookieParser())
   server.use(bodyParser.urlencoded({ extended: true }));
+  server.use(bodyParser.json());
   server.use(session({
     secret: config.server.sessionSecret,
     resave: true,
