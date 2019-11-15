@@ -1,8 +1,9 @@
-import { Button, Row, Col, Card, Typography, Icon } from 'antd'
+import { Button, Row, Col, Card, Typography, Icon, Layout } from 'antd'
+const { Footer } = Layout
 const { Title, Text } = Typography;
 
 const SetupAuthCompletePage = () => (
-  <div style={{ background: '#fff', padding: 24, minHeight: 280 }}>
+  <div>
     <Row type="flex" justify="center">
       <Col span={24}>
         <Card style={{ backgroundColor: '#f5f5f5' }}>
@@ -15,6 +16,11 @@ const SetupAuthCompletePage = () => (
         </Card>
       </Col>
     </Row>
+    <Footer style={{textAlign: 'center', backgroundColor: '#fff'}}>
+      <span>
+        For more information read the <a href="#">Documentation</a>
+      </span>
+    </Footer>
   </div>
 )
 

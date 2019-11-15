@@ -1,9 +1,10 @@
 import Link from 'next/link'
-import { Button, Row, Col, Card, Typography } from 'antd'
+import { Button, Row, Col, Card, Typography, Layout } from 'antd'
+const { Footer } = Layout
 const { Title } = Typography;
 
 const SetupAuthIndexPage = () => (
-  <div style={{ background: '#fff', padding: 24, minHeight: 280 }}>
+  <div>
     <Row type="flex" justify="center">
       <Col span={24}>
         <Card style={{ backgroundColor: '#f5f5f5' }}>
@@ -18,6 +19,11 @@ const SetupAuthIndexPage = () => (
         </Card>
       </Col>
     </Row>
+    <Footer style={{textAlign: 'center', backgroundColor: '#fff'}}>
+      <span>
+        For more information read the <a href="#">Documentation</a>
+      </span>
+    </Footer>
   </div>
 )
 

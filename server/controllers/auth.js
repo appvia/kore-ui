@@ -1,6 +1,7 @@
 const Router = require('express').Router
 const passport = require('passport')
 const app = require('../next')
+const { hub } = require('../../config')
 
 function getLogin(authService) {
   return async (req, res, next) => {
@@ -37,7 +38,7 @@ function getLoginGithubCallback(userService) {
     const userInfo = await userService.getUserInfo(email)
     const teams = userInfo.teams || []
     req.session.passport.user.teams = teams
-    req.session.passport.user.isAdmin = Boolean(teams.filter(t => t.slug === 'hub-admins').length)
+    req.session.passport.user.isAdmin = Boolean(teams.filter(t => t.slug === hub.hubAdminTeamName).length)
     req.session.save(function() {
       res.redirect('/')
     })

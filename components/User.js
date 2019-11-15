@@ -2,13 +2,16 @@ import * as React from 'react'
 import { Tag, Typography, Menu, Icon } from 'antd'
 
 const { Text, Paragraph } = Typography
-const { SubMenu } = Menu;
+const { SubMenu } = Menu
 
 class User extends React.Component {
   adminTag() {
-    return (
-      <Tag color="green">admin</Tag>
-    )
+    if (this.props.user.isAdmin) {
+      return (
+        <Tag color="green">admin</Tag>
+      )
+    }
+    return null
   }
 
   render() {

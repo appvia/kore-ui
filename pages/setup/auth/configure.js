@@ -1,7 +1,8 @@
 import { hub } from '../../../config'
 import CopyTextWithLabel from '../../../components/CopyTextWithLabel'
 import AuthConfigForm from '../../../components/forms/AuthConfigForm'
-import { Row, Col, Card, Typography, Icon, Button } from 'antd'
+import { Row, Col, Card, Typography, Icon, Button, Layout } from 'antd'
+const { Footer } = Layout
 const { Title, Text, Paragraph } = Typography
 
 const StepOne = () => (
@@ -27,7 +28,7 @@ const StepTwo = () => (
 )
 
 const ConfigureAuthPage = () => (
-  <div style={{ background: '#fff', padding: 24, minHeight: 280 }}>
+  <div>
     <Row type="flex">
       <Col span={24}>
         <Title>Configure Authentication provider</Title>
@@ -37,6 +38,11 @@ const ConfigureAuthPage = () => (
         <StepTwo />
       </Col>
     </Row>
+    <Footer style={{textAlign: 'center', backgroundColor: '#fff'}}>
+      <span>
+        For more information read the <a href="#">Documentation</a>
+      </span>
+    </Footer>
   </div>
 )
 
