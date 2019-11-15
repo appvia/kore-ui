@@ -31,8 +31,13 @@ function getLogout() {
   }
 }
 
-function getLoginGithubCallback() {
-  return (req, res) => {
+function getLoginGithubCallback(userService) {
+  return async (req, res) => {
+    const email = req.session.passport.user.emails[0].value
+    const userInfo = await userService.getUserInfo(email)
+    const teams = userInfo.teams || []
+    req.session.passport.user.teams = teams
+    req.session.passport.user.isAdmin = Boolean(teams.filter(t => t.slug === 'hub-admins').length)
     req.session.save(function() {
       res.redirect('/')
     })
@@ -50,12 +55,12 @@ function postConfigureAuthProvider(authService) {
   }
 }
 
-function initRouter({ authService }) {
+function initRouter({ authService, userService }) {
   const router = Router()
   router.get('/login', getLogin(authService))
   router.get('/logout', getLogout())
   router.get('/login/github', passport.authenticate('github'))
-  router.get('/login/github/callback', passport.authenticate('github', { failureRedirect: '/login' }), getLoginGithubCallback())
+  router.get('/login/github/callback', passport.authenticate('github', { failureRedirect: '/login' }), getLoginGithubCallback(userService))
   router.post('/auth/configure', postConfigureAuthProvider(authService))
   return router
 }

@@ -57,7 +57,7 @@ class MyApp extends App {
           <meta name="viewport" content="initial-scale=1.0, width=device-width"/>
         </Head>
         <AntLayout style={{background: '#fff'}}>
-          <Header style={{ backgroundColor: '#385E89' }}>
+          <Header>
             <div style={{color: '#FFF', float: 'left', fontSize: '18px', marginLeft: '-25px'}}>Appvia Hub</div>
             <User user={props.user}/>
           </Header>
