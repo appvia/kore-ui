@@ -23,6 +23,7 @@ class AuthService {
   async setConfiguredAuthProvider(data) {
     try {
       await axios.put(`${this.hubApi.url}/auth/configure`, data)
+      require('../lib/passport')(data.id)(data.config)
     } catch (err) {
       console.error('Error setting configured auth provider from API', err)
       return Promise.reject(err)

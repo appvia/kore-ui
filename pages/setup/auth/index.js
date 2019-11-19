@@ -1,24 +1,23 @@
 import Link from 'next/link'
-import { Button, Row, Col, Card, Typography, Layout } from 'antd'
+import { Layout, Typography, Result, Icon, Button } from 'antd'
 const { Footer } = Layout
-const { Title } = Typography;
+const { Paragraph } = Typography;
 
 const SetupAuthIndexPage = () => (
   <div>
-    <Row type="flex" justify="center">
-      <Col span={24}>
-        <Card style={{ backgroundColor: '#f5f5f5' }}>
-          <Title>Welcome to the Hub!</Title>
-          <Title level={4}>Authentication is not currently configured</Title>
-          <p>This must be done before any teams can start using the hub</p>
-          <Button type="primary">
-            <Link href="/setup/auth/configure">
-              <a>Begin setup</a>
-            </Link>
-          </Button>
-        </Card>
-      </Col>
-    </Row>
+    <Result
+      icon={<Icon type="smile" theme="twoTone" />}
+      title="Welcome to the Hub!"
+      subTitle="Authentication is not currently configured"
+      extra={[
+        <Paragraph>This must be done before any teams can start using the hub</Paragraph>,
+        <Button type="primary">
+          <Link href="/setup/auth/configure">
+            <a>Begin setup</a>
+          </Link>
+        </Button>
+      ]}
+    />
     <Footer style={{textAlign: 'center', backgroundColor: '#fff'}}>
       <span>
         For more information read the <a href="#">Documentation</a>

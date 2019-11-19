@@ -4,8 +4,9 @@ import Head from "next/head"
 import axios from 'axios'
 
 import { Layout, Typography, Menu, Icon } from 'antd'
-const { Header, Footer, Content, Sider } = Layout
+const { Header, Content, Sider } = Layout
 const { Paragraph } = Typography
+
 import User from '../components/User'
 import redirect from '../utils/redirect'
 import { hub } from '../config'
@@ -57,8 +58,6 @@ class MyApp extends App {
 
     return redirect(ctx.res, '/logout', true)
   }
-
-
 
   render() {
     const { Component, pageProps, user } = this.props
@@ -134,12 +133,12 @@ class MyApp extends App {
           <meta name="viewport" content="initial-scale=1.0, width=device-width"/>
         </Head>
         <Layout style={{background: '#f0f2f5', height:'100vh'}}>
-          <Header>
+          <Header style={{backgroundColor: '#002140'}}>
             <div style={{color: '#FFF', float: 'left', fontSize: '18px', marginLeft: '-25px'}}>Appvia Hub</div>
             <User user={props.user}/>
           </Header>
-          <Layout style={{background: '#f0f2f5', height:'100vh'}}>
-            {sider}
+          <Layout hasSider="true" style={{background: '#f0f2f5', height:'100vh'}}>
+            {!props.hideSider ? sider : null}
             <Content style={{background: '#fff', padding: 24, minHeight: 280}}>
               <Component {...props} />
             </Content>

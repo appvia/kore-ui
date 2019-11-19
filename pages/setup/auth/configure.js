@@ -1,9 +1,10 @@
+import { Layout, Typography, Card, Button, Icon } from 'antd'
+const { Footer } = Layout
+const { Title, Text, Paragraph } = Typography
+
 import { hub } from '../../../config'
 import CopyTextWithLabel from '../../../components/CopyTextWithLabel'
 import AuthConfigForm from '../../../components/forms/AuthConfigForm'
-import { Row, Col, Card, Typography, Icon, Button, Layout } from 'antd'
-const { Footer } = Layout
-const { Title, Text, Paragraph } = Typography
 
 const StepOne = () => (
   <Card title="Step 1 - Create GitHub OAuth app" style={{ marginTop: '20px' }} headStyle={{ backgroundColor: '#f5f5f5' }}>
@@ -29,15 +30,11 @@ const StepTwo = () => (
 
 const ConfigureAuthPage = () => (
   <div>
-    <Row type="flex">
-      <Col span={24}>
-        <Title>Configure Authentication provider</Title>
-        <Title level={3}>Using GitHub</Title>
-        <Text type="warning" style={{ fontSize: '12px' }}><Icon type="exclamation-circle"/> You'll need to be an admin of your GitHub organisation in order to complete this</Text>
-        <StepOne />
-        <StepTwo />
-      </Col>
-    </Row>
+    <Title>Configure Authentication provider</Title>
+    <Title level={3}>Using GitHub</Title>
+    <Text type="warning" style={{ fontSize: '12px' }}><Icon type="exclamation-circle"/> You'll need to be an admin of your GitHub organisation in order to complete this</Text>
+    <StepOne />
+    <StepTwo />
     <Footer style={{textAlign: 'center', backgroundColor: '#fff'}}>
       <span>
         For more information read the <a href="#">Documentation</a>

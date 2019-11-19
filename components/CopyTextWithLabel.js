@@ -1,4 +1,4 @@
-import { Row, Col, Typography } from 'antd'
+import { Typography, Row, Col } from 'antd'
 const { Text } = Typography;
 
 const CopyTextWithLabel = ({ label, text }) => {

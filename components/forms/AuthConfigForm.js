@@ -6,7 +6,7 @@ import { Button, Form, Input, Alert } from 'antd'
 
 class AuthConfigForm extends React.Component {
   constructor(props) {
-    super(props);
+    super(props)
     this.state = {
       buttonText: 'Save',
       submitting: false,
@@ -57,7 +57,7 @@ class AuthConfigForm extends React.Component {
               submitting: false,
               formErrorMessage: 'An error occurred saving the configuration, please try again'
             })
-          })
+          }.bind(this))
       }
     })
   }
