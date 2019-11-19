@@ -9,7 +9,7 @@ const SetupAuthCompletePage = () => (
       title="Authentication setup complete"
       subTitle="GitHub has been configured as your Identity Provider"
       extra={[
-        <Paragraph>It's recommended that you now <Text strong>Login with GitHub</Text> to continue the setup.</Paragraph>,
+        <Paragraph key="para1">It's recommended that you now <Text strong>Login with GitHub</Text> to continue the setup.</Paragraph>,
         <Button type="primary" key="login">
           <a href="/login/github">Login with GitHub</a>
         </Button>

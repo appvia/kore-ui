@@ -10,8 +10,8 @@ const SetupAuthIndexPage = () => (
       title="Welcome to the Hub!"
       subTitle="Authentication is not currently configured"
       extra={[
-        <Paragraph>This must be done before any teams can start using the hub</Paragraph>,
-        <Button type="primary">
+        <Paragraph key="para1">This must be done before any teams can start using the hub</Paragraph>,
+        <Button key="button1" type="primary">
           <Link href="/setup/auth/configure">
             <a>Begin setup</a>
           </Link>
