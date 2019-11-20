@@ -8,27 +8,23 @@ class UserService {
   }
 
   async getOrCreateUser(emailAddress) {
-    try {
-      const body = user(emailAddress)
-      return axios.all([
-        axios.put(`${this.hubApi.url}/user/${body.metadata.name}`, body),
-        axios.get(`${this.hubApi.url}/user/${body.metadata.name}/teams`)
-      ])
-        .then(axios.spread(function (userResult, teamsResult) {
-          return { ...userResult.data, teams: teamsResult.data }
-        }))
-        .catch(err => {
-          console.error('Error occurring', err)
-        })
-    } catch (err) {
-      console.error('Error getting user info from API', err)
-      return Promise.reject(err)
-    }
+    const body = user(emailAddress)
+    return axios.all([
+      axios.put(`${this.hubApi.url}/user/${body.metadata.name}`, body),
+      axios.get(`${this.hubApi.url}/user/${body.metadata.name}/teams`)
+    ])
+      .then(axios.spread(function (userResult, teamsResult) {
+        return { ...userResult.data, teams: teamsResult.data }
+      }))
+      .catch(err => {
+        console.error('Error getting user info from API', err)
+        return Promise.reject(err)
+      })
   }
 
   isAdmin(user) {
     const teams = user.teams.items || []
-    return Boolean(teams.filter(t => t.metadata.namespace === hub.hubAdminTeamName).length)
+    return Boolean(teams.filter(t => t.spec.team === hub.hubAdminTeamName).length)
   }
 }
 
