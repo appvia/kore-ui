@@ -36,7 +36,6 @@ class ConfigureCloudProvidersPage extends React.Component {
 
   onChange = (className) => {
     return (e) => {
-      console.log('onChange', className, e.target.checked)
       let selected = [ ...this.state.selected ]
       if (e.target.checked) {
         selected.push(className)
@@ -57,7 +56,6 @@ class ConfigureCloudProvidersPage extends React.Component {
       }
       axios.post(`${hub.baseUrl}/classes`, body)
         .then(function (res) {
-          console.log(res)
           if (res.status === 200) {
             return redirect(null, '/setup/hub/complete')
           }

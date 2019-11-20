@@ -1,5 +1,5 @@
 {
   "watch": ["server", "static", "config.js"],
-  "exec": "npm start",
+  "exec": "node server/index.js",
   "ext": "js"
 }

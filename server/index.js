@@ -13,13 +13,13 @@ app.prepare().then(() => {
   const server = express()
 
   server.use(cookieParser())
-  server.use(bodyParser.urlencoded({ extended: true }));
-  server.use(bodyParser.json());
+  server.use(bodyParser.urlencoded({ extended: true }))
+  server.use(bodyParser.json())
   server.use(session({
     secret: config.server.sessionSecret,
     resave: true,
     saveUninitialized: false
-  }));
+  }))
 
   server.use(passport.initialize())
   server.use(passport.session())
