@@ -4,10 +4,10 @@ import { Layout, Typography, Card, Checkbox, Row, Col } from 'antd'
 const { Footer } = Layout
 const { Title, Text, Paragraph } = Typography
 
-import { hub } from '../../../config'
-import redirect from '../../../utils/redirect'
+import { hub } from '../../../../config'
+import redirect from '../../../../utils/redirect'
 
-import JSONSchemaForm from '../../../components/forms/JSONSchemaForm'
+import JSONSchemaForm from '../../../../components/forms/JSONSchemaForm'
 
 const RECOMMENDED = 'gke'
 
@@ -59,7 +59,7 @@ class ConfigureCloudProvidersPage extends React.Component {
         .then(function (res) {
           console.log(res)
           if (res.status === 200) {
-            return redirect(null, '/setup/cloud-providers/complete')
+            return redirect(null, '/setup/hub/complete')
           }
         }.bind(this))
         .catch(function (error) {

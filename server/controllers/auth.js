@@ -38,7 +38,7 @@ function getLoginGithubCallback(userService) {
     req.session.passport.user.teams = userInfo.teams.items || []
     req.session.passport.user.isAdmin = userService.isAdmin(userInfo)
     req.session.save(function() {
-      res.redirect('/setup/cloud-providers')
+      res.redirect('/setup/hub')
     })
   }
 }

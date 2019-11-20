@@ -10,7 +10,7 @@ const SetupCloudProvidersCompletePage = () => (
       title="Hub setup complete"
       subTitle="You have configured the minimum setting in order to work with the hub"
       extra={[
-        <Button type="primary" key="continue">
+        <Button type="primary" key="buttonContinue">
           <Link href="/">
             <a>Continue</a>
           </Link>
