@@ -7,11 +7,11 @@ class UserService {
     this.hubApi = hubApi
   }
 
-  async getOrCreateUser(emailAddress) {
-    const body = user(emailAddress)
+  async getOrCreateUser(username) {
+    const userResource = user(username)
     return axios.all([
-      axios.put(`${this.hubApi.url}/user/${body.metadata.name}`, body),
-      axios.get(`${this.hubApi.url}/user/${body.metadata.name}/teams`)
+      axios.put(`${this.hubApi.url}/user/${userResource.metadata.name}`, userResource),
+      axios.get(`${this.hubApi.url}/user/${userResource.metadata.name}/teams`)
     ])
       .then(axios.spread(function (userResult, teamsResult) {
         return { ...userResult.data, teams: teamsResult.data }

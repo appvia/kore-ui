@@ -1,12 +1,10 @@
-module.exports = (emailAddress) => ({
+module.exports = (username) => ({
   apiVersion: 'org.hub.appvia.io/v1',
   kind: 'User',
   metadata: {
-    annotations: {},
-    name: emailAddress.substr(0, emailAddress.indexOf('@')),
-    namespace: 'hub'
+    name: username
   },
   spec: {
-    username: emailAddress
+    username
   }
 })

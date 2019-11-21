@@ -33,8 +33,8 @@ function getLogout() {
 
 function getLoginGithubCallback(userService) {
   return async (req, res) => {
-    const email = req.session.passport.user.emails[0].value
-    const userInfo = await userService.getOrCreateUser(email)
+    const username = req.session.passport.user.username
+    const userInfo = await userService.getOrCreateUser(username)
     req.session.passport.user.teams = userInfo.teams.items || []
     req.session.passport.user.isAdmin = userService.isAdmin(userInfo)
     req.session.save(function() {
