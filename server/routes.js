@@ -10,7 +10,7 @@ const userService = new UserService(config.hubApi)
 const classService = new ClassService(config.hubApi)
 
 router.use(require('./controllers/user').initRouter())
-router.use(require('./controllers/auth').initRouter({ authService, userService }))
+router.use(require('./controllers/auth').initRouter({ authService, userService, classService }))
 router.use(require('./controllers/class').initRouter({ classService }))
 
 module.exports = router

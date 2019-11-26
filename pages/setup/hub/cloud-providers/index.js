@@ -49,7 +49,7 @@ class ConfigureCloudProvidersPage extends React.Component {
   handleFormSubmit = ({ kind, className }) => {
     return (values, setState) => {
       const body = {
-        team: 'hub-admins',
+        team: hub.hubAdminTeamName,
         className,
         kind,
         spec: values
@@ -95,15 +95,13 @@ class ConfigureCloudProvidersPage extends React.Component {
     const ProviderForms = () => {
       return this.props.classes.items.filter(c => this.state.selected.includes(c.metadata.name)).map(s => {
         const requiresKind = s.spec.requires.kind
-        const requiresSchema = s.spec.schemas.definitions[requiresKind]
-        const specSchemaRef = requiresSchema.properties.spec.$ref
-        const specSchema = s.spec.schemas.definitions[specSchemaRef.substr(specSchemaRef.lastIndexOf('/') + 1, specSchemaRef.length)]
+        const requiresKindSchema = s.spec.schemas.definitions[requiresKind].properties.spec
         return (
           <Card key={s.metadata.name} title={s.spec.displayName} style={{marginTop: '20px'}} headStyle={{backgroundColor: '#f5f5f5'}}>
             <Paragraph>
             <Text>Enter the credentials for {s.spec.displayName}</Text>
             </Paragraph>
-            <JSONSchemaForm schema={specSchema} handleSubmit={this.handleFormSubmit({ kind: requiresKind, className: s.metadata.name })} />
+            <JSONSchemaForm schema={requiresKindSchema} handleSubmit={this.handleFormSubmit({ kind: requiresKind, className: s.metadata.name })} />
           </Card>
         )
       })
@@ -116,9 +114,9 @@ class ConfigureCloudProvidersPage extends React.Component {
         <Providers />
         <ProviderForms />
         <Footer style={{textAlign: 'center', backgroundColor: '#fff'}}>
-      <span>
-        For more information read the <a href="#">Documentation</a>
-      </span>
+        <span>
+          For more information read the <a href="#">Documentation</a>
+        </span>
         </Footer>
       </div>
     )
