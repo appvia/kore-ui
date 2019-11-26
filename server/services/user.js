@@ -1,5 +1,5 @@
 const axios = require('axios')
-const user = require('../models/user')
+const User = require('../models/User')
 const TeamMembership = require('../models/TeamMembership')
 const { hub } = require('../../config')
 
@@ -16,7 +16,7 @@ class UserService {
       return userResult.data
     } catch (err) {
       if (err.response.status === 404) {
-        const userResource = user(username)
+        const userResource = User(username)
         console.log(`*** user not found, creating new resource`, userResource)
         return userResource
       }
