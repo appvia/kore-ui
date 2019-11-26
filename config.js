@@ -5,7 +5,7 @@ module.exports = {
   },
   hub: {
     baseUrl: process.env.HUB_BASE_URL || 'http://localhost:3000',
-    hubAdminTeamName: 'hub-admins'
+    hubAdminTeamName: 'hub-admin'
   },
   hubApi: {
     url: process.env.HUB_API_URL || 'http://localhost:9000/api/v1alpha1'

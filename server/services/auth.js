@@ -7,7 +7,8 @@ class AuthService {
 
   async getConfiguredAuthProvider() {
     try {
-      const result = await axios.get(`${this.hubApi.url}/auth`)
+      const apiUrl = 'http://localhost:9000/api/v1alpha1'
+      const result = await axios.get(`${apiUrl}/auth`)
       const providers = result.data.providers
       const configured = result.data.configured || {}
       if (configured.id) {
@@ -22,7 +23,8 @@ class AuthService {
 
   async setConfiguredAuthProvider(data) {
     try {
-      await axios.put(`${this.hubApi.url}/auth/configure`, data)
+      const apiUrl = 'http://localhost:9000/api/v1alpha1'
+      await axios.put(`${apiUrl}/auth/configure`, data)
       require('../lib/passport')(data.id)(data.config)
     } catch (err) {
       console.error('Error setting configured auth provider from API', err)
