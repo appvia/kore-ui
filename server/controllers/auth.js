@@ -9,7 +9,12 @@ function getLogin(authService) {
       if (!authProvider) {
         return res.redirect('/setup/auth')
       }
-      require('../lib/passport')(authProvider.id)(authProvider.config)
+      const config = {
+        clientID: authProvider.spec.clientID,
+        clientSecret: authProvider.spec.clientSecret,
+        ...authService.providerSpecificConfig(authProvider.metadata.name)
+      }
+      require('../lib/passport')(authProvider.metadata.name)(config)
       req.authProvider = authProvider
       return app.render(req, res, '/login', req.query)
     } catch (err) {
@@ -31,7 +36,7 @@ function getLogout() {
   }
 }
 
-function getLoginGithubCallback(userService, classService) {
+function getLoginGithubCallback(userService, classService, hubConfig) {
   return async (req, res) => {
     const username = req.session.passport.user.username
     const userInfo = await userService.getOrCreateUser(username)
@@ -39,7 +44,8 @@ function getLoginGithubCallback(userService, classService) {
     req.session.passport.user.isAdmin = userService.isAdmin(userInfo)
     let redirectPath = '/'
     if (req.session.passport.user.isAdmin) {
-      const gkeBinding = await classService.getTeamBindingByName('hub-admin', 'gke')
+      // this is hard-coded to check for GKE binding, but this will need to be more flexible in the future
+      const gkeBinding = await classService.getTeamBindingByName(hubConfig.hubAdminTeamName, 'gke')
       if (!gkeBinding) {
         redirectPath = '/setup/hub'
       }
@@ -61,12 +67,12 @@ function postConfigureAuthProvider(authService) {
   }
 }
 
-function initRouter({ authService, userService, classService }) {
+function initRouter({ authService, userService, classService, hubConfig }) {
   const router = Router()
   router.get('/login', getLogin(authService))
   router.get('/logout', getLogout())
   router.get('/login/github', passport.authenticate('github'))
-  router.get('/login/github/callback', passport.authenticate('github', { failureRedirect: '/login' }), getLoginGithubCallback(userService, classService))
+  router.get('/login/github/callback', passport.authenticate('github', { failureRedirect: '/login' }), getLoginGithubCallback(userService, classService, hubConfig))
   router.post('/auth/configure', postConfigureAuthProvider(authService))
   return router
 }

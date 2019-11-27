@@ -8,26 +8,9 @@ class UserService {
     this.hubApi = hubApi
   }
 
-  async getUserResource(username) {
-    console.log(`*** Checking for user ${username}`)
-    try {
-      const userResult = await axios.get(`${this.hubApi.url}/users/${username}`)
-      console.log(`*** user found`, userResult.data)
-      return userResult.data
-    } catch (err) {
-      if (err.response.status === 404) {
-        const userResource = User(username)
-        console.log(`*** user not found, creating new resource`, userResource)
-        return userResource
-      }
-      console.error(`*** unknown error finding user ${username}`, err)
-      return Promise.reject(err)
-    }
-  }
-
   async getOrCreateUser(username) {
     try {
-      const userResource = await this.getUserResource(username)
+      const userResource = await User(username)
       console.log(`*** putting user ${username}`, userResource)
       const userResult = await axios.put(`${this.hubApi.url}/users/${username}`, userResource)
       const adminTeamMembers = await this.getTeamMembers(hub.hubAdminTeamName)

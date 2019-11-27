@@ -38,11 +38,8 @@ class AuthConfigForm extends React.Component {
     this.props.form.validateFields((err, values) => {
       if (!err) {
         const body = {
-          id: 'github',
-          config: {
-            callbackURL: `${hub.baseUrl}/login/github/callback`,
-            ...values
-          }
+          name: 'github',
+          config: values
         }
         axios.post(`${hub.baseUrl}/auth/configure`, body)
           .then(function (res) {

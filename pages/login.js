@@ -7,7 +7,7 @@ const LoginPage = ({ authProvider }) => (
         <Card title="Login" style={{ textAlign: 'center' }}>
           <p>Login using the configured Identity Provider below</p>
           <Button key={authProvider.id} style={{ margin: '5px' }} type="primary">
-            <a href={`/login/${authProvider.id}`}>Login with {authProvider.displayName}</a>
+            <a href={`/login/${authProvider.metadata.name}`}>Login with {authProvider.spec.displayName}</a>
           </Button>
         </Card>
       </Col>

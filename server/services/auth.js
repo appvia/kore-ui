@@ -1,20 +1,17 @@
 const axios = require('axios')
+const AuthProvider = require('../models/AuthProvider')
 
 class AuthService {
-  constructor(hubApi) {
+  constructor(hubApi, baseUrl) {
     this.hubApi = hubApi
+    this.baseUrl = baseUrl
   }
 
   async getConfiguredAuthProvider() {
     try {
-      const apiUrl = 'http://localhost:9000/api/v1alpha1'
-      const result = await axios.get(`${apiUrl}/auth`)
-      const providers = result.data.providers
-      const configured = result.data.configured || {}
-      if (configured.id) {
-        return { ...configured, ...(providers.find(p => p.id === configured.id)) }
-      }
-      return null
+      const result = await axios.get(`${this.hubApi.url}/auth`)
+      const providers = result.data.items
+      return providers.find(p => p.spec.clientID)
     } catch (err) {
       console.error('Error getting auth providers from API', err)
       return Promise.reject(err)
@@ -23,13 +20,26 @@ class AuthService {
 
   async setConfiguredAuthProvider(data) {
     try {
-      const apiUrl = 'http://localhost:9000/api/v1alpha1'
-      await axios.put(`${apiUrl}/auth/configure`, data)
-      require('../lib/passport')(data.id)(data.config)
+      const authProvider = await AuthProvider(data.name, data.config)
+      await axios.put(`${this.hubApi.url}/auth/${data.name}`, authProvider)
+      const config = {
+        clientID: data.config.clientID,
+        clientSecret: data.config.clientSecret,
+        ...this.providerSpecificConfig(data.name)
+      }
+      require('../lib/passport')(data.name)(config)
     } catch (err) {
       console.error('Error setting configured auth provider from API', err)
       return Promise.reject(err)
     }
+  }
+
+  providerSpecificConfig(provider) {
+    return {
+      'github': {
+        callbackUrl: `${this.baseUrl}/login/github/callback`
+      }
+    }[provider]
   }
 }
 
