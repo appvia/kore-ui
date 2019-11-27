@@ -1,0 +1,80 @@
+---
+version: '3'
+services:
+  etcd:
+    image: bitnami/etcd:latest
+    environment:
+      ALLOW_NONE_AUTHENTICATION: "yes"
+    ports:
+      - 2379:2379
+
+  kube-controller-manager:
+    image: mirrorgooglecontainers/kube-controller-manager-amd64:v1.14.8
+    command:
+      - /usr/local/bin/kube-controller-manager
+      - --master=http://kube-apiserver:8080
+
+  kube-apiserver:
+    image: mirrorgooglecontainers/kube-apiserver-amd64:v1.14.8
+    command:
+      - /usr/local/bin/kube-apiserver
+      - --address=0.0.0.0
+      - --alsologtostderr
+      - --authorization-mode=RBAC
+      - --bind-address=0.0.0.0
+      - --default-watch-cache-size=200
+      - --delete-collection-workers=10
+      - --etcd-servers=http://etcd:2379
+      - --log-flush-frequency=10s
+      - --profiling=true
+      - --runtime-config=autoscaling/v1=false
+      - --runtime-config=autoscaling/v2beta1=false
+      - --runtime-config=autoscaling/v2beta2=false
+      - --runtime-config=batch/v1=false
+      - --runtime-config=batch/v1beta1=false
+      - --runtime-config=networking.k8s.io/v1=false
+      - --runtime-config=networking.k8s.io/v1beta1=false
+      - --runtime-config=node.k8s.io/v1beta1=false
+    ports:
+      - 8080:8080
+      - 6443:6443
+
+  gke-operator:
+    image: quay.io/appvia/gke-operator:latest
+    environment:
+      OPERATOR_NAME: gke
+      WATCH_NAMESPACE: ""
+    command:
+      - /usr/local/bin/entrypoint
+      - --kubeconfig=/config/kubeconfig.local
+    restart: always
+    volumes:
+      - ./hack/kubeconfig.local:/config/kubeconfig.local:ro
+
+  kube-operator:
+    image: quay.io/appvia/kube-operator:latest
+    environment:
+      OPERATOR_NAME: kube
+      WATCH_NAMESPACE: ""
+    command:
+      - /usr/local/bin/entrypoint
+      - --kubeconfig=/config/kubeconfig.local
+    restart: always
+    volumes:
+      - ./hack/kubeconfig.local:/config/kubeconfig.local:ro
+
+#  hub-apiserver:
+#    image: quay.io/appvia/hub-apiserver:latest
+#    command:
+#      - --kube-api-server http://127.0.0.1:8080
+#      - --verbose
+#    ports:
+#      - 10080:10080
+
+  hub-ui:
+    build: .
+    environment:
+      HUB_API_URL: http://docker.for.mac.localhost:10080/api/v1alpha1
+#      HUB_API_URL: http://hub-apiserver:10080/api/v1alpha1
+    ports:
+      - 3000:3000
