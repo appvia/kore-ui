@@ -49,15 +49,17 @@ class MyApp extends App {
       return { pageProps }
     }
     const user = await this.getUser(ctx.req)
+    const teamsResult = await axios.get(`${hub.baseUrl}/apiproxy/teams`)
+    const teams = teamsResult.data.items.filter(t => t.metadata.name !== hub.hubAdminTeamName)
     if (user) {
-      return { pageProps, user }
+      return { pageProps, user, teams }
     }
     return redirect(ctx.res, '/logout', true)
   }
 
   render() {
-    const { Component, pageProps, user } = this.props
-    const props = { ...pageProps, user }
+    const { Component } = this.props
+    const props = { ...this.props, ...this.props.pageProps }
 
     return (
       <div>
@@ -72,7 +74,7 @@ class MyApp extends App {
             <User user={props.user}/>
           </Header>
           <Layout hasSider="true" style={{background: '#f0f2f5', height:'100vh'}}>
-            <SiderMenu hide={props.hideSider || props.unrestrictedPage} isAdmin={props.user && props.user.isAdmin}/>
+            <SiderMenu hide={props.hideSider || props.unrestrictedPage} isAdmin={props.user && props.user.isAdmin} teams={props.teams}/>
             <Content style={{background: '#fff', padding: 24, minHeight: 280}}>
               <Component {...props} />
             </Content>

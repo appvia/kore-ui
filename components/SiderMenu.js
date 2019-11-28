@@ -21,16 +21,16 @@ class SiderMenu extends React.Component {
       return null
     }
 
-    const menuItem = ({ key, text, link, icon }) => (
+    const menuItem = ({ key, text, href, link, icon }) => (
       <Menu.Item key={key} style={{margin: '0'}}>
         { this.state.siderCollapsed ?
-          <Link href="/teams/new">
+          <Link href={href || link} as={link}>
             <div>
               <Icon type={icon} />
               <span><a className="collapsed">{text}</a></span>
             </div>
           </Link> :
-          <Link href={link}>
+          <Link href={href || link} as={link}>
             <span>
               <a className="expanded">
                 <Icon type={icon} />{text}
@@ -85,6 +85,9 @@ class SiderMenu extends React.Component {
         </Paragraph>
         <Menu mode="inline" style={{background: '#f0f2f5', borderBottom: '1px solid #d9d9d9', paddingBottom: '10px'}}>
           {menuItem({ key: 1, text: 'New team', link: '/teams/new', icon: 'plus-circle' })}
+          {(this.props.teams || []).map(t => (
+            menuItem({ key: t.metadata.name, text: t.spec.summary, href: '/teams/[name]', link: `/teams/${t.metadata.name}`, icon: 'team' })
+          ))}
         </Menu>
         <Paragraph
           strong

@@ -22,7 +22,7 @@ class ConfigureCloudProvidersPage extends React.Component {
   }
 
   static getInitialProps = async () => {
-    const classes = await this.getClusterClasses()
+    const classes = await ConfigureCloudProvidersPage.getClusterClasses()
     return {
       title: 'Configure cluster providers',
       hideSider: true,

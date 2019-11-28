@@ -1,6 +1,7 @@
 import * as React from 'react'
 import axios from 'axios'
 import { hub } from '../../config'
+import canonical from '../../utils/canonical'
 import redirect from '../../utils/redirect'
 import { Typography, Button, Form, Input, Alert, Switch, Card, Row, Col, Tooltip, Icon } from 'antd'
 
@@ -41,12 +42,19 @@ class NewTeamForm extends React.Component {
 
     this.props.form.validateFields((err, values) => {
       if (!err) {
-        return redirect(null, '/')
-        // this.setState({
-        //   buttonText: 'Save',
-        //   submitting: false,
-        //   formErrorMessage: 'An error occurred saving the configuration, please try again'
-        // })
+        axios.post(`${hub.baseUrl}/teams`, values)
+          .then(function (res) {
+            if (res.status === 200) {
+              return redirect(null, `/teams/${canonical(values.teamName)}`)
+            }
+          }.bind(this))
+          .catch(function (error) {
+            this.setState({
+              buttonText: 'Save',
+              submitting: false,
+              formErrorMessage: 'An error occurred saving the configuration, please try again'
+            })
+          }.bind(this))
       }
     })
   }
@@ -95,8 +103,7 @@ class NewTeamForm extends React.Component {
     const clusterName = () => {
       const teamName = this.props.form.getFieldValue('teamName')
       if (teamName) {
-        const strippedTeamName = teamName.replace(/[^a-zA-Z0-9\s]/g, '').replace(/\W/g, '-').toLowerCase()
-        return `gcp-gke-${strippedTeamName}-notprod`
+        return `gcp-gke-${canonical(teamName)}-notprod`
       }
       return 'generated using your team name'
     }
