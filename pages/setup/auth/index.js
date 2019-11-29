@@ -26,11 +26,9 @@ const SetupAuthIndexPage = () => (
   </div>
 )
 
-SetupAuthIndexPage.getInitialProps = async () => {
-  return {
-    title: 'No authentication provider configured',
-    unrestrictedPage: true
-  }
+SetupAuthIndexPage.staticProps = {
+  title: 'No authentication provider configured',
+  unrestrictedPage: true
 }
 
 export default SetupAuthIndexPage

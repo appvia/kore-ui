@@ -15,7 +15,7 @@ const LoginPage = ({ authProvider }) => (
   </div>
 )
 
-LoginPage.getInitialProps = ({ req }) => {
+LoginPage.staticProps = ({ req }) => {
   return {
     title: 'Login',
     unrestrictedPage: true,

@@ -9,6 +9,7 @@ const { Header, Content } = Layout
 import User from '../components/User'
 import SiderMenu from '../components/SiderMenu'
 import redirect from '../utils/redirect'
+import apiRequest from '../utils/api-request'
 import { hub } from '../config'
 
 class MyApp extends App {
@@ -21,40 +22,47 @@ class MyApp extends App {
     this.setState({
       siderCollapsed,
       menuTitleFontSize: this.state.siderCollapsed ? '15px' : '10px'
-    });
+    })
   }
 
-  static async getUser(req) {
+  static async getUserSession(req) {
     if (req) {
       const session = req.session
       return session && session.passport && session.passport.user
     }
     try {
-      const result = await axios.get(`${hub.baseUrl}/user`)
-      if (result.data.displayName) {
-        return result.data
-      }
-      return false
+      const result = await axios.get(`${hub.baseUrl}/session/user`)
+      return result.data
     } catch (err) {
-      throw new Error(err.message)
+      return false
+    }
+  }
+
+  static async getTeams(req) {
+    try {
+      const teams = await apiRequest(req, 'get', '/teams')
+      return (teams.items || []).filter(t => t.metadata.name !== hub.hubAdminTeamName)
+    } catch (err) {
+      console.error('Error retrieving hub teams', err.message)
+      return []
     }
   }
 
   static async getInitialProps({ Component, ctx }) {
-    let pageProps = {};
-    if (Component.getInitialProps) {
-      pageProps = await Component.getInitialProps(ctx);
-    }
+    let pageProps = ((Component.staticProps && typeof Component.staticProps === 'function') ? Component.staticProps(ctx) : Component.staticProps) || {}
     if (pageProps.unrestrictedPage) {
       return { pageProps }
     }
-    const user = await this.getUser(ctx.req)
-    const teamsResult = await axios.get(`${hub.baseUrl}/apiproxy/teams`)
-    const teams = teamsResult.data.items.filter(t => t.metadata.name !== hub.hubAdminTeamName)
-    if (user) {
-      return { pageProps, user, teams }
+    const user = await MyApp.getUserSession(ctx.req)
+    if (!user) {
+      return redirect(ctx.res, '/logout', true)
     }
-    return redirect(ctx.res, '/logout', true)
+    if (Component.getInitialProps) {
+      const initialProps = await Component.getInitialProps(ctx)
+      pageProps = { ...pageProps, ...initialProps }
+    }
+    const teams = await MyApp.getTeams(ctx.req)
+    return { pageProps, user, teams }
   }
 
   render() {

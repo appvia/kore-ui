@@ -43,11 +43,9 @@ const ConfigureAuthPage = () => (
   </div>
 )
 
-ConfigureAuthPage.getInitialProps = async () => {
-  return {
-    title: 'Configure authentication provider',
-    unrestrictedPage: true
-  }
+ConfigureAuthPage.staticProps = {
+  title: 'Configure authentication provider',
+  unrestrictedPage: true
 }
 
 export default ConfigureAuthPage

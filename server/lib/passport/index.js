@@ -1,6 +1,1 @@
-const passport = require('passport')
-
-module.exports = (provider) => {
-  const path = `./providers/${provider}`
-  return require(path)
-}
+module.exports = (provider) => require(`./providers/${provider}`)

@@ -5,23 +5,12 @@ const { Footer } = Layout
 const { Title } = Typography
 
 import NewTeamForm from '../../components/forms/NewTeamForm'
-import { hub } from '../../config'
+import apiRequest from '../../utils/api-request'
 
 class NewTeamPage extends React.Component {
 
-  static async getClusterPlans() {
-    return axios.get(`${hub.baseUrl}/apiproxy/plans`)
-      .then(result => {
-        console.log('result.data', result.data)
-        return result.data
-      })
-      .catch(err => {
-        throw new Error(err.message)
-      })
-  }
-
-  static getInitialProps = async () => {
-    const plans = await NewTeamPage.getClusterPlans()
+  static getInitialProps = async (ctx) => {
+    const plans = await apiRequest(ctx.req, 'get', '/plans')
     return {
       title: 'Create new team',
       plans

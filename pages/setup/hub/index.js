@@ -29,11 +29,9 @@ const SetupCloudProvidersIndexPage = ({ user }) => (
   </div>
 )
 
-SetupCloudProvidersIndexPage.getInitialProps = async () => {
-  return {
-    title: 'Welcome. Initial Hub setup',
-    hideSider: true
-  }
+SetupCloudProvidersIndexPage.staticProps = {
+  title: 'Welcome. Initial Hub setup',
+  hideSider: true
 }
 
 export default SetupCloudProvidersIndexPage

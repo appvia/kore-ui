@@ -23,11 +23,9 @@ const SetupAuthCompletePage = () => (
   </div>
 )
 
-SetupAuthCompletePage.getInitialProps = async () => {
-  return {
-    title: 'Authentication setup complete',
-    unrestrictedPage: true
-  }
+SetupAuthCompletePage.staticProps = {
+  title: 'Authentication setup complete',
+  unrestrictedPage: true
 }
 
 export default SetupAuthCompletePage

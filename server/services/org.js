@@ -6,7 +6,7 @@ const GKE = require('../models/GKE')
 const { hub } = require('../../config')
 const canonical = require('../../utils/canonical')
 
-class UserService {
+class OrgService {
   constructor(hubApi) {
     this.hubApi = hubApi
   }
@@ -32,7 +32,7 @@ class UserService {
     return (user.teams || []).includes(hub.hubAdminTeamName)
   }
 
-  async createTeam(data, username) {
+  async createTeamWithFirstMember(data, username) {
     try {
       const teamName = canonical(data.teamName)
       const spec = {
@@ -44,10 +44,10 @@ class UserService {
       await axios.put(`${this.hubApi.url}/teams/${teamName}`, team)
       console.log('about to create team member')
       await this.addUserToTeam(teamName, username)
-      console.log('waiting for 2s')
-      await new Promise((resolve) => setTimeout(resolve, 2000))
-      console.log('about to create cluster')
-      await axios.put(`${this.hubApi.url}/teams/${teamName}/resources/bindings/gke/gke`, GKE(`gcp-gke-${teamName}-notprod`))
+      // console.log('waiting for 2s')
+      // await new Promise((resolve) => setTimeout(resolve, 2000))
+      // console.log('about to create cluster')
+      // await axios.put(`${this.hubApi.url}/teams/${teamName}/resources/bindings/gke/gke`, GKE(`gcp-gke-${teamName}-notprod`))
     } catch (err) {
       console.error('Error putting team from API', err)
       return Promise.reject(err)
@@ -86,4 +86,4 @@ class UserService {
   }
 }
 
-module.exports = UserService
+module.exports = OrgService

@@ -28,7 +28,7 @@ const SetupCloudProvidersCompletePage = () => (
 SetupCloudProvidersCompletePage.getInitialProps = async () => {
   return {
     title: 'Hub setup complete',
-    unrestrictedPage: true
+    hideSider: true
   }
 }
 

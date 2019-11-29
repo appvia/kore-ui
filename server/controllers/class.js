@@ -29,10 +29,10 @@ function postClasses(classService) {
 }
 
 
-function initRouter({ classService }) {
+function initRouter({ ensureAuthenticated, classService }) {
   const router = Router()
-  router.get('/classes', getClasses(classService))
-  router.post('/classes', postClasses(classService))
+  router.get('/classes', ensureAuthenticated, getClasses(classService))
+  router.post('/classes', ensureAuthenticated, postClasses(classService))
   return router
 }
 

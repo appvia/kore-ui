@@ -126,6 +126,8 @@ class NewTeamForm extends React.Component {
       }
       return 'generated using your team name'
     }
+
+    const plans = this.props.plans.items || []
     const planColumns = [
       {
         title: 'Property',
@@ -138,7 +140,13 @@ class NewTeamForm extends React.Component {
         key: 'value',
       }
     ]
-    const extractPlanValues = (values) => Object.keys(values).map(key => ({ key, property: key, value: `${values[key]}` }))
+    const planValues = Object.keys(plans[this.state.selectedPlan].spec.values)
+      .map(key => ({
+        key,
+        property: key,
+        value: `${plans[this.state.selectedPlan].spec.values[key]}`
+      }))
+    const selectedPlan = plans[this.state.selectedPlan]
 
     const ClusterBuildInfo = () => this.state.buildCluster ? (
       <div>
@@ -166,32 +174,30 @@ class NewTeamForm extends React.Component {
               </Col>
               <Col>
                 <Radio.Group onChange={this.onPlanChange} value={this.state.selectedPlan}>
-                  {this.props.plans.items.map((p, idx) => (
+                  {plans.map((p, idx) => (
                     <Radio.Button value={idx}>{p.spec.description}</Radio.Button>
                   ))}
                 </Radio.Group>
               </Col>
             </Row>
             <Row style={{padding: '5px 0', marginTop: '15px'}}>
-              {[this.props.plans.items[this.state.selectedPlan]].map(plan => (
-                <Card>
-                  <Paragraph style={{marginBottom: '0'}}>
-                    <Text strong>{plan.spec.description} - {plan.spec.summary}</Text>
-                    <Text style={{float: 'right'}}>
-                      <a onClick={this.showHidePlanDetails}>{this.state.showPlanDetails ? 'Hide' : 'Show'} plans details</a>
-                    </Text>
-                  </Paragraph>
-                  {this.state.showPlanDetails ? (
-                    <Table
-                      style={{marginTop: '20px'}}
-                      size="middle"
-                      pagination={false}
-                      columns={planColumns}
-                      dataSource={extractPlanValues(plan.spec.values)}
-                    />
-                  ): null }
-                </Card>
-              ))}
+              <Card>
+                <Paragraph style={{marginBottom: '0'}}>
+                  <Text strong>{selectedPlan.spec.description} - {selectedPlan.spec.summary}</Text>
+                  <Text style={{float: 'right'}}>
+                    <a onClick={this.showHidePlanDetails}>{this.state.showPlanDetails ? 'Hide' : 'Show'} plans details</a>
+                  </Text>
+                </Paragraph>
+                {this.state.showPlanDetails ? (
+                  <Table
+                    style={{marginTop: '20px'}}
+                    size="middle"
+                    pagination={false}
+                    columns={planColumns}
+                    dataSource={planValues}
+                  />
+                ): null }
+              </Card>
             </Row>
           </div>
         </Card>

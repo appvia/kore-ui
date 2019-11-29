@@ -36,12 +36,12 @@ function getLogout() {
   }
 }
 
-function getLoginGithubCallback(userService, classService, hubConfig) {
+function getLoginGithubCallback(orgService, classService, hubConfig) {
   return async (req, res) => {
     const username = req.session.passport.user.username
-    const userInfo = await userService.getOrCreateUser(username)
+    const userInfo = await orgService.getOrCreateUser(username)
     req.session.passport.user.teams = userInfo.teams || []
-    req.session.passport.user.isAdmin = userService.isAdmin(userInfo)
+    req.session.passport.user.isAdmin = orgService.isAdmin(userInfo)
     let redirectPath = '/'
     if (req.session.passport.user.isAdmin) {
       // this is hard-coded to check for GKE binding, but this will need to be more flexible in the future
@@ -67,12 +67,12 @@ function postConfigureAuthProvider(authService) {
   }
 }
 
-function initRouter({ authService, userService, classService, hubConfig }) {
+function initRouter({ authService, orgService, classService, hubConfig }) {
   const router = Router()
   router.get('/login', getLogin(authService))
   router.get('/logout', getLogout())
   router.get('/login/github', passport.authenticate('github'))
-  router.get('/login/github/callback', passport.authenticate('github', { failureRedirect: '/login' }), getLoginGithubCallback(userService, classService, hubConfig))
+  router.get('/login/github/callback', passport.authenticate('github', { failureRedirect: '/login' }), getLoginGithubCallback(orgService, classService, hubConfig))
   router.post('/auth/configure', postConfigureAuthProvider(authService))
   return router
 }
