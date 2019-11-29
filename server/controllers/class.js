@@ -1,16 +1,5 @@
 const Router = require('express').Router
 
-function getClasses(classService) {
-  return async (req, res) => {
-    try {
-      const classes = await classService.getClasses({ category: req.query.category })
-      res.json(classes)
-    } catch (e) {
-      res.status(500).send()
-    }
-  }
-}
-
 function postClasses(classService) {
   return async (req, res) => {
     const kind = req.body.kind
@@ -31,7 +20,6 @@ function postClasses(classService) {
 
 function initRouter({ ensureAuthenticated, classService }) {
   const router = Router()
-  router.get('/classes', ensureAuthenticated, getClasses(classService))
   router.post('/classes', ensureAuthenticated, postClasses(classService))
   return router
 }

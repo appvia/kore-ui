@@ -6,23 +6,15 @@ const { Title, Text, Paragraph } = Typography
 
 import { hub } from '../../../../config'
 import redirect from '../../../../utils/redirect'
-
+import apiRequest from '../../../../utils/api-request'
 import JSONSchemaForm from '../../../../components/forms/JSONSchemaForm'
 
 const RECOMMENDED = 'gke'
 
 class ConfigureCloudProvidersPage extends React.Component {
-  static async getClusterClasses() {
-    try {
-      const result = await axios.get(`${hub.baseUrl}/classes?category=cluster`)
-      return result.data
-    } catch (err) {
-      throw new Error(err.message)
-    }
-  }
 
-  static getInitialProps = async () => {
-    const classes = await ConfigureCloudProvidersPage.getClusterClasses()
+  static getInitialProps = async (ctx) => {
+    const classes = await apiRequest(ctx.req, 'get', '/classes?category=cluster')
     return {
       title: 'Configure cluster providers',
       hideSider: true,

@@ -68,7 +68,7 @@ class OrgService {
   async addUserToTeam(team, username) {
     console.log(`*** adding user ${username} to team ${team}`)
     try {
-      await axios.put(`${this.hubApi.url}/teams/${team}/members/${username}`, TeamMembership(team, username))
+      await axios.put(`${this.hubApi.url}/teams/${team}/members/${username}`, { headers: {'Content-Type': 'application/json'} })
     } catch (err) {
       console.error('Error adding user to team', err)
       return Promise.reject(err)

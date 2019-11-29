@@ -4,17 +4,17 @@ import { Typography, Card, List, Avatar } from 'antd'
 const { Paragraph } = Typography
 
 import Breadcrumb from '../../components/Breadcrumb'
-import { hub } from '../../config'
+import apiRequest from '../../utils/api-request'
 
 class TeamDashboard extends React.Component {
 
-  static async getTeamDetails(name) {
-    const getTeam = () => axios.get(`${hub.baseUrl}/apiproxy/teams/${name}`)
-    const getTeamMembers = () => axios.get(`${hub.baseUrl}/apiproxy/teams/${name}/members`)
+  static async getTeamDetails(req, name) {
+    const getTeam = () => apiRequest(req, 'get', `/teams/${name}`)
+    const getTeamMembers = () => apiRequest(req, 'get', `/teams/${name}/members`)
 
     return axios.all([getTeam(), getTeamMembers()])
-      .then(axios.spread(function (teamResult, membersResult) {
-        return { team: teamResult.data, members: membersResult.data }
+      .then(axios.spread(function (team, members) {
+        return { team, members }
       }))
       .catch(err => {
         throw new Error(err.message)
@@ -22,7 +22,7 @@ class TeamDashboard extends React.Component {
   }
 
   static getInitialProps = async (ctx) => {
-    const teamDetails = await TeamDashboard.getTeamDetails(ctx.query.name)
+    const teamDetails = await TeamDashboard.getTeamDetails(ctx.req, ctx.query.name)
     return {
       title: 'Team dashboard',
       ...teamDetails

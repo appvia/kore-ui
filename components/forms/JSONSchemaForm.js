@@ -34,7 +34,6 @@ class JSONSchemaForm extends React.Component {
 
     this.props.form.validateFields((err, values) => {
       if (!err) {
-        console.log('submitting form')
         this.props.handleSubmit(values, this.setState.bind(this))
       }
     })
