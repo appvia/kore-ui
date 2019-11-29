@@ -1,4 +1,5 @@
 const axios = require('axios')
+const Allocation = require('../models/Allocation')
 
 class ClassService {
   constructor(hubApi) {
@@ -18,8 +19,9 @@ class ClassService {
 
   async putTeamClass({ team, className, resource}) {
     try {
-      const result = await axios.put(`${this.hubApi.url}/teams/${team}/bindings/${className}`, resource)
-      return result.data
+      const bindingResult = await axios.put(`${this.hubApi.url}/teams/${team}/bindings/${className}`, resource)
+      const allocationResult = await axios.put(`${this.hubApi.url}/teams/${team}/allocations/gke`, Allocation())
+      return bindingResult.data
     } catch (err) {
       console.error('Error putting team class from API', err)
       return Promise.reject(err)

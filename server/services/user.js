@@ -2,6 +2,7 @@ const axios = require('axios')
 const User = require('../models/User')
 const TeamMembership = require('../models/TeamMembership')
 const Team = require('../models/Team')
+const GKE = require('../models/GKE')
 const { hub } = require('../../config')
 const canonical = require('../../utils/canonical')
 
@@ -39,8 +40,14 @@ class UserService {
         description: data.teamDescription
       }
       const team = Team(teamName, spec)
-      await axios.put(`${this.hubApi.url}/teams/${data.name}`, team)
+      console.log('about to create team')
+      await axios.put(`${this.hubApi.url}/teams/${teamName}`, team)
+      console.log('about to create team member')
       await this.addUserToTeam(teamName, username)
+      console.log('waiting for 2s')
+      await new Promise((resolve) => setTimeout(resolve, 2000))
+      console.log('about to create cluster')
+      await axios.put(`${this.hubApi.url}/teams/${teamName}/resources/bindings/gke/gke`, GKE(`gcp-gke-${teamName}-notprod`))
     } catch (err) {
       console.error('Error putting team from API', err)
       return Promise.reject(err)

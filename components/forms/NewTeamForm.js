@@ -3,9 +3,9 @@ import axios from 'axios'
 import { hub } from '../../config'
 import canonical from '../../utils/canonical'
 import redirect from '../../utils/redirect'
-import { Typography, Button, Form, Input, Alert, Switch, Card, Row, Col, Tooltip, Icon } from 'antd'
+import { Typography, Button, Form, Input, Alert, Switch, Card, Row, Col, Tooltip, Icon, Radio, Table } from 'antd'
 
-const { Text } = Typography
+const { Text, Paragraph } = Typography
 
 class NewTeamForm extends React.Component {
   constructor(props) {
@@ -14,7 +14,9 @@ class NewTeamForm extends React.Component {
       buttonText: 'Save',
       submitting: false,
       formErrorMessage: false,
-      buildCluster: true
+      buildCluster: true,
+      selectedPlan: 0,
+      showPlanDetails: false
     }
   }
 
@@ -37,7 +39,9 @@ class NewTeamForm extends React.Component {
       buttonText: 'Saving...',
       submitting: true,
       formErrorMessage: false,
-      buildCluster: this.state.buildCluster
+      buildCluster: this.state.buildCluster,
+      selectedPlan: this.state.selectedPlan,
+      showPlanDetails: this.state.showPlanDetails
     })
 
     this.props.form.validateFields((err, values) => {
@@ -47,21 +51,36 @@ class NewTeamForm extends React.Component {
             if (res.status === 200) {
               return redirect(null, `/teams/${canonical(values.teamName)}`)
             }
-          }.bind(this))
+          })
           .catch(function (error) {
             this.setState({
               buttonText: 'Save',
               submitting: false,
-              formErrorMessage: 'An error occurred saving the configuration, please try again'
+              formErrorMessage: 'An error occurred saving the configuration, please try again',
+              buildCluster: this.state.buildCluster,
+              selectedPlan: this.state.selectedPlan,
+              showPlanDetails: this.state.showPlanDetails
             })
           }.bind(this))
       }
     })
   }
 
+  onPlanChange = (e) => {
+    const state = { ...this.state }
+    state.selectedPlan = e.target.value
+    this.setState(state)
+  }
+
   onSwitchChange = value => {
     const state = { ...this.state }
     state.buildCluster = value
+    this.setState(state)
+  }
+
+  showHidePlanDetails = () => {
+    const state = { ...this.state }
+    state.showPlanDetails = !state.showPlanDetails
     this.setState(state)
   }
 
@@ -107,12 +126,25 @@ class NewTeamForm extends React.Component {
       }
       return 'generated using your team name'
     }
+    const planColumns = [
+      {
+        title: 'Property',
+        dataIndex: 'property',
+        key: 'property',
+      },
+      {
+        title: 'Value',
+        dataIndex: 'value',
+        key: 'value',
+      }
+    ]
+    const extractPlanValues = (values) => Object.keys(values).map(key => ({ key, property: key, value: `${values[key]}` }))
 
     const ClusterBuildInfo = () => this.state.buildCluster ? (
       <div>
         <Card style={{borderTop: 'none'}}>
           <div className="body">
-            <Row>
+            <Row style={{padding: '5px 0'}}>
               <Col xs={24} sm={12} md={8} lg={6} xl={4}>
                 <Text strong>Cluster provider</Text>
               </Col>
@@ -120,13 +152,46 @@ class NewTeamForm extends React.Component {
                 <Text>GKE</Text>
               </Col>
             </Row>
-            <Row>
+            <Row style={{padding: '5px 0'}}>
               <Col xs={24} sm={12} md={8} lg={6} xl={4}>
                 <Text strong>Cluster name</Text>
               </Col>
               <Col>
                 <Text>{clusterName()}</Text>
               </Col>
+            </Row>
+            <Row style={{padding: '5px 0'}}>
+              <Col xs={24} sm={12} md={8} lg={6} xl={4}>
+                <Text strong>Plan</Text>
+              </Col>
+              <Col>
+                <Radio.Group onChange={this.onPlanChange} value={this.state.selectedPlan}>
+                  {this.props.plans.items.map((p, idx) => (
+                    <Radio.Button value={idx}>{p.spec.description}</Radio.Button>
+                  ))}
+                </Radio.Group>
+              </Col>
+            </Row>
+            <Row style={{padding: '5px 0', marginTop: '15px'}}>
+              {[this.props.plans.items[this.state.selectedPlan]].map(plan => (
+                <Card>
+                  <Paragraph style={{marginBottom: '0'}}>
+                    <Text strong>{plan.spec.description} - {plan.spec.summary}</Text>
+                    <Text style={{float: 'right'}}>
+                      <a onClick={this.showHidePlanDetails}>{this.state.showPlanDetails ? 'Hide' : 'Show'} plans details</a>
+                    </Text>
+                  </Paragraph>
+                  {this.state.showPlanDetails ? (
+                    <Table
+                      style={{marginTop: '20px'}}
+                      size="middle"
+                      pagination={false}
+                      columns={planColumns}
+                      dataSource={extractPlanValues(plan.spec.values)}
+                    />
+                  ): null }
+                </Card>
+              ))}
             </Row>
           </div>
         </Card>

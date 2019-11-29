@@ -63,18 +63,35 @@ services:
     volumes:
       - ./hack/kubeconfig.local:/config/kubeconfig.local:ro
 
-#  hub-apiserver:
-#    image: quay.io/appvia/hub-apiserver:latest
-#    command:
-#      - --kube-api-server http://127.0.0.1:8080
-#      - --verbose
-#    ports:
-#      - 10080:10080
+  hub-crds:
+    image: bitnami/kubectl
+    command:
+      - apply
+      - -f
+      - /deploy
+      - --validate=false
+      - --server
+      - http://kube-apiserver:8080
+    depends_on:
+     - kube-controller-manager
+     - kube-apiserver
+    volumes:
+      - ../hub-apis/deploy:/deploy:ro
+
+  hub-apiserver:
+    image: quay.io/appvia/hub-apiserver:v0.0.1
+    command:
+      - --kube-api-server
+      - http://kube-apiserver:8080
+      - --verbose
+    ports:
+      - 10080:10080
+    depends_on:
+     - hub-crds
 
   hub-ui:
     build: .
     environment:
-      HUB_API_URL: http://docker.for.mac.localhost:10080/api/v1alpha1
-#      HUB_API_URL: http://hub-apiserver:10080/api/v1alpha1
+      HUB_API_URL: http://hub-apiserver:10080/api/v1alpha1
     ports:
       - 3000:3000
