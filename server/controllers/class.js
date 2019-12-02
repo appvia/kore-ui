@@ -3,7 +3,7 @@ const Router = require('express').Router
 function postClasses(classService) {
   return async (req, res) => {
     const kind = req.body.kind
-    const resource = require(`../models/${kind}`)(req.body.spec)
+    const resource = require(`./models`)(req.body.spec)
     try {
       const classResult = await classService.putTeamClass({
         team: req.body.team,

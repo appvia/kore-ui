@@ -1,5 +1,5 @@
 const axios = require('axios')
-const AuthProvider = require('../models/AuthProvider')
+const AuthProvider = require('../../lib/crd/AuthProvider')
 
 class AuthService {
   constructor(hubApi, baseUrl) {

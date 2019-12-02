@@ -3,8 +3,8 @@ import axios from 'axios'
 import { Typography, Card, List, Avatar } from 'antd'
 const { Paragraph } = Typography
 
-import Breadcrumb from '../../components/Breadcrumb'
-import apiRequest from '../../utils/api-request'
+import Breadcrumb from '../../lib/components/Breadcrumb'
+import apiRequest from '../../lib/utils/api-request'
 
 class TeamDashboard extends React.Component {
 

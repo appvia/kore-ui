@@ -4,10 +4,10 @@ const { Footer } = Layout
 const { Title, Text, Paragraph } = Typography
 
 import { hub } from '../../../../config'
-import redirect from '../../../../utils/redirect'
-import apiRequest from '../../../../utils/api-request'
-import JSONSchemaForm from '../../../../components/forms/JSONSchemaForm'
-import Generic from '../../../../server/models/Generic'
+import redirect from '../../../../lib/utils/redirect'
+import apiRequest from '../../../../lib/utils/api-request'
+import JSONSchemaForm from '../../../../lib/components/forms/JSONSchemaForm'
+import Generic from '../../../../lib/crd/Generic'
 
 const RECOMMENDED = 'gke'
 

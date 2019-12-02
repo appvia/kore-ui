@@ -1,5 +1,5 @@
 const axios = require('axios')
-const User = require('../models/User')
+const User = require('../../lib/crd/User')
 const { hub } = require('../../config')
 
 class OrgService {

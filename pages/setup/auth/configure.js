@@ -3,8 +3,8 @@ const { Footer } = Layout
 const { Title, Text, Paragraph } = Typography
 
 import { hub } from '../../../config'
-import CopyTextWithLabel from '../../../components/CopyTextWithLabel'
-import AuthConfigForm from '../../../components/forms/AuthConfigForm'
+import CopyTextWithLabel from '../../../lib/components/CopyTextWithLabel'
+import AuthConfigForm from '../../../lib/components/forms/AuthConfigForm'
 
 const StepOne = () => (
   <Card title="Step 1 - Create GitHub OAuth app" style={{ marginTop: '20px' }} headStyle={{ backgroundColor: '#f5f5f5' }}>

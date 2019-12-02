@@ -6,10 +6,10 @@ import axios from 'axios'
 import { Layout } from 'antd'
 const { Header, Content } = Layout
 
-import User from '../components/User'
-import SiderMenu from '../components/SiderMenu'
-import redirect from '../utils/redirect'
-import apiRequest from '../utils/api-request'
+import User from '../lib/components/User'
+import SiderMenu from '../lib/components/SiderMenu'
+import redirect from '../lib/utils/redirect'
+import apiRequest from '../lib/utils/api-request'
 import { hub } from '../config'
 
 class MyApp extends App {

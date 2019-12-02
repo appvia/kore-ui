@@ -3,8 +3,8 @@ import { Layout, Typography } from 'antd'
 const { Footer } = Layout
 const { Title } = Typography
 
-import NewTeamForm from '../../components/forms/NewTeamForm'
-import apiRequest from '../../utils/api-request'
+import NewTeamForm from '../../lib/components/forms/NewTeamForm'
+import apiRequest from '../../lib/utils/api-request'
 
 class NewTeamPage extends React.Component {
 
