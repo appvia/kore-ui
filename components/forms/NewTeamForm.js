@@ -58,7 +58,7 @@ class NewTeamForm extends React.Component {
           const state = { ...this.state }
           state.buttonText = 'Save'
           state.submitting = false
-          state.formErrorMessage = 'An error occurred saving the configuration, please try again'
+          state.formErrorMessage = 'An error occurred creating the team, please try again'
           this.setState(state)
         }
       }

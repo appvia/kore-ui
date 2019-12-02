@@ -9,6 +9,6 @@ module.exports = async (req, method, apiPath, body, options) => {
     return result.data
   } catch (err) {
     console.error(`Error making api request, method: "${method}", url: "${url}"`, err.message)
-    return {}
+    return method === 'get' ? {} : Promise.reject(err)
   }
 }

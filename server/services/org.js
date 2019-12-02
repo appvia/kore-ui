@@ -1,10 +1,6 @@
 const axios = require('axios')
 const User = require('../models/User')
-const TeamMembership = require('../models/TeamMembership')
-const Team = require('../models/Team')
-const GKE = require('../models/GKE')
 const { hub } = require('../../config')
-const canonical = require('../../utils/canonical')
 
 class OrgService {
   constructor(hubApi) {

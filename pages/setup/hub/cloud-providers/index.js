@@ -1,5 +1,4 @@
 import React from 'react'
-import axios from 'axios'
 import { Layout, Typography, Card, Checkbox, Row, Col } from 'antd'
 const { Footer } = Layout
 const { Title, Text, Paragraph } = Typography
@@ -8,6 +7,7 @@ import { hub } from '../../../../config'
 import redirect from '../../../../utils/redirect'
 import apiRequest from '../../../../utils/api-request'
 import JSONSchemaForm from '../../../../components/forms/JSONSchemaForm'
+import Generic from '../../../../server/models/Generic'
 
 const RECOMMENDED = 'gke'
 
@@ -38,27 +38,25 @@ class ConfigureCloudProvidersPage extends React.Component {
     }
   }
 
-  handleFormSubmit = ({ kind, className }) => {
-    return (values, setState) => {
-      const body = {
-        team: hub.hubAdminTeamName,
-        className,
-        kind,
+  handleFormSubmit = ({ requires, className }) => {
+    return async (values, setState) => {
+      const resource = Generic({
+        apiVersion: `${requires.group}/${requires.version}`,
+        kind: requires.kind,
+        name: className,
         spec: values
+      })
+      try {
+        await apiRequest(null, 'put', `/teams/${hub.hubAdminTeamName}/bindings/${className}`, resource)
+        return redirect(null, '/setup/hub/complete')
+      } catch (err) {
+        console.error('Error submitting form', err)
+        const state = { ...this.state }
+        state.buttonText = 'Save'
+        state.submitting = false
+        state.formErrorMessage = 'An error occurred saving the configuration, please try again'
+        setState(state)
       }
-      axios.post(`${hub.baseUrl}/classes`, body)
-        .then(function (res) {
-          if (res.status === 200) {
-            return redirect(null, '/setup/hub/complete')
-          }
-        }.bind(this))
-        .catch(function (error) {
-          setState({
-            buttonText: 'Save',
-            submitting: false,
-            formErrorMessage: 'An error occurred saving the configuration, please try again'
-          })
-        })
     }
   }
 
@@ -86,14 +84,14 @@ class ConfigureCloudProvidersPage extends React.Component {
 
     const ProviderForms = () => {
       return this.props.classes.items.filter(c => this.state.selected.includes(c.metadata.name)).map(s => {
-        const requiresKind = s.spec.requires.kind
-        const requiresKindSchema = s.spec.schemas.definitions[requiresKind].properties.spec
+        const requires = s.spec.requires
+        const requiresSchema = s.spec.schemas.definitions[requires.kind].properties.spec
         return (
           <Card key={s.metadata.name} title={s.spec.displayName} style={{marginTop: '20px'}} headStyle={{backgroundColor: '#f5f5f5'}}>
             <Paragraph>
-            <Text>Enter the credentials for {s.spec.displayName}</Text>
+              <Text>Complete the form required for <Text strong>{s.spec.displayName}</Text></Text>
             </Paragraph>
-            <JSONSchemaForm schema={requiresKindSchema} handleSubmit={this.handleFormSubmit({ kind: requiresKind, className: s.metadata.name })} />
+            <JSONSchemaForm schema={requiresSchema} handleSubmit={this.handleFormSubmit({ requires, className: s.metadata.name })} />
           </Card>
         )
       })
