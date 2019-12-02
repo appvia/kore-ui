@@ -1,9 +1,8 @@
 import Link from 'next/link'
-import { Layout, Typography, Result, Button } from 'antd'
+import { Layout, Result, Button } from 'antd'
 const { Footer } = Layout
-const { Paragraph, Text } = Typography;
 
-const SetupCloudProvidersCompletePage = () => (
+const SetupHubCompletePage = () => (
   <div>
     <Result
       status="success"
@@ -25,11 +24,9 @@ const SetupCloudProvidersCompletePage = () => (
   </div>
 )
 
-SetupCloudProvidersCompletePage.getInitialProps = async () => {
-  return {
-    title: 'Hub setup complete',
-    hideSider: true
-  }
+SetupHubCompletePage.staticProps = {
+  title: 'Hub setup complete',
+  hideSider: true
 }
 
-export default SetupCloudProvidersCompletePage
+export default SetupHubCompletePage

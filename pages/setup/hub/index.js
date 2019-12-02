@@ -2,7 +2,7 @@ import Link from 'next/link'
 import { Layout, Result, Icon, Button } from 'antd'
 const { Footer } = Layout
 
-const SetupCloudProvidersIndexPage = ({ user }) => (
+const SetupHubIndexPage = ({ user }) => (
   <div>
     <Result
       icon={<Icon type="smile" theme="twoTone" />}
@@ -29,9 +29,9 @@ const SetupCloudProvidersIndexPage = ({ user }) => (
   </div>
 )
 
-SetupCloudProvidersIndexPage.staticProps = {
+SetupHubIndexPage.staticProps = {
   title: 'Welcome. Initial Hub setup',
   hideSider: true
 }
 
-export default SetupCloudProvidersIndexPage
+export default SetupHubIndexPage

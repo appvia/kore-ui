@@ -1,12 +1,12 @@
-const IndexPage = ({ user }) => {
+const IndexPage = () => {
   return (
     <div>
     </div>
   )
 }
 
-IndexPage.getInitialProps = () => ({
+IndexPage.staticProps = {
   title: 'Dashboard'
-})
+}
 
 export default IndexPage
