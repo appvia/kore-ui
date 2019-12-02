@@ -1,8 +1,9 @@
 import * as React from 'react'
-import axios from 'axios'
-import { hub } from '../../config'
 import canonical from '../../utils/canonical'
 import redirect from '../../utils/redirect'
+import apiRequest from '../../utils/api-request'
+import Team from '../../server/models/Team'
+
 import { Typography, Button, Form, Input, Alert, Switch, Card, Row, Col, Tooltip, Icon, Radio, Table } from 'antd'
 
 const { Text, Paragraph } = Typography
@@ -35,38 +36,36 @@ class NewTeamForm extends React.Component {
   handleSubmit = e => {
     e.preventDefault()
 
-    this.setState({
-      buttonText: 'Saving...',
-      submitting: true,
-      formErrorMessage: false,
-      buildCluster: this.state.buildCluster,
-      selectedPlan: this.state.selectedPlan,
-      showPlanDetails: this.state.showPlanDetails
-    })
+    const state = { ...this.state }
+    state.buttonText = 'Saving...'
+    state.submitting = true
+    state.formErrorMessage = false
+    this.setState(state)
 
-    this.props.form.validateFields((err, values) => {
+    this.props.form.validateFields(async (err, values) => {
       if (!err) {
-        axios.post(`${hub.baseUrl}/teams`, values)
-          .then(function (res) {
-            if (res.status === 200) {
-              return redirect(null, `/teams/${canonical(values.teamName)}`)
-            }
-          })
-          .catch(function (error) {
-            this.setState({
-              buttonText: 'Save',
-              submitting: false,
-              formErrorMessage: 'An error occurred saving the configuration, please try again',
-              buildCluster: this.state.buildCluster,
-              selectedPlan: this.state.selectedPlan,
-              showPlanDetails: this.state.showPlanDetails
-            })
-          }.bind(this))
+        const canonicalTeamName = canonical(values.teamName)
+        const spec = {
+          summary: values.teamName,
+          description: values.teamDescription
+        }
+        try {
+          await apiRequest(null, 'put', `/teams/${canonicalTeamName}`, Team(canonicalTeamName, spec))
+          await apiRequest(null, 'put', `/teams/${canonicalTeamName}/members/${this.props.user.username}`)
+          return redirect(null, `/teams/${canonicalTeamName}`)
+        } catch (err) {
+          console.error('Error submitting form', err)
+          const state = { ...this.state }
+          state.buttonText = 'Save'
+          state.submitting = false
+          state.formErrorMessage = 'An error occurred saving the configuration, please try again'
+          this.setState(state)
+        }
       }
     })
   }
 
-  onPlanChange = (e) => {
+  onPlanChange = e => {
     const state = { ...this.state }
     state.selectedPlan = e.target.value
     this.setState(state)

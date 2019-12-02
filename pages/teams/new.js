@@ -20,7 +20,7 @@ class NewTeamPage extends React.Component {
     return (
       <div>
         <Title>New Team</Title>
-        <NewTeamForm plans={this.props.plans} />
+        <NewTeamForm plans={this.props.plans} user={this.props.user}/>
         <Footer style={{textAlign: 'center', backgroundColor: '#fff'}}>
       <span>
         For more information read the <a href="#">Documentation</a>

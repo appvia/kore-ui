@@ -15,7 +15,6 @@ router.use(require('./controllers/auth').initRouter({ authService, orgService, c
 
 // other routes must have an authenticated user
 router.use(require('./controllers/session').initRouter({ ensureAuthenticated }))
-router.use(require('./controllers/org').initRouter({ ensureAuthenticated, orgService }))
 router.use(require('./controllers/class').initRouter({ ensureAuthenticated, classService }))
 router.use(require('./controllers/apiproxy').initRouter({ ensureAuthenticated, hubApi: config.hubApi }))
 

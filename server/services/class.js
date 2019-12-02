@@ -1,5 +1,4 @@
 const axios = require('axios')
-const Allocation = require('../models/Allocation')
 
 class ClassService {
   constructor(hubApi) {

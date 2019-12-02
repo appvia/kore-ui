@@ -32,27 +32,27 @@ class OrgService {
     return (user.teams || []).includes(hub.hubAdminTeamName)
   }
 
-  async createTeamWithFirstMember(data, username) {
-    try {
-      const teamName = canonical(data.teamName)
-      const spec = {
-        summary: data.teamName,
-        description: data.teamDescription
-      }
-      const team = Team(teamName, spec)
-      console.log('about to create team')
-      await axios.put(`${this.hubApi.url}/teams/${teamName}`, team)
-      console.log('about to create team member')
-      await this.addUserToTeam(teamName, username)
-      // console.log('waiting for 2s')
-      // await new Promise((resolve) => setTimeout(resolve, 2000))
-      // console.log('about to create cluster')
-      // await axios.put(`${this.hubApi.url}/teams/${teamName}/resources/bindings/gke/gke`, GKE(`gcp-gke-${teamName}-notprod`))
-    } catch (err) {
-      console.error('Error putting team from API', err)
-      return Promise.reject(err)
-    }
-  }
+  // async createTeamWithFirstMember(data, username) {
+  //   try {
+  //     const teamName = canonical(data.teamName)
+  //     const spec = {
+  //       summary: data.teamName,
+  //       description: data.teamDescription
+  //     }
+  //     const team = Team(teamName, spec)
+  //     console.log('about to create team')
+  //     await axios.put(`${this.hubApi.url}/teams/${teamName}`, team)
+  //     console.log('about to create team member')
+  //     await this.addUserToTeam(teamName, username)
+  //     // console.log('waiting for 2s')
+  //     // await new Promise((resolve) => setTimeout(resolve, 2000))
+  //     // console.log('about to create cluster')
+  //     // await axios.put(`${this.hubApi.url}/teams/${teamName}/resources/bindings/gke/gke`, GKE(`gcp-gke-${teamName}-notprod`))
+  //   } catch (err) {
+  //     console.error('Error putting team from API', err)
+  //     return Promise.reject(err)
+  //   }
+  // }
 
   async getTeamMembers(team) {
     try {

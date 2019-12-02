@@ -3,11 +3,12 @@ const Router = require('express').Router
 
 const PATH_BLACKLIST = ['/auth']
 
-function apiProxyGet(hubApi) {
+function apiProxy(hubApi) {
   return async (req, res) => {
+    const method = req.method.toLowerCase()
     const apiUrlPath = req.originalUrl.replace('/apiproxy', '')
     try {
-      const result = await axios.get(`${hubApi.url}${apiUrlPath}`)
+      const result = await axios[method](`${hubApi.url}${apiUrlPath}`, req.body)
       return res.json(result.data)
     } catch (err) {
       const status = (err.response && err.response.status) || 500
@@ -27,7 +28,7 @@ function checkBlacklist(req, res, next) {
 
 function initRouter({ ensureAuthenticated, hubApi }) {
   const router = Router()
-  router.get('/apiproxy/*', ensureAuthenticated, checkBlacklist, apiProxyGet(hubApi))
+  router.use('/apiproxy/*', ensureAuthenticated, checkBlacklist, apiProxy(hubApi))
   return router
 }
 
