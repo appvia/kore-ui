@@ -76,12 +76,12 @@ class MyApp extends App {
           <meta charSet="utf-8"/>
           <meta name="viewport" content="initial-scale=1.0, width=device-width"/>
         </Head>
-        <Layout style={{background: '#f0f2f5', height:'100vh'}}>
+        <Layout style={{minHeight:'100vh'}}>
           <Header style={{backgroundColor: '#002140'}}>
             <div style={{color: '#FFF', float: 'left', fontSize: '18px', marginLeft: '-25px'}}>Appvia Hub</div>
             <User user={props.user}/>
           </Header>
-          <Layout hasSider="true" style={{background: '#f0f2f5', height:'100vh'}}>
+          <Layout hasSider="true" style={{minHeight:'100vh'}}>
             <SiderMenu hide={props.hideSider || props.unrestrictedPage} isAdmin={props.user && props.user.isAdmin} teams={props.teams}/>
             <Content style={{background: '#fff', padding: 24, minHeight: 280}}>
               <Component {...props} />
