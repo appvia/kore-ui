@@ -12,7 +12,7 @@ const orgService = new OrgService(config.hubApi)
 router.use(require('./controllers/auth').initRouter({ authService, orgService, hubConfig: config.hub }))
 
 // other routes must have an authenticated user
-router.use(require('./controllers/session').initRouter({ ensureAuthenticated }))
+router.use(require('./controllers/session').initRouter({ ensureAuthenticated, orgService }))
 router.use(require('./controllers/apiproxy').initRouter({ ensureAuthenticated, hubApi: config.hubApi }))
 
 module.exports = router

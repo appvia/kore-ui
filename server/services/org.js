@@ -24,6 +24,11 @@ class OrgService {
     }
   }
 
+  async refreshUser(user) {
+    user.teams = await this.getUserTeams(user.username)
+    user.isAdmin = this.isAdmin(user)
+  }
+
   isAdmin(user) {
     return (user.teams || []).includes(hub.hubAdminTeamName)
   }

@@ -10,25 +10,28 @@ import User from '../lib/components/User'
 import SiderMenu from '../lib/components/SiderMenu'
 import redirect from '../lib/utils/redirect'
 import apiRequest from '../lib/utils/api-request'
-import { hub } from '../config'
+import { hub, hubApi } from '../config'
+import OrgService from '../server/services/org'
 
 class MyApp extends App {
   state = {
-    siderCollapsed: false,
-    menuTitleFontSize: '15px'
+    siderCollapsed: false
   }
 
   onSiderCollapse = siderCollapsed => {
-    this.setState({
-      siderCollapsed,
-      menuTitleFontSize: this.state.siderCollapsed ? '15px' : '10px'
-    })
+    this.setState({ siderCollapsed })
   }
 
   static async getUserSession(req) {
     if (req) {
       const session = req.session
-      return session && session.passport && session.passport.user
+      const user = session && session.passport && session.passport.user
+      if (user) {
+        const orgService = new OrgService(hubApi)
+        await orgService.refreshUser(user)
+        return user
+      }
+      return false
     }
     try {
       const result = await axios.get(`${hub.baseUrl}/session/user`)
@@ -38,10 +41,10 @@ class MyApp extends App {
     }
   }
 
-  static async getTeams(req) {
+  static async getTeams(req, userTeams) {
     try {
       const teams = await apiRequest(req, 'get', '/teams')
-      return (teams.items || []).filter(t => t.metadata.name !== hub.hubAdminTeamName)
+      return (teams.items || []).filter(t => userTeams.includes(t.metadata.name) && t.metadata.name !== hub.hubAdminTeamName)
     } catch (err) {
       console.error('Error retrieving hub teams', err.message)
       return []
@@ -61,7 +64,7 @@ class MyApp extends App {
       const initialProps = await Component.getInitialProps(ctx)
       pageProps = { ...pageProps, ...initialProps }
     }
-    const teams = await MyApp.getTeams(ctx.req)
+    const teams = await MyApp.getTeams(ctx.req, user.teams)
     return { pageProps, user, teams }
   }
 
