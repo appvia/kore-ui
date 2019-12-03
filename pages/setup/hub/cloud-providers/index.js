@@ -48,6 +48,8 @@ class ConfigureCloudProvidersPage extends React.Component {
       })
       try {
         await apiRequest(null, 'put', `/teams/${hub.hubAdminTeamName}/bindings/${className}`, resource)
+        // allocate this binding to all teams
+        await apiRequest(null, 'put', `/teams/${hub.hubAdminTeamName}/bindings/${className}/allocation/allteams`)
         return redirect(null, '/setup/hub/complete')
       } catch (err) {
         console.error('Error submitting form', err)
