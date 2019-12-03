@@ -8,6 +8,6 @@ module.exports = {
     hubAdminTeamName: 'hub-admin'
   },
   hubApi: {
-    url: process.env.HUB_API_URL || 'http://localhost:9000/api/v1alpha1'
+    url: process.env.HUB_API_URL || 'http://localhost:10080/api/v1alpha1'
   }
 }

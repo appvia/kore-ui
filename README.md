@@ -18,20 +18,24 @@ npm run dev
 To run in production mode, do the following
 
 ```bash
+npm install
 npm run build
 npm start
 ```
 
 ### Docker compose
 
-To run all services for the hub together you can use the docker-compose file
+To run all dependent services for the hub together you can use the docker-compose file
 
 ```bash
-# clone the APIs repo
-git clone git@github.com:appvia/hub-apis.git
-docker-compose up -d
-# deploy the CRDs for the hub
-KUBECONFIG="none" kubectl apply -f ../hub-apis/deploy --validate=false
+# clone the Hub API server repo
+git clone git@github.com:appvia/hub-apiserver.git
+# pull to ensure you have the latest image versions
+docker-compose --file ../hub-apiserver/docker-compose.yml --file docker-compose.yml pull
+# run docker-compose using the base compose file form the API server repo
+docker-compose --file ../hub-apiserver/docker-compose.yml --file docker-compose.yml up -d
+# run the UI
+npm run dev
 ```
 
 Visit http://localhost:3000 in the browser to use the hub.
