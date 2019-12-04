@@ -87,7 +87,7 @@ class MyApp extends App {
           <Layout hasSider="true" style={{minHeight:'100vh'}}>
             <SiderMenu hide={props.hideSider || props.unrestrictedPage} isAdmin={props.user && props.user.isAdmin} teams={props.teams}/>
             <Content style={{background: '#fff', padding: 24, minHeight: 280}}>
-              <Component {...props} />
+              <Component {...this.props.pageProps} user={this.props.user} />
             </Content>
           </Layout>
         </Layout>
