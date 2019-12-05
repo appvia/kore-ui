@@ -7,7 +7,7 @@ const SetupHubCompletePage = () => (
     <Result
       status="success"
       title="Hub setup complete"
-      subTitle="You have configured the minimum setting in order to work with the hub"
+      subTitle="You have configured the minimum settings in order to work with the hub"
       extra={[
         <Button type="primary" key="buttonContinue">
           <Link href="/">
