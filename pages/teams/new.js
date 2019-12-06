@@ -5,6 +5,7 @@ const { Title } = Typography
 
 import NewTeamForm from '../../lib/components/forms/NewTeamForm'
 import ClusterBuildForm from '../../lib/components/forms/ClusterBuildForm'
+import Breadcrumb from '../../lib/components/Breadcrumb'
 import apiRequest from '../../lib/utils/api-request'
 
 class NewTeamPage extends React.Component {
@@ -52,6 +53,7 @@ class NewTeamPage extends React.Component {
   render() {
     return (
       <div>
+        <Breadcrumb items={[{text: 'New team'}]} />
         <Title>New Team</Title>
         <NewTeamForm
           user={this.props.user}
