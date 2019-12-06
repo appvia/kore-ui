@@ -2,8 +2,8 @@ import React from 'react'
 import axios from 'axios'
 import moment from 'moment'
 import Link from 'next/link'
-import { Typography, Card, List, Tag, Button, Avatar, Popconfirm, message } from 'antd'
-const { Paragraph, Text } = Typography
+import { Typography, Card, List, Tag, Button, Avatar, Popconfirm, message, Icon, Modal } from 'antd'
+const { Paragraph, Text, Title } = Typography
 
 import Breadcrumb from '../../lib/components/Breadcrumb'
 import apiRequest from '../../lib/utils/api-request'
@@ -11,14 +11,16 @@ import apiRequest from '../../lib/utils/api-request'
 class TeamDashboard extends React.Component {
   state = {
     teamName: this.props.team.metadata.name,
-    members: this.props.members
+    members: this.props.members,
+    showClusterCreds: false
   }
 
   componentDidUpdate(props, state) {
     if (this.props.team.metadata.name !== state.teamName) {
       this.setState({
         teamName: this.props.team.metadata.name,
-        members: props.members
+        members: props.members,
+        showClusterCreds: false
       })
     }
   }
@@ -61,6 +63,14 @@ class TeamDashboard extends React.Component {
     }
   }
 
+  showHideClusterCreds = (cluster) => {
+    return () => {
+      const state = { ...this.state }
+      state.showClusterCreds = cluster
+      this.setState(state)
+    }
+  }
+
   render() {
     const memberActions = (member) => {
       const deleteAction = (
@@ -85,6 +95,10 @@ class TeamDashboard extends React.Component {
     )
 
     const clusters = this.props.resources.items.filter(r => r.kind === 'Kubernetes')
+
+    const clusterActions = (cluster) => {
+      return [<Text><a key="show_creds" onClick={this.showHideClusterCreds(cluster)}><Icon type="eye" theme="filled"/> Access</a></Text>]
+    }
 
     return (
       <div>
@@ -120,11 +134,11 @@ class TeamDashboard extends React.Component {
               const useResource = this.props.resources.items.find(resource => resource.kind === cluster.spec.use.kind && resource.metadata.name === cluster.spec.use.name)
               const created = moment(cluster.metadata.creationTimestamp).fromNow()
               return (
-                <List.Item>
+                <List.Item actions={clusterActions(cluster)}>
                   <List.Item.Meta
                     avatar={<Avatar icon="cluster" />}
-                    title={cluster.metadata.name}
-                    description={<Text type='secondary'>{created}</Text>}
+                    title={<Text>{useResource.spec.description}<Text style={{ fontFamily: 'monospace', marginLeft: '15px' }}>{cluster.metadata.name}</Text></Text>}
+                    description={<Text type='secondary'>Created {created}</Text>}
                   />
                   <Tag color="#5cdbd3">{useResource.status.status}</Tag>
                 </List.Item>
@@ -132,6 +146,28 @@ class TeamDashboard extends React.Component {
             }}
           >
           </List>
+          {this.state.showClusterCreds ? (
+            <Modal
+              title={
+                <div>
+                  <Title level={4}>Access:
+                    <Text style={{fontFamily: 'monospace'}}>{this.state.showClusterCreds.metadata.name}</Text>
+                  </Title>
+                </div>
+              }
+              visible={this.state.showClusterCreds}
+              onOk={this.showHideClusterCreds(false)}
+              onCancel={this.showHideClusterCreds(false)}
+              width={700}
+            >
+              <Text strong>API endpoint</Text>
+              <Paragraph copyable>{this.state.showClusterCreds.spec.endpoint}</Paragraph>
+              <Text strong>CA Certificate</Text>
+              <Paragraph copyable>{this.state.showClusterCreds.spec.caCertificate}</Paragraph>
+              <Text strong>Token</Text>
+              <Paragraph copyable>{this.state.showClusterCreds.spec.token}</Paragraph>
+            </Modal>
+          ) : null}
         </Card>
       </div>
     )
