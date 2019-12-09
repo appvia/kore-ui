@@ -21,7 +21,8 @@ class NewTeamPage extends React.Component {
 
   waitForAvailableClusterProviders = async (teamName, attempt) => {
     const MAX_ATTEMPTS = 3
-    if ((attempt || 1) > MAX_ATTEMPTS) {
+    attempt = attempt || 1
+    if (attempt > MAX_ATTEMPTS) {
       return []
     }
     const available = await apiRequest(null, 'get', `/teams/${teamName}/available`)
