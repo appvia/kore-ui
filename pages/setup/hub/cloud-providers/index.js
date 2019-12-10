@@ -5,6 +5,7 @@ const { Title, Text, Paragraph } = Typography
 
 import { hub } from '../../../../config'
 import redirect from '../../../../lib/utils/redirect'
+import canonical from '../../../../lib/utils/canonical'
 import apiRequest from '../../../../lib/utils/api-request'
 import JSONSchemaForm from '../../../../lib/components/forms/JSONSchemaForm'
 import Generic from '../../../../lib/crd/Generic'
@@ -38,18 +39,19 @@ class ConfigureCloudProvidersPage extends React.Component {
     }
   }
 
-  handleFormSubmit = ({ requires, className }) => {
+  handleFormSubmit = ({ requires }) => {
     return async (values, setState) => {
+      const metaName = canonical(values.name)
       const resource = Generic({
         apiVersion: `${requires.group}/${requires.version}`,
         kind: requires.kind,
-        name: className,
+        name: metaName,
         spec: values
       })
       try {
-        await apiRequest(null, 'put', `/teams/${hub.hubAdminTeamName}/bindings/${className}`, resource)
+        await apiRequest(null, 'put', `/teams/${hub.hubAdminTeamName}/bindings/${metaName}`, resource)
         // allocate this binding to all teams
-        await apiRequest(null, 'put', `/teams/${hub.hubAdminTeamName}/bindings/${className}/allocation/allteams`)
+        await apiRequest(null, 'put', `/teams/${hub.hubAdminTeamName}/bindings/${metaName}/allocation/allteams`)
         return redirect(null, '/setup/hub/complete')
       } catch (err) {
         console.error('Error submitting form', err)
@@ -93,7 +95,7 @@ class ConfigureCloudProvidersPage extends React.Component {
             <Paragraph>
               <Text>Complete the form required for <Text strong>{s.spec.displayName}</Text></Text>
             </Paragraph>
-            <JSONSchemaForm schema={requiresSchema} handleSubmit={this.handleFormSubmit({ requires, className: s.metadata.name })} />
+            <JSONSchemaForm schema={requiresSchema} handleSubmit={this.handleFormSubmit({ requires })} />
           </Card>
         )
       })

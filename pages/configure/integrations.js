@@ -13,6 +13,7 @@ import { hub } from '../../config'
 
 class ConfigureIntegrationsPage extends React.Component {
   state = {
+    clusterClasses: this.props.clusterClasses,
     editIntegration: false,
     addNewIntegration: false
   }
@@ -27,12 +28,7 @@ class ConfigureIntegrationsPage extends React.Component {
 
         const processBindings = async bindings => {
           await asyncForEach(bindings, async b => {
-            const [instance, instanceClass] = await Promise.all([
-              apiRequest(req, 'get', `/teams/${hub.hubAdminTeamName}/bindings/${b.metadata.name}`),
-              apiRequest(req, 'get', `/teams/${hub.hubAdminTeamName}/bindings/${b.metadata.name}/class`)
-            ])
-            b.instance = instance
-            b.instance.class = instanceClass
+            b.instance = await apiRequest(req, 'get', `/teams/${hub.hubAdminTeamName}/bindings/${b.metadata.name}`)
           })
         }
 
@@ -65,10 +61,10 @@ class ConfigureIntegrationsPage extends React.Component {
       bindingToPut.spec = values
       delete bindingToPut.class
       try {
-        const newBinding = await apiRequest(null, 'put', `/teams/${hub.hubAdminTeamName}/bindings/${currentBinding.class.metadata.name}`,  bindingToPut)
+        const newBinding = await apiRequest(null, 'put', `/teams/${hub.hubAdminTeamName}/bindings/${currentBinding.metadata.name}`,  bindingToPut)
         currentBinding.spec = newBinding.spec
         currentBinding.metadata = newBinding.metadata
-        this.cancelEditIntegration()
+        this.clearEditIntegration()
         message.success('Integration updated')
       } catch (err) {
         console.error('Error submitting form', err)
@@ -81,12 +77,10 @@ class ConfigureIntegrationsPage extends React.Component {
     }
   }
 
-  handleEditIntegrationCancel = () => {
-    this.cancelEditIntegration()
-  }
-
   editIntegration = (className, binding) => {
-    return () => {
+    return async () => {
+      const instanceClass = await apiRequest(null, 'get', `/teams/${hub.hubAdminTeamName}/bindings/${binding.metadata.name}/class`)
+      binding.instance.class = instanceClass
       const state = { ...this.state }
       const requires = binding.instance.class.spec.requires
       const requiresSchema = binding.instance.class.spec.schemas.definitions[requires.kind].properties.spec
@@ -95,7 +89,7 @@ class ConfigureIntegrationsPage extends React.Component {
     }
   }
 
-  cancelEditIntegration = () => {
+  clearEditIntegration = () => {
     const state = { ...this.state }
     state.editIntegration = false
     this.setState(state)
@@ -113,30 +107,43 @@ class ConfigureIntegrationsPage extends React.Component {
     }
   }
 
-  cancelAddNewIntegration = () => {
+  clearAddNewIntegration = () => {
     const state = { ...this.state }
     state.addNewIntegration = false
     this.setState(state)
   }
 
-  handleNewIntegrationSave = () => {
-    console.log('handleNewIntegrationSave')
-    this.cancelAddNewIntegration()
+  handleNewIntegrationSave = async (createdBinding) => {
+    const allBindings = await apiRequest(null, 'get', `/teams/${hub.hubAdminTeamName}/bindings`)
+    const newBindingWrapper = allBindings.items.find(b => b.metadata.name === createdBinding.metadata.name)
+    newBindingWrapper.instance = createdBinding
+    const state = { ...this.state }
+    state.clusterClasses.map(c => {
+      if (c.metadata.name === newBindingWrapper.spec.class.name) {
+        c.bindings.push(newBindingWrapper)
+      }
+      return c
+    })
+
+    state.addNewIntegration = false
+    this.setState(state)
+    message.success('Integration created')
   }
 
   render() {
+    console.log('this.state.clusterClasses', this.state.clusterClasses)
     return (
       <div>
         <Breadcrumb items={[{text: 'Configure'}, {text: 'Integrations'}]} />
         <Card title="Cloud cluster providers" extra={<Button type="primary" onClick={this.addNewIntegration()}>+ New</Button>}>
           <List
-            dataSource={this.props.clusterClasses}
+            dataSource={this.state.clusterClasses}
             renderItem={c => c.bindings.map(b => (
-              <List.Item actions={[<Text><a key="show_creds" onClick={this.editIntegration(c.spec.displayName, b)}><Icon type="eye" theme="filled"/> Edit</a></Text>]}>
+              <List.Item key={b.metadata.name} actions={[<Text><a key="show_creds" onClick={this.editIntegration(c.spec.displayName, b)}><Icon type="eye" theme="filled"/> Edit</a></Text>]}>
                 <List.Item.Meta
                   avatar={<Avatar icon="cloud" />}
                   title={<Text>{c.spec.displayName} <Tooltip title={c.spec.description}><Icon type="info-circle" /></Tooltip></Text>}
-                  description={<span>{b.metadata.name}</span>}
+                  description={<span>{b.instance.spec.name}</span>}
                 />
               </List.Item>
             ))}
@@ -151,7 +158,7 @@ class ConfigureIntegrationsPage extends React.Component {
                 </div>
               }
               visible={!!this.state.editIntegration}
-              onClose={this.cancelEditIntegration}
+              onClose={this.clearEditIntegration}
               width={700}
             >
               <JSONSchemaForm
@@ -163,7 +170,7 @@ class ConfigureIntegrationsPage extends React.Component {
                 schema={this.state.editIntegration.requiresSchema}
                 formData={this.state.editIntegration.binding.instance.spec}
                 handleSubmit={this.handleEditIntegrationSave({ currentBinding: this.state.editIntegration.binding.instance })}
-                handleCancel={this.handleEditIntegrationCancel}
+                handleCancel={this.clearEditIntegration}
               />
             </Drawer>
           ) : null}
@@ -171,7 +178,7 @@ class ConfigureIntegrationsPage extends React.Component {
             <Drawer
               title={<Title level={4}>New cloud cluster provider</Title>}
               visible={!!this.state.addNewIntegration}
-              onClose={this.cancelAddNewIntegration}
+              onClose={this.clearAddNewIntegration}
               width={700}
             >
               <ClusterProviderForm classes={this.state.addNewIntegration.classes} handleSubmit={this.handleNewIntegrationSave}/>
