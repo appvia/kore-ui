@@ -19,15 +19,17 @@ class ConfigureIntegrationsPage extends React.Component {
 
   static async getPageData(req) {
     const getClasses = () => apiRequest(req, 'get', '/classes')
+    const getTeams = () => apiRequest(req, 'get', '/teams')
     const getBindings = () => apiRequest(req, 'get', `/teams/${hub.hubAdminTeamName}/bindings`)
 
-    return axios.all([getClasses(), getBindings()])
-      .then(axios.spread(async function (classes, bindings) {
+    return axios.all([getClasses(), getTeams(), getBindings()])
+      .then(axios.spread(async function (classes, allTeams, bindings) {
         const clusterClasses = classes.items.filter(c => c.spec.category === 'cluster')
 
         const processBindings = async bindings => {
           await asyncForEach(bindings, async b => {
             b.instance = await apiRequest(req, 'get', `/teams/${hub.hubAdminTeamName}/bindings/${b.metadata.name}`)
+            b.instance.allocations = await apiRequest(req, 'get', `/teams/${hub.hubAdminTeamName}/bindings/${b.metadata.name}/allocation`)
           })
         }
 
@@ -39,7 +41,7 @@ class ConfigureIntegrationsPage extends React.Component {
         }
 
         await processClasses(clusterClasses)
-        return { clusterClasses }
+        return { clusterClasses, allTeams }
       }))
       .catch(err => {
         throw new Error(err.message)
@@ -54,10 +56,11 @@ class ConfigureIntegrationsPage extends React.Component {
     }
   }
 
-  handleEditIntegrationSave = (updatedBinding) => {
+  handleEditIntegrationSave = (updatedBinding, updatedAllocations) => {
     const currentBinding = this.state.editIntegration.binding.instance
     currentBinding.spec = updatedBinding.spec
     currentBinding.metadata = updatedBinding.metadata
+    currentBinding.allocations.items = updatedAllocations
     this.clearEditIntegration()
     message.success('Integration updated')
   }
@@ -65,15 +68,12 @@ class ConfigureIntegrationsPage extends React.Component {
   editIntegration = (className, binding) => {
     return async () => {
       const instanceClass = await apiRequest(null, 'get', `/teams/${hub.hubAdminTeamName}/bindings/${binding.metadata.name}/class`)
-      const allocations = await apiRequest(null, 'get', `/teams/${hub.hubAdminTeamName}/bindings/${binding.metadata.name}/allocation`)
       const classes = await apiRequest(null, 'get', '/classes?category=cluster')
-      const teams = await apiRequest(null, 'get', '/teams')
       binding.instance.class = instanceClass
-      binding.instance.allocations = allocations.items
       const state = { ...this.state }
       const requires = binding.instance.class.spec.requires
       const requiresSchema = binding.instance.class.spec.schemas.definitions[requires.kind].properties.spec
-      state.editIntegration = { className, binding, requires, requiresSchema, classes, teams }
+      state.editIntegration = { className, binding, requires, requiresSchema, classes, teams: this.props.allTeams }
       this.setState(state)
     }
   }
@@ -87,9 +87,8 @@ class ConfigureIntegrationsPage extends React.Component {
   addNewIntegration = () => {
     return async () => {
       const classes = await apiRequest(null, 'get', '/classes?category=cluster')
-      const teams = await apiRequest(null, 'get', '/teams')
       const state = { ...this.state }
-      state.addNewIntegration = { classes, teams }
+      state.addNewIntegration = { classes, teams: this.props.allTeams }
       this.setState(state)
     }
   }
@@ -100,10 +99,11 @@ class ConfigureIntegrationsPage extends React.Component {
     this.setState(state)
   }
 
-  handleNewIntegrationSave = async (createdBinding) => {
+  handleNewIntegrationSave = async (createdBinding, createdAllocations) => {
     const allBindings = await apiRequest(null, 'get', `/teams/${hub.hubAdminTeamName}/bindings`)
     const newBindingWrapper = allBindings.items.find(b => b.metadata.name === createdBinding.metadata.name)
     newBindingWrapper.instance = createdBinding
+    newBindingWrapper.instance.allocations = { items: createdAllocations }
     const state = { ...this.state }
     state.clusterClasses.map(c => {
       if (c.metadata.name === newBindingWrapper.spec.class.name) {
@@ -118,6 +118,11 @@ class ConfigureIntegrationsPage extends React.Component {
   }
 
   render() {
+    const getBindingAllocations = (allocations) => {
+      const allocatedTeams = this.props.allTeams.items.filter(team => allocations.includes(team.metadata.name)).map(team => team.spec.summary)
+      return allocatedTeams.length > 0 ? allocatedTeams.join(', ') : 'All teams'
+    }
+
     return (
       <div>
         <Breadcrumb items={[{text: 'Configure'}, {text: 'Integrations'}]} />
@@ -128,8 +133,8 @@ class ConfigureIntegrationsPage extends React.Component {
               <List.Item key={b.metadata.name} actions={[<Text><a key="show_creds" onClick={this.editIntegration(c.spec.displayName, b)}><Icon type="eye" theme="filled"/> Edit</a></Text>]}>
                 <List.Item.Meta
                   avatar={<Avatar icon="cloud" />}
-                  title={<Text>{c.spec.displayName} <Tooltip title={c.spec.description}><Icon type="info-circle" /></Tooltip></Text>}
-                  description={<span>{b.instance.spec.name}</span>}
+                  title={<Text>{c.spec.displayName} <Tooltip title={c.spec.description}><Icon type="info-circle" /></Tooltip> <Text type="secondary">{b.instance.spec.name}</Text></Text>}
+                  description={<span>Allocated to: {getBindingAllocations(b.instance.allocations.items)}</span>}
                 />
               </List.Item>
             ))}
