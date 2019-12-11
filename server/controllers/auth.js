@@ -45,8 +45,9 @@ function getLoginGithubCallback(orgService, hubConfig) {
     let redirectPath = '/'
     if (req.session.passport.user.isAdmin) {
       // this is hard-coded to check for GKE binding, but this will need to be more flexible in the future
-      const gkeBinding = await orgService.getTeamBindingByName(hubConfig.hubAdminTeamName, 'gke')
-      if (!gkeBinding) {
+      const bindings = await orgService.getTeamBindings(hubConfig.hubAdminTeamName)
+      const gkeClassBindings = bindings.items.filter(binding => binding.spec.class.kind === 'Class' && binding.spec.class.name === 'gke')
+      if (gkeClassBindings.length === 0) {
         redirectPath = '/setup/hub'
       }
     }

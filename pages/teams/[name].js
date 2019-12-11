@@ -96,9 +96,14 @@ class TeamDashboard extends React.Component {
 
     const clusters = this.props.resources.items.filter(r => r.kind === 'Kubernetes')
 
-    const clusterActions = (cluster) => {
-      return [<Text><a key="show_creds" onClick={this.showHideClusterCreds(cluster)}><Icon type="eye" theme="filled"/> Access</a></Text>]
+    const clusterActions = (cluster, status) => {
+      if (cluster.status.status === 'Success') {
+        return [<Text><a key="show_creds" onClick={this.showHideClusterCreds(cluster)}><Icon type="eye" theme="filled"/> Access</a></Text>]
+      }
+      return []
     }
+
+    console.log('clusters', clusters)
 
     return (
       <div>
@@ -122,7 +127,7 @@ class TeamDashboard extends React.Component {
           style={{ marginBottom: '20px' }}
           extra={
             <Button type="primary">
-              <Link href="/teams/[name]/clusters/new" as="/teams/dave/clusters/new">
+              <Link href="/teams/[name]/clusters/new" as={`/teams/${this.props.team.metadata.name}/clusters/new`}>
                 <a>+ New Cluster</a>
               </Link>
             </Button>
@@ -140,7 +145,7 @@ class TeamDashboard extends React.Component {
                     title={<Text>{useResource.spec.description}<Text style={{ fontFamily: 'monospace', marginLeft: '15px' }}>{cluster.metadata.name}</Text></Text>}
                     description={<Text type='secondary'>Created {created}</Text>}
                   />
-                  <Tag color="#5cdbd3">{useResource.status.status}</Tag>
+                  <Tag color="#5cdbd3">{cluster.status.status}</Tag>
                 </List.Item>
               )
             }}
@@ -155,7 +160,7 @@ class TeamDashboard extends React.Component {
                   </Title>
                 </div>
               }
-              visible={this.state.showClusterCreds}
+              visible={!!this.state.showClusterCreds}
               onOk={this.showHideClusterCreds(false)}
               onCancel={this.showHideClusterCreds(false)}
               width={700}

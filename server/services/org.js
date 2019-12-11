@@ -64,9 +64,9 @@ class OrgService {
     }
   }
 
-  async getTeamBindingByName(team, bindingName) {
+  async getTeamBindings(team) {
   try {
-    const result = await axios.get(`${this.hubApi.url}/teams/${team}/bindings/${bindingName}`)
+    const result = await axios.get(`${this.hubApi.url}/teams/${team}/bindings`)
     return result.data
   } catch (err) {
     if (err.response && err.response.status === 404) {
