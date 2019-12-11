@@ -1,16 +1,11 @@
 import React from 'react'
-import { Layout, Typography, Card, Checkbox, Row, Col } from 'antd'
+import { Layout, Typography } from 'antd'
 const { Footer } = Layout
-const { Title, Text, Paragraph } = Typography
+const { Title, Paragraph } = Typography
 
-import { hub } from '../../../../config'
 import redirect from '../../../../lib/utils/redirect'
-import canonical from '../../../../lib/utils/canonical'
 import apiRequest from '../../../../lib/utils/api-request'
-import JSONSchemaForm from '../../../../lib/components/forms/JSONSchemaForm'
-import Generic from '../../../../lib/crd/Generic'
-
-const RECOMMENDED = 'gke'
+import ClusterProviderForm from '../../../../lib/components/forms/ClusterProviderForm'
 
 class ConfigureCloudProvidersPage extends React.Component {
 
@@ -23,90 +18,21 @@ class ConfigureCloudProvidersPage extends React.Component {
     }
   }
 
-  state = {
-    selected: [RECOMMENDED]
-  }
-
-  onChange = (className) => {
-    return (e) => {
-      let selected = [ ...this.state.selected ]
-      if (e.target.checked) {
-        selected.push(className)
-      } else {
-        selected = selected.filter(s => s !== className)
-      }
-      this.setState({ selected })
-    }
-  }
-
-  handleFormSubmit = ({ requires }) => {
-    return async (values, setState) => {
-      const metaName = canonical(values.name)
-      const resource = Generic({
-        apiVersion: `${requires.group}/${requires.version}`,
-        kind: requires.kind,
-        name: metaName,
-        spec: values
-      })
-      try {
-        await apiRequest(null, 'put', `/teams/${hub.hubAdminTeamName}/bindings/${metaName}`, resource)
-        // allocate this binding to all teams
-        await apiRequest(null, 'put', `/teams/${hub.hubAdminTeamName}/bindings/${metaName}/allocation/allteams`)
-        return redirect(null, '/setup/hub/complete')
-      } catch (err) {
-        console.error('Error submitting form', err)
-        const state = { ...this.state }
-        state.buttonText = 'Save'
-        state.submitting = false
-        state.formErrorMessage = 'An error occurred saving the configuration, please try again'
-        setState(state)
-      }
-    }
+  handleFormSubmit = () => {
+    redirect(null, '/setup/hub/complete')
   }
 
   render() {
-    const Providers = () => (
-      <Row gutter={20}>
-        {this.props.classes.items.map(c => (
-          <Col span={8} key={c.metadata.name}>
-            <Card>
-              <Paragraph>
-                <Checkbox
-                  checked={this.state.selected.includes(c.metadata.name)}
-                  onChange={this.onChange(c.metadata.name)}
-                >
-                  <Text strong>{c.spec.displayName}</Text>
-                </Checkbox>
-                { c.metadata.name === RECOMMENDED ? <Text style={{color: '#1890ff'}}>Recommended</Text> : null }
-              </Paragraph>
-              <Paragraph>{c.spec.description}</Paragraph>
-            </Card>
-          </Col>
-        ))}
-      </Row>
-    )
-
-    const ProviderForms = () => {
-      return this.props.classes.items.filter(c => this.state.selected.includes(c.metadata.name)).map(s => {
-        const requires = s.spec.requires
-        const requiresSchema = s.spec.schemas.definitions[requires.kind].properties.spec
-        return (
-          <Card key={s.metadata.name} title={s.spec.displayName} style={{marginTop: '20px'}} headStyle={{backgroundColor: '#f5f5f5'}}>
-            <Paragraph>
-              <Text>Complete the form required for <Text strong>{s.spec.displayName}</Text></Text>
-            </Paragraph>
-            <JSONSchemaForm schema={requiresSchema} handleSubmit={this.handleFormSubmit({ requires })} />
-          </Card>
-        )
-      })
-    }
-
     return (
       <div>
-        <Title>Configure Cloud Cluster Providers</Title>
-        <Paragraph>Choose the cloud providers for your clusters.</Paragraph>
-        <Providers />
-        <ProviderForms />
+        <Title>Configure Cloud Cluster Provider</Title>
+        <Paragraph>Choose your first cloud provider for your clusters, more can be configured later.</Paragraph>
+        <ClusterProviderForm
+          mode="new"
+          classes={this.props.classes}
+          teams={{ items: [] }}
+          handleSubmit={this.handleFormSubmit}
+        />
         <Footer style={{textAlign: 'center', backgroundColor: '#fff'}}>
         <span>
           For more information read the <a href="#">Documentation</a>
