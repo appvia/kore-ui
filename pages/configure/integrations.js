@@ -7,7 +7,6 @@ import apiRequest from '../../lib/utils/api-request'
 import asyncForEach from '../../lib/utils/async-foreach'
 import Breadcrumb from '../../lib/components/Breadcrumb'
 import ClusterProviderForm from '../../lib/components/forms/ClusterProviderForm'
-import JSONSchemaForm from '../../lib/components/forms/JSONSchemaForm'
 
 import { hub } from '../../config'
 
@@ -55,36 +54,26 @@ class ConfigureIntegrationsPage extends React.Component {
     }
   }
 
-  handleEditIntegrationSave = ({ currentBinding }) => {
-    return async (values, setState) => {
-      const bindingToPut = { ...currentBinding }
-      bindingToPut.spec = values
-      delete bindingToPut.class
-      try {
-        const newBinding = await apiRequest(null, 'put', `/teams/${hub.hubAdminTeamName}/bindings/${currentBinding.metadata.name}`,  bindingToPut)
-        currentBinding.spec = newBinding.spec
-        currentBinding.metadata = newBinding.metadata
-        this.clearEditIntegration()
-        message.success('Integration updated')
-      } catch (err) {
-        console.error('Error submitting form', err)
-        const state = { ...this.state }
-        state.buttonText = 'Save'
-        state.submitting = false
-        state.formErrorMessage = 'An error occurred saving the configuration, please try again'
-        setState(state)
-      }
-    }
+  handleEditIntegrationSave = (updatedBinding) => {
+    const currentBinding = this.state.editIntegration.binding.instance
+    currentBinding.spec = updatedBinding.spec
+    currentBinding.metadata = updatedBinding.metadata
+    this.clearEditIntegration()
+    message.success('Integration updated')
   }
 
   editIntegration = (className, binding) => {
     return async () => {
       const instanceClass = await apiRequest(null, 'get', `/teams/${hub.hubAdminTeamName}/bindings/${binding.metadata.name}/class`)
+      const allocations = await apiRequest(null, 'get', `/teams/${hub.hubAdminTeamName}/bindings/${binding.metadata.name}/allocation`)
+      const classes = await apiRequest(null, 'get', '/classes?category=cluster')
+      const teams = await apiRequest(null, 'get', '/teams')
       binding.instance.class = instanceClass
+      binding.instance.allocations = allocations.items
       const state = { ...this.state }
       const requires = binding.instance.class.spec.requires
       const requiresSchema = binding.instance.class.spec.schemas.definitions[requires.kind].properties.spec
-      state.editIntegration = { className, binding, requires, requiresSchema }
+      state.editIntegration = { className, binding, requires, requiresSchema, classes, teams }
       this.setState(state)
     }
   }
@@ -98,11 +87,9 @@ class ConfigureIntegrationsPage extends React.Component {
   addNewIntegration = () => {
     return async () => {
       const classes = await apiRequest(null, 'get', '/classes?category=cluster')
+      const teams = await apiRequest(null, 'get', '/teams')
       const state = { ...this.state }
-      state.addNewIntegration = {
-        classes
-      }
-      console.log('state', state)
+      state.addNewIntegration = { classes, teams }
       this.setState(state)
     }
   }
@@ -131,7 +118,6 @@ class ConfigureIntegrationsPage extends React.Component {
   }
 
   render() {
-    console.log('this.state.clusterClasses', this.state.clusterClasses)
     return (
       <div>
         <Breadcrumb items={[{text: 'Configure'}, {text: 'Integrations'}]} />
@@ -154,24 +140,21 @@ class ConfigureIntegrationsPage extends React.Component {
               title={
                 <div>
                   <Title level={4}>{this.state.editIntegration.className}</Title>
-                  <Text>{this.state.editIntegration.binding.metadata.name}</Text>
+                  <Text>{this.state.editIntegration.binding.instance.spec.name}</Text>
                 </div>
               }
               visible={!!this.state.editIntegration}
               onClose={this.clearEditIntegration}
               width={700}
             >
-              <JSONSchemaForm
-                formConfig={{
-                  layout: 'horizontal',
-                  labelCol: { span: 24 },
-                  wrapperCol: { span: 24 }
-                }}
-                schema={this.state.editIntegration.requiresSchema}
-                formData={this.state.editIntegration.binding.instance.spec}
-                handleSubmit={this.handleEditIntegrationSave({ currentBinding: this.state.editIntegration.binding.instance })}
-                handleCancel={this.clearEditIntegration}
-              />
+              <ClusterProviderForm
+                mode="edit"
+                jsonSchemaFormData={this.state.editIntegration.binding.instance.spec}
+                selectedProvider={this.state.editIntegration.binding.spec.class.name}
+                bindingInstance={this.state.editIntegration.binding.instance}
+                classes={this.state.editIntegration.classes}
+                teams={this.state.editIntegration.teams}
+                handleSubmit={this.handleEditIntegrationSave}/>
             </Drawer>
           ) : null}
           {this.state.addNewIntegration ? (
@@ -181,7 +164,12 @@ class ConfigureIntegrationsPage extends React.Component {
               onClose={this.clearAddNewIntegration}
               width={700}
             >
-              <ClusterProviderForm classes={this.state.addNewIntegration.classes} handleSubmit={this.handleNewIntegrationSave}/>
+              <ClusterProviderForm
+                mode="new"
+                classes={this.state.addNewIntegration.classes}
+                teams={this.state.addNewIntegration.teams}
+                handleSubmit={this.handleNewIntegrationSave}
+              />
             </Drawer>
           ) : null}
         </Card>
