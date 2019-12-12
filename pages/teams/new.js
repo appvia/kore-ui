@@ -67,6 +67,7 @@ class NewTeamPage extends React.Component {
           team={this.state.team}
           plans={this.state.plans}
           providers={this.state.providers}
+          teamClusters={[]}
         />
         <Footer style={{textAlign: 'center', backgroundColor: '#fff'}}>
           <span>
