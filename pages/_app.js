@@ -15,11 +15,8 @@ import OrgService from '../server/services/org'
 
 class MyApp extends App {
   state = {
-    siderCollapsed: false
-  }
-
-  onSiderCollapse = siderCollapsed => {
-    this.setState({ siderCollapsed })
+    siderCollapsed: false,
+    userTeams: this.props.userTeams
   }
 
   static async getUserSession(req) {
@@ -41,7 +38,7 @@ class MyApp extends App {
     }
   }
 
-  static async getTeams(req, userTeams) {
+  static async getUserTeamsDetails(req, userTeams) {
     try {
       const teams = await apiRequest(req, 'get', '/teams')
       return (teams.items || []).filter(t => userTeams.includes(t.metadata.name) && t.metadata.name !== hub.hubAdminTeamName)
@@ -64,8 +61,18 @@ class MyApp extends App {
       const initialProps = await Component.getInitialProps(ctx)
       pageProps = { ...pageProps, ...initialProps }
     }
-    const teams = await MyApp.getTeams(ctx.req, user.teams)
-    return { pageProps, user, teams }
+    const userTeams = await MyApp.getUserTeamsDetails(ctx.req, user.teams)
+    return { pageProps, user, userTeams }
+  }
+
+  onSiderCollapse = siderCollapsed => {
+    this.setState({ ...this.state, siderCollapsed })
+  }
+
+  teamAdded = (team) => {
+    const state = { ...this.state }
+    state.userTeams.push(team)
+    this.setState(state)
   }
 
   render() {
@@ -85,9 +92,9 @@ class MyApp extends App {
             <User user={props.user}/>
           </Header>
           <Layout hasSider="true" style={{minHeight:'100vh'}}>
-            <SiderMenu hide={props.hideSider || props.unrestrictedPage} isAdmin={props.user && props.user.isAdmin} teams={props.teams}/>
+            <SiderMenu hide={props.hideSider || props.unrestrictedPage} isAdmin={props.user && props.user.isAdmin} userTeams={this.state.userTeams}/>
             <Content style={{background: '#fff', padding: 24, minHeight: 280}}>
-              <Component {...this.props.pageProps} user={this.props.user} />
+              <Component {...this.props.pageProps} user={this.props.user} teamAdded={this.teamAdded} />
             </Content>
           </Layout>
         </Layout>

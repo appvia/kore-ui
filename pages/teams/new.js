@@ -44,6 +44,7 @@ class NewTeamPage extends React.Component {
 
   handleTeamCreated = async (team) => {
     const { providers, plans } = await this.getProviderPlans(team)
+    this.props.teamAdded(team)
     this.setState({
       team,
       providers,
