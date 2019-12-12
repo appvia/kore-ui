@@ -11,16 +11,14 @@ import apiRequest from '../../lib/utils/api-request'
 class TeamDashboard extends React.Component {
   state = {
     teamName: this.props.team.metadata.name,
-    members: this.props.members,
-    showClusterCreds: false
+    members: this.props.members
   }
 
   componentDidUpdate(props, state) {
     if (this.props.team.metadata.name !== state.teamName) {
       this.setState({
         teamName: this.props.team.metadata.name,
-        members: props.members,
-        showClusterCreds: false
+        members: props.members
       })
     }
   }
@@ -63,12 +61,26 @@ class TeamDashboard extends React.Component {
     }
   }
 
-  showHideClusterCreds = (cluster) => {
-    return () => {
-      const state = { ...this.state }
-      state.showClusterCreds = cluster
-      this.setState(state)
-    }
+  revealClusterCreds = cluster => {
+    return () => (
+      Modal.info({
+        title: (
+          <Title level={4}>Access: <Text style={{fontFamily: 'monospace'}}>{cluster.metadata.name}</Text></Title>
+        ),
+        content: (
+          <div>
+            <Text strong>API endpoint</Text>
+            <Paragraph copyable>{cluster.spec.endpoint}</Paragraph>
+            <Text strong>CA Certificate</Text>
+            <Paragraph copyable>{cluster.spec.caCertificate}</Paragraph>
+            <Text strong>Token</Text>
+            <Paragraph copyable>{cluster.spec.token}</Paragraph>
+          </div>
+        ),
+        width: 800,
+        onOk() {}
+      })
+    )
   }
 
   render() {
@@ -96,14 +108,12 @@ class TeamDashboard extends React.Component {
 
     const clusters = this.props.resources.items.filter(r => r.kind === 'Kubernetes')
 
-    const clusterActions = (cluster, status) => {
+    const clusterActions = (cluster) => {
       if (cluster.status.status === 'Success') {
-        return [<Text><a key="show_creds" onClick={this.showHideClusterCreds(cluster)}><Icon type="eye" theme="filled"/> Access</a></Text>]
+        return [<Text><a key="show_creds" onClick={this.revealClusterCreds(cluster)}><Icon type="eye" theme="filled"/> Access</a></Text>]
       }
       return []
     }
-
-    console.log('clusters', clusters)
 
     return (
       <div>
@@ -151,28 +161,6 @@ class TeamDashboard extends React.Component {
             }}
           >
           </List>
-          {this.state.showClusterCreds ? (
-            <Modal
-              title={
-                <div>
-                  <Title level={4}>Access:
-                    <Text style={{fontFamily: 'monospace'}}>{this.state.showClusterCreds.metadata.name}</Text>
-                  </Title>
-                </div>
-              }
-              visible={!!this.state.showClusterCreds}
-              onOk={this.showHideClusterCreds(false)}
-              onCancel={this.showHideClusterCreds(false)}
-              width={700}
-            >
-              <Text strong>API endpoint</Text>
-              <Paragraph copyable>{this.state.showClusterCreds.spec.endpoint}</Paragraph>
-              <Text strong>CA Certificate</Text>
-              <Paragraph copyable>{this.state.showClusterCreds.spec.caCertificate}</Paragraph>
-              <Text strong>Token</Text>
-              <Paragraph copyable>{this.state.showClusterCreds.spec.token}</Paragraph>
-            </Modal>
-          ) : null}
         </Card>
       </div>
     )
