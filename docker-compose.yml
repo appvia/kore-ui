@@ -1,12 +1,6 @@
 ---
 version: '3'
 services:
-  hub-apis:
-    image: quay.io/appvia/hub-apis:latest
-    environment:
-      KUBE_SERVER: http://kube-apiserver:8080
-    restart: always
-
   hub-apiserver:
     image: quay.io/appvia/hub-apiserver:latest
     environment:
