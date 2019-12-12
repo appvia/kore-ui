@@ -35,6 +35,8 @@ class NewTeamClusterPage extends React.Component {
 
   render() {
     const teamName = this.props.team.metadata.name
+    const teamClusters = this.props.resources.items.filter(r => r.kind === 'Kubernetes')
+
     return (
       <div>
         <Breadcrumb
@@ -49,6 +51,7 @@ class NewTeamClusterPage extends React.Component {
           team={this.props.team}
           plans={this.props.plans}
           providers={this.props.providers}
+          teamClusters={teamClusters}
           skipButtonText="Cancel"
         />
       </div>
