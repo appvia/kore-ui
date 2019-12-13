@@ -39,6 +39,7 @@ function getLogout() {
 function getLoginGithubCallback(orgService, hubConfig) {
   return async (req, res) => {
     const username = req.session.passport.user.username
+    orgService.setXIdentityHeader(username)
     const userInfo = await orgService.getOrCreateUser(username)
     req.session.passport.user.teams = userInfo.teams || []
     req.session.passport.user.isAdmin = orgService.isAdmin(userInfo)

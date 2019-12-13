@@ -12,10 +12,15 @@ class OrgService {
     }
   }
 
+  setXIdentityHeader(username) {
+    this.requestOptions.headers['X-Identity'] = username
+  }
+
   async getOrCreateUser(username) {
     try {
       const userResource = await User(username)
       console.log(`*** putting user ${username}`, userResource)
+      this.requestOptions.headers['X-Identity'] = username
       const userResult = await axios.put(`${this.hubApi.url}/users/${username}`, userResource, this.requestOptions)
       const adminTeamMembers = await this.getTeamMembers(hub.hubAdminTeamName)
       if (adminTeamMembers.length === 1) {
