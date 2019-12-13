@@ -56,6 +56,8 @@ class OrgService {
 
   async addUserToTeam(team, username) {
     console.log(`*** adding user ${username} to team ${team}`)
+    const options = { ...this.requestOptions }
+    options.headers['Content-Type'] = 'application/json'
     try {
       await axios.put(`${this.hubApi.url}/teams/${team}/members/${username}`, undefined, this.requestOptions)
     } catch (err) {
