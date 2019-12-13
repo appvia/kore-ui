@@ -7,8 +7,13 @@ function apiProxy(hubApi) {
   return async (req, res) => {
     const method = req.method.toLowerCase()
     const apiUrlPath = req.originalUrl.replace('/apiproxy', '')
+    const options = { headers: { 'X-Identity': req.session.passport.user.username }}
     try {
-      const result = await axios[method](`${hubApi.url}${apiUrlPath}`, req.body)
+      const result = await axios[method](
+        `${hubApi.url}${apiUrlPath}`,
+        method === 'get' ? options : req.body,
+        method !== 'get' ? req.body : undefined
+      )
       return res.json(result.data)
     } catch (err) {
       const status = (err.response && err.response.status) || 500
