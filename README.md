@@ -30,10 +30,12 @@ To run all dependent services for the hub together you can use the docker-compos
 ```bash
 # clone the Hub API server repo
 git clone git@github.com:appvia/hub-apiserver.git
-# pull to ensure you have the latest image versions
-docker-compose --file ../hub-apiserver/docker-compose.yml --file docker-compose.yml pull
-# run docker-compose using the base compose file form the API server repo
-docker-compose --file ../hub-apiserver/docker-compose.yml --file docker-compose.yml up -d
+# start the dependencies using docker-compose
+make deps-start
+# to see logs
+make deps-logs
+# stop the dependencies
+make deps-stop
 # run the UI
 npm run dev
 ```
