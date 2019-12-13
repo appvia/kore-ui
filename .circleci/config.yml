@@ -1,0 +1,30 @@
+---
+version: 2
+
+defaults: &defaults
+  docker:
+    - image: circleci/golang:1.13-alpine
+  environment:
+    DOCKER_IMAGE: quay.io/appvia/hub-ui
+
+jobs:
+  release:
+    <<: *defaults
+    steps:
+      - checkout
+      - setup_remote_docker:
+          docker_layer_caching: true
+      - deploy:
+          command: |
+            docker login -u ${DOCKER_USER} -p ${DOCKER_PASSWORD} quay.io
+            docker build -t ${DOCKER_IMAGE}:${CIRCLE_TAG:-latest} .
+            docker push ${DOCKER_IMAGE}:${CIRCLE_TAG:-latest}
+
+workflows:
+  version: 2
+  workflow:
+    jobs:
+      - release:
+          filters:
+            branches:
+              only: master
