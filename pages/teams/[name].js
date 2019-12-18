@@ -1,4 +1,5 @@
 import React from 'react'
+import PropTypes from 'prop-types'
 import axios from 'axios'
 import moment from 'moment'
 import Link from 'next/link'
@@ -9,6 +10,13 @@ import Breadcrumb from '../../lib/components/Breadcrumb'
 import apiRequest from '../../lib/utils/api-request'
 
 class TeamDashboard extends React.Component {
+  static propTypes = {
+    team: PropTypes.object.isRequired,
+    members: PropTypes.object.isRequired,
+    user: PropTypes.object.isRequired,
+    resources: PropTypes.object.isRequired
+  }
+
   state = {
     teamName: this.props.team.metadata.name,
     members: this.props.members
@@ -110,7 +118,7 @@ class TeamDashboard extends React.Component {
 
     const clusterActions = (cluster) => {
       if (cluster.status.status === 'Success') {
-        return [<Text><a key="show_creds" onClick={this.revealClusterCreds(cluster)}><Icon type="eye" theme="filled"/> Access</a></Text>]
+        return [<Text key="access"><a key="show_creds" onClick={this.revealClusterCreds(cluster)}><Icon type="eye" theme="filled"/> Access</a></Text>]
       }
       return []
     }

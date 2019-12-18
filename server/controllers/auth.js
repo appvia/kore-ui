@@ -36,6 +36,7 @@ function getLogout() {
   }
 }
 
+/* eslint-disable require-atomic-updates */
 function getLoginGithubCallback(orgService, hubConfig) {
   return async (req, res) => {
     const username = req.session.passport.user.username
@@ -57,6 +58,7 @@ function getLoginGithubCallback(orgService, hubConfig) {
     })
   }
 }
+/* eslint-enable require-atomic-updates */
 
 function postConfigureAuthProvider(authService) {
   return async (req, res) => {

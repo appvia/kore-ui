@@ -1,4 +1,5 @@
 import React from 'react'
+import PropTypes from 'prop-types'
 import { Layout, Typography } from 'antd'
 const { Footer } = Layout
 const { Title } = Typography
@@ -9,10 +10,15 @@ import Breadcrumb from '../../lib/components/Breadcrumb'
 import apiRequest from '../../lib/utils/api-request'
 
 class NewTeamPage extends React.Component {
+  static propTypes = {
+    user: PropTypes.object.isRequired,
+    teamAdded: PropTypes.func.isRequired
+  }
+
   state = {
     team: false,
     providers: [],
-    plans: []
+    plans: { items: [] }
   }
 
   static staticProps = {

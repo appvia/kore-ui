@@ -1,6 +1,6 @@
-import React from "react"
-import App from "next/app"
-import Head from "next/head"
+import React from 'react'
+import App from 'next/app'
+import Head from 'next/head'
 import axios from 'axios'
 
 import { Layout } from 'antd'
@@ -78,6 +78,8 @@ class MyApp extends App {
   render() {
     const { Component } = this.props
     const props = { ...this.props, ...this.props.pageProps }
+    const isAdmin = Boolean(props.user && props.user.isAdmin)
+    const hideSider = Boolean(props.hideSider || props.unrestrictedPage)
 
     return (
       <div>
@@ -92,7 +94,7 @@ class MyApp extends App {
             <User user={props.user}/>
           </Header>
           <Layout hasSider="true" style={{minHeight:'100vh'}}>
-            <SiderMenu hide={props.hideSider || props.unrestrictedPage} isAdmin={props.user && props.user.isAdmin} userTeams={this.state.userTeams}/>
+            <SiderMenu hide={hideSider} isAdmin={isAdmin} userTeams={this.state.userTeams || []}/>
             <Content style={{background: '#fff', padding: 24, minHeight: 280}}>
               <Component {...this.props.pageProps} user={this.props.user} teamAdded={this.teamAdded} />
             </Content>

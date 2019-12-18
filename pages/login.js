@@ -1,3 +1,4 @@
+import PropTypes from 'prop-types'
 import { Button, Row, Col, Card } from 'antd'
 
 const LoginPage = ({ authProvider }) => (
@@ -21,6 +22,10 @@ LoginPage.staticProps = ({ req }) => {
     unrestrictedPage: true,
     authProvider: req.authProvider
   }
+}
+
+LoginPage.propTypes = {
+  authProvider: PropTypes.object.isRequired
 }
 
 export default LoginPage

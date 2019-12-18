@@ -1,4 +1,5 @@
 import React from 'react'
+import PropTypes from 'prop-types'
 import axios from 'axios'
 import { Typography, Card, List, Button, Avatar, Tooltip, Icon, Drawer, message } from 'antd'
 const { Text, Title } = Typography
@@ -11,6 +12,11 @@ import ClusterProviderForm from '../../lib/components/forms/ClusterProviderForm'
 import { hub } from '../../config'
 
 class ConfigureIntegrationsPage extends React.Component {
+  static propTypes = {
+    clusterClasses: PropTypes.array.isRequired,
+    allTeams: PropTypes.object.isRequired
+  }
+
   state = {
     clusterClasses: this.props.clusterClasses,
     editIntegration: false,
@@ -28,8 +34,10 @@ class ConfigureIntegrationsPage extends React.Component {
 
         const processBindings = async bindings => {
           await asyncForEach(bindings, async b => {
-            b.instance = await apiRequest(req, 'get', `/teams/${hub.hubAdminTeamName}/bindings/${b.metadata.name}`)
-            b.instance.allocations = await apiRequest(req, 'get', `/teams/${hub.hubAdminTeamName}/bindings/${b.metadata.name}/allocation`)
+            const instance = await apiRequest(req, 'get', `/teams/${hub.hubAdminTeamName}/bindings/${b.metadata.name}`)
+            instance.allocations = await apiRequest(req, 'get', `/teams/${hub.hubAdminTeamName}/bindings/${b.metadata.name}/allocation`)
+            // eslint-disable-next-line require-atomic-updates
+            b.instance = instance
           })
         }
 
@@ -69,11 +77,12 @@ class ConfigureIntegrationsPage extends React.Component {
     return async () => {
       const instanceClass = await apiRequest(null, 'get', `/teams/${hub.hubAdminTeamName}/bindings/${binding.metadata.name}/class`)
       const classes = await apiRequest(null, 'get', '/classes?category=cluster')
-      binding.instance.class = instanceClass
+      const bindingCopy = { ...binding }
+      bindingCopy.instance.class = instanceClass
+      const requires = bindingCopy.instance.class.spec.requires
+      const requiresSchema = bindingCopy.instance.class.spec.schemas.definitions[requires.kind].properties.spec
       const state = { ...this.state }
-      const requires = binding.instance.class.spec.requires
-      const requiresSchema = binding.instance.class.spec.schemas.definitions[requires.kind].properties.spec
-      state.editIntegration = { className, binding, requires, requiresSchema, classes, teams: this.props.allTeams }
+      state.editIntegration = { className, binding: bindingCopy, requires, requiresSchema, classes, teams: this.props.allTeams }
       this.setState(state)
     }
   }
@@ -130,7 +139,7 @@ class ConfigureIntegrationsPage extends React.Component {
           <List
             dataSource={this.state.clusterClasses}
             renderItem={c => c.bindings.map(b => (
-              <List.Item key={b.metadata.name} actions={[<Text><a key="show_creds" onClick={this.editIntegration(c.spec.displayName, b)}><Icon type="eye" theme="filled"/> Edit</a></Text>]}>
+              <List.Item key={b.metadata.name} actions={[<Text key="show_creds"><a onClick={this.editIntegration(c.spec.displayName, b)}><Icon type="eye" theme="filled"/> Edit</a></Text>]}>
                 <List.Item.Meta
                   avatar={<Avatar icon="cloud" />}
                   title={<Text>{c.spec.displayName} <Tooltip title={c.spec.description}><Icon type="info-circle" /></Tooltip> <Text type="secondary">{b.instance.spec.name}</Text></Text>}
