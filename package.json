@@ -3,8 +3,9 @@
   "version": "0.1.0",
   "scripts": {
     "dev": "nodemon",
-    "build": "next build",
-    "start": "NODE_ENV=production node server/index.js"
+    "build": "npm run lint && next build",
+    "start": "NODE_ENV=production node server/index.js",
+    "lint": "eslint ."
   },
   "dependencies": {
     "@zeit/next-less": "^1.0.1",
@@ -24,10 +25,15 @@
     "null-loader": "^3.0.0",
     "passport": "^0.4.0",
     "passport-github": "^1.1.0",
+    "prop-types": "^15.7.2",
     "react": "^16.10.1",
     "react-dom": "^16.10.1"
   },
   "devDependencies": {
+    "babel-eslint": "^10.0.3",
+    "eslint": "^6.7.2",
+    "eslint-plugin-babel": "^5.3.0",
+    "eslint-plugin-react": "^7.17.0",
     "mini-css-extract-plugin": "^0.8.0",
     "nodemon": "^1.19.4"
   },

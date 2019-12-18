@@ -1,7 +1,7 @@
 import Link from 'next/link'
 import { Layout, Typography, Result, Icon, Button } from 'antd'
 const { Footer } = Layout
-const { Paragraph } = Typography;
+const { Paragraph } = Typography
 
 const SetupAuthIndexPage = () => (
   <div>

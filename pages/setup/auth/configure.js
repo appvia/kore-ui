@@ -13,7 +13,7 @@ const StepOne = () => (
       <br/>
       <Button type="link" target="_blank" href="https://developer.github.com/apps/building-oauth-apps/creating-an-oauth-app/" style={{ padding: '0' }}>https://developer.github.com/apps/building-oauth-apps/creating-an-oauth-app/</Button>
     </Paragraph>
-    <Paragraph>You'll need the following details</Paragraph>
+    <Paragraph>You&apos;ll need the following details</Paragraph>
     <CopyTextWithLabel label="Homepage URL" text={hub.baseUrl}/>
     <CopyTextWithLabel label="Authorization callback URL" text={`${hub.baseUrl}/login/github/callback`}/>
   </Card>
@@ -32,7 +32,7 @@ const ConfigureAuthPage = () => (
   <div>
     <Title>Configure Authentication provider</Title>
     <Title level={3}>Using GitHub</Title>
-    <Text type="warning" style={{ fontSize: '12px' }}><Icon type="exclamation-circle"/> You'll need to be an admin of your GitHub organisation in order to complete this</Text>
+    <Text type="warning" style={{ fontSize: '12px' }}><Icon type="exclamation-circle"/> You&apos;ll need to be an admin of your GitHub organisation in order to complete this</Text>
     <StepOne />
     <StepTwo />
     <Footer style={{textAlign: 'center', backgroundColor: '#fff'}}>

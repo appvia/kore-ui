@@ -1,4 +1,5 @@
 import React from 'react'
+import PropTypes from 'prop-types'
 import { Layout, Typography } from 'antd'
 const { Footer } = Layout
 const { Title, Paragraph } = Typography
@@ -8,6 +9,9 @@ import apiRequest from '../../../../lib/utils/api-request'
 import ClusterProviderForm from '../../../../lib/components/forms/ClusterProviderForm'
 
 class ConfigureCloudProvidersPage extends React.Component {
+  static propTypes = {
+    classes: PropTypes.object.isRequired
+  }
 
   static getInitialProps = async (ctx) => {
     const classes = await apiRequest(ctx.req, 'get', '/classes?category=cluster')
@@ -34,9 +38,9 @@ class ConfigureCloudProvidersPage extends React.Component {
           handleSubmit={this.handleFormSubmit}
         />
         <Footer style={{textAlign: 'center', backgroundColor: '#fff'}}>
-        <span>
+          <span>
           For more information read the <a href="#">Documentation</a>
-        </span>
+          </span>
         </Footer>
       </div>
     )

@@ -34,10 +34,12 @@ class OrgService {
     }
   }
 
+  /* eslint-disable require-atomic-updates */
   async refreshUser(user) {
     user.teams = await this.getUserTeams(user.username)
     user.isAdmin = this.isAdmin(user)
   }
+  /* eslint-enable require-atomic-updates */
 
   isAdmin(user) {
     return (user.teams || []).includes(hub.hubAdminTeamName)
@@ -77,17 +79,17 @@ class OrgService {
   }
 
   async getTeamBindings(team) {
-  try {
-    const result = await axios.get(`${this.hubApi.url}/teams/${team}/bindings`, this.requestOptions)
-    return result.data
-  } catch (err) {
-    if (err.response && err.response.status === 404) {
-      return null
+    try {
+      const result = await axios.get(`${this.hubApi.url}/teams/${team}/bindings`, this.requestOptions)
+      return result.data
+    } catch (err) {
+      if (err.response && err.response.status === 404) {
+        return null
+      }
+      console.error('Error getting team binding from API', err)
+      return Promise.reject(err)
     }
-    console.error('Error getting team binding from API', err)
-    return Promise.reject(err)
   }
-}
 }
 
 module.exports = OrgService

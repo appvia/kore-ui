@@ -1,4 +1,5 @@
 import Link from 'next/link'
+import PropTypes from 'prop-types'
 import { Layout, Result, Icon, Button } from 'antd'
 const { Footer } = Layout
 
@@ -32,6 +33,10 @@ const SetupHubIndexPage = ({ user }) => (
 SetupHubIndexPage.staticProps = {
   title: 'Welcome. Initial Hub setup',
   hideSider: true
+}
+
+SetupHubIndexPage.propTypes = {
+  user: PropTypes.object.isRequired
 }
 
 export default SetupHubIndexPage

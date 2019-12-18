@@ -1,4 +1,5 @@
 import React from 'react'
+import PropTypes from 'prop-types'
 import axios from 'axios'
 import { Typography } from 'antd'
 const { Title } = Typography
@@ -8,6 +9,13 @@ import ClusterBuildForm from '../../../../lib/components/forms/ClusterBuildForm'
 import apiRequest from '../../../../lib/utils/api-request'
 
 class NewTeamClusterPage extends React.Component {
+  static propTypes = {
+    user: PropTypes.object.isRequired,
+    team: PropTypes.object.isRequired,
+    resources: PropTypes.object.isRequired,
+    plans: PropTypes.object.isRequired,
+    providers: PropTypes.array.isRequired
+  }
 
   static async getPageData(req, name) {
     const getTeam = () => apiRequest(req, 'get', `/teams/${name}`)

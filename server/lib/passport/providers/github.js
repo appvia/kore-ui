@@ -12,21 +12,20 @@ module.exports = function(config) {
   // example does not have a database, the complete Facebook profile is serialized
   // and deserialized.
   passport.serializeUser(function(user, cb) {
-    cb(null, user);
-  });
+    cb(null, user)
+  })
 
   passport.deserializeUser(function(obj, cb) {
-    cb(null, obj);
-  });
+    cb(null, obj)
+  })
 
   passport.use(new Strategy(config, function(accessToken, refreshToken, profile, cb) {
-      // In this example, the user's GitHub profile is supplied as the user
-      // record.  In a production-quality application, the Facebook profile should
-      // be associated with a user record in the application's database, which
-      // allows for account linking and authentication with other identity
-      // providers.
-      console.log('passport', accessToken, refreshToken)
-      return cb(null, profile);
-    }
-  ));
+    // In this example, the user's GitHub profile is supplied as the user
+    // record.  In a production-quality application, the Facebook profile should
+    // be associated with a user record in the application's database, which
+    // allows for account linking and authentication with other identity
+    // providers.
+    console.log('passport', accessToken, refreshToken)
+    return cb(null, profile)
+  }))
 }

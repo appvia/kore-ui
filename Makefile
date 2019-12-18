@@ -20,13 +20,25 @@ docker:
 
 deps-start:
 	@echo "--> Pulling images"
-	@docker-compose --file ../hub-apiserver/docker-compose.yml --file docker-compose.yml pull
+	@docker-compose \
+		--file ../hub-apiserver/hack/compose/kube.yml \
+		--file ../hub-apiserver/hack/compose/operators.yml \
+		--file docker-compose.yml pull
 	@echo "--> Starting dependencies"
-	@docker-compose --file ../hub-apiserver/docker-compose.yml --file docker-compose.yml up -d
+	@docker-compose \
+		--file ../hub-apiserver/hack/compose/kube.yml \
+		--file ../hub-apiserver/hack/compose/operators.yml \
+		--file docker-compose.yml up -d
 
 deps-logs:
-	@docker-compose --file ../hub-apiserver/docker-compose.yml --file docker-compose.yml logs -f
+	@docker-compose \
+		--file ../hub-apiserver/hack/compose/kube.yml \
+		--file ../hub-apiserver/hack/compose/operators.yml \
+		--file docker-compose.yml logs -f
 
 deps-stop:
 	@echo "--> Stopping dependencies"
-	@docker-compose --file ../hub-apiserver/docker-compose.yml --file docker-compose.yml down
+	@docker-compose \
+		--file ../hub-apiserver/hack/compose/kube.yml \
+		--file ../hub-apiserver/hack/compose/operators.yml \
+		--file docker-compose.yml down
