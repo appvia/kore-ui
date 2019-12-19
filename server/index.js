@@ -1,6 +1,7 @@
 const express = require('express')
 const passport = require('passport')
 const session = require('express-session')
+const redis = require('redis')
 const cookieParser = require('cookie-parser')
 const bodyParser = require('body-parser')
 const app = require('./next')
@@ -9,6 +10,9 @@ const routes = require('./routes')
 
 const port = config.server.port
 
+const RedisStore = require('connect-redis')(session)
+const redisClient = redis.createClient()
+
 app.prepare().then(() => {
   const server = express()
 
@@ -16,7 +20,12 @@ app.prepare().then(() => {
   server.use(bodyParser.urlencoded({ extended: true }))
   server.use(bodyParser.json())
   server.use(session({
-    secret: config.server.sessionSecret,
+    store: new RedisStore({
+      client: redisClient,
+      url: config.server.session.url ,
+      ttl: config.server.session.ttlInSeconds
+    }),
+    secret: config.server.session.sessionSecret,
     resave: true,
     saveUninitialized: false
   }))
