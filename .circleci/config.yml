@@ -17,6 +17,7 @@ jobs:
       - deploy:
           command: |
             npm install
+            npm test
             npm run build
   release:
     <<: *defaults

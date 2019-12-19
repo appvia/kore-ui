@@ -39,13 +39,8 @@ class MyApp extends App {
   }
 
   static async getUserTeamsDetails(req, userTeams) {
-    try {
-      const teams = await apiRequest(req, 'get', '/teams')
-      return (teams.items || []).filter(t => userTeams.includes(t.metadata.name) && t.metadata.name !== hub.hubAdminTeamName)
-    } catch (err) {
-      console.error('Error retrieving hub teams', err.message)
-      return []
-    }
+    const teams = await apiRequest(req, 'get', '/teams')
+    return (teams.items || []).filter(t => userTeams.includes(t.metadata.name) && t.metadata.name !== hub.hubAdminTeamName)
   }
 
   static async getInitialProps({ Component, ctx }) {

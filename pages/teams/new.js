@@ -68,13 +68,15 @@ class NewTeamPage extends React.Component {
           team={this.state.team}
           handleTeamCreated={this.handleTeamCreated}
         />
-        <ClusterBuildForm
-          user={this.props.user}
-          team={this.state.team}
-          plans={this.state.plans}
-          providers={this.state.providers}
-          teamClusters={[]}
-        />
+        {this.state.team ? (
+          <ClusterBuildForm
+            user={this.props.user}
+            team={this.state.team}
+            plans={this.state.plans}
+            providers={this.state.providers}
+            teamClusters={[]}
+          />
+        ) : null}
         <Footer style={{textAlign: 'center', backgroundColor: '#fff'}}>
           <span>
             For more information read the <a href="#">Documentation</a>
