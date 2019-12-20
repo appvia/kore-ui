@@ -31,6 +31,7 @@ class ConfigureIntegrationsPage extends React.Component {
     return axios.all([getClasses(), getTeams(), getBindings()])
       .then(axios.spread(async function (classes, allTeams, bindings) {
         const clusterClasses = classes.items.filter(c => c.spec.category === 'cluster')
+        allTeams.items = allTeams.items.filter(t => t.metadata.name !== hub.hubAdminTeamName)
 
         const processBindings = async bindings => {
           await asyncForEach(bindings, async b => {
@@ -137,7 +138,7 @@ class ConfigureIntegrationsPage extends React.Component {
         <Breadcrumb items={[{text: 'Configure'}, {text: 'Integrations'}]} />
         <Card title="Cloud cluster providers" extra={<Button type="primary" onClick={this.addNewIntegration()}>+ New</Button>}>
           <List
-            dataSource={this.state.clusterClasses}
+            dataSource={this.state.clusterClasses.filter(c => c.bindings.length > 0)}
             renderItem={c => c.bindings.map(b => (
               <List.Item key={b.metadata.name} actions={[<Text key="show_creds"><a onClick={this.editIntegration(c.spec.displayName, b)}><Icon type="eye" theme="filled"/> Edit</a></Text>]}>
                 <List.Item.Meta

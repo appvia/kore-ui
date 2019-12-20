@@ -1,15 +1,8 @@
----
 version: 2
-
-defaults: &defaults
-  docker:
-    - image: node:10
-  environment:
-    DOCKER_IMAGE: quay.io/appvia/hub-ui
-
 jobs:
   build:
-    <<: *defaults
+    docker:
+      - image: node:10
     steps:
       - checkout
       - setup_remote_docker:
@@ -20,7 +13,8 @@ jobs:
             npm test
             npm run build
   release:
-    <<: *defaults
+    docker:
+      - image: docker:19.03-dind
     steps:
       - checkout
       - setup_remote_docker:
@@ -28,8 +22,8 @@ jobs:
       - deploy:
           command: |
             docker login -u ${DOCKER_USER} -p ${DOCKER_PASSWORD} quay.io
-            docker build -t ${DOCKER_IMAGE}:${CIRCLE_TAG:-latest} .
-            docker push ${DOCKER_IMAGE}:${CIRCLE_TAG:-latest}
+            docker build -t quay.io/appvia/hub-ui:${CIRCLE_TAG:-latest} .
+            docker push quay.io/appvia/hub-ui:${CIRCLE_TAG:-latest}
 
 workflows:
   version: 2
