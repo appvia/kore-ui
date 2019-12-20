@@ -17,7 +17,8 @@ function apiProxy(hubApi) {
       return res.json(result.data)
     } catch (err) {
       const status = (err.response && err.response.status) || 500
-      console.error(`Error making request to API with path ${apiUrlPath}`, status, err.message)
+      const message = (err.response && err.response.data && err.response.data.message) || err.message
+      console.error(`Error making request to API with path ${apiUrlPath}`, status, message)
       return res.status(status).send()
     }
   }

@@ -67,24 +67,29 @@ class ConfigureIntegrationsPage extends React.Component {
   }
 
   handleEditIntegrationSave = (updatedBinding, updatedAllocations) => {
-    const currentBinding = this.state.editIntegration.binding.instance
-    currentBinding.spec = updatedBinding.spec
-    currentBinding.metadata = updatedBinding.metadata
-    currentBinding.allocations.items = updatedAllocations
+    const state = copy(this.state)
+    const editedClass = state.clusterClasses.find(c => c.metadata.name === state.editIntegration.classMetadataName)
+    const editedBinding = editedClass.bindings.find(b => b.metadata.name === state.editIntegration.binding.metadata.name)
+
+    editedBinding.instance.spec = updatedBinding.spec
+    editedBinding.instance.metadata = updatedBinding.metadata
+    editedBinding.instance.allocations.items = updatedAllocations
+
+    this.setState(state)
     this.clearEditIntegration()
     message.success('Integration updated')
   }
 
-  editIntegration = (className, binding) => {
+  editIntegration = (classMetadataName, className, binding) => {
     return async () => {
       const instanceClass = await apiRequest(null, 'get', `/teams/${hub.hubAdminTeamName}/bindings/${binding.metadata.name}/class`)
       const classes = await apiRequest(null, 'get', '/classes?category=cluster')
-      const bindingCopy = { ...binding }
+      const bindingCopy = copy(binding)
       bindingCopy.instance.class = instanceClass
       const requires = bindingCopy.instance.class.spec.requires
       const requiresSchema = bindingCopy.instance.class.spec.schemas.definitions[requires.kind].properties.spec
       const state = copy(this.state)
-      state.editIntegration = { className, binding: bindingCopy, requires, requiresSchema, classes, teams: this.props.allTeams }
+      state.editIntegration = { classMetadataName, className, binding: bindingCopy, requires, requiresSchema, classes, teams: this.props.allTeams }
       this.setState(state)
     }
   }
@@ -141,7 +146,7 @@ class ConfigureIntegrationsPage extends React.Component {
           <List
             dataSource={this.state.clusterClasses.filter(c => c.bindings.length > 0)}
             renderItem={c => c.bindings.map(b => (
-              <List.Item key={b.metadata.name} actions={[<Text key="show_creds"><a onClick={this.editIntegration(c.spec.displayName, b)}><Icon type="eye" theme="filled"/> Edit</a></Text>]}>
+              <List.Item key={b.metadata.name} actions={[<Text key="show_creds"><a onClick={this.editIntegration(c.metadata.name, c.spec.displayName, b)}><Icon type="eye" theme="filled"/> Edit</a></Text>]}>
                 <List.Item.Meta
                   avatar={<Avatar icon="cloud" />}
                   title={<Text>{c.spec.displayName} <Tooltip title={c.spec.description}><Icon type="info-circle" /></Tooltip> <Text type="secondary">{b.instance.spec.name}</Text></Text>}
