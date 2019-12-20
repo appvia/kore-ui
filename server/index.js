@@ -11,7 +11,7 @@ const routes = require('./routes')
 const port = config.server.port
 
 const RedisStore = require('connect-redis')(session)
-const redisClient = redis.createClient()
+const redisClient = redis.createClient({ url: config.server.session.url })
 
 app.prepare().then(() => {
   const server = express()
@@ -22,7 +22,7 @@ app.prepare().then(() => {
   server.use(session({
     store: new RedisStore({
       client: redisClient,
-      url: config.server.session.url ,
+      url: config.server.session.url,
       ttl: config.server.session.ttlInSeconds
     }),
     secret: config.server.session.sessionSecret,
