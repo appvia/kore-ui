@@ -4,7 +4,7 @@
   "scripts": {
     "dev": "nodemon",
     "test": "jest",
-    "build": "npm run lint && next build",
+    "build": "next build",
     "start": "NODE_ENV=production node server/index.js",
     "lint": "eslint ."
   },

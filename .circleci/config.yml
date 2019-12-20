@@ -10,6 +10,7 @@ jobs:
       - deploy:
           command: |
             npm install
+            npm run lint
             npm test
             npm run build
   release:
@@ -34,3 +35,5 @@ workflows:
           filters:
             branches:
               only: master
+          requires:
+            - build
