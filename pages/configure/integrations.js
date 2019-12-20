@@ -6,6 +6,7 @@ const { Text, Title } = Typography
 
 import apiRequest from '../../lib/utils/api-request'
 import asyncForEach from '../../lib/utils/async-foreach'
+import copy from '../../lib/utils/object-copy'
 import Breadcrumb from '../../lib/components/Breadcrumb'
 import ClusterProviderForm from '../../lib/components/forms/ClusterProviderForm'
 
@@ -82,14 +83,14 @@ class ConfigureIntegrationsPage extends React.Component {
       bindingCopy.instance.class = instanceClass
       const requires = bindingCopy.instance.class.spec.requires
       const requiresSchema = bindingCopy.instance.class.spec.schemas.definitions[requires.kind].properties.spec
-      const state = { ...this.state }
+      const state = copy(this.state)
       state.editIntegration = { className, binding: bindingCopy, requires, requiresSchema, classes, teams: this.props.allTeams }
       this.setState(state)
     }
   }
 
   clearEditIntegration = () => {
-    const state = { ...this.state }
+    const state = copy(this.state)
     state.editIntegration = false
     this.setState(state)
   }
@@ -97,14 +98,14 @@ class ConfigureIntegrationsPage extends React.Component {
   addNewIntegration = () => {
     return async () => {
       const classes = await apiRequest(null, 'get', '/classes?category=cluster')
-      const state = { ...this.state }
+      const state = copy(this.state)
       state.addNewIntegration = { classes, teams: this.props.allTeams }
       this.setState(state)
     }
   }
 
   clearAddNewIntegration = () => {
-    const state = { ...this.state }
+    const state = copy(this.state)
     state.addNewIntegration = false
     this.setState(state)
   }
@@ -114,7 +115,7 @@ class ConfigureIntegrationsPage extends React.Component {
     const newBindingWrapper = allBindings.items.find(b => b.metadata.name === createdBinding.metadata.name)
     newBindingWrapper.instance = createdBinding
     newBindingWrapper.instance.allocations = { items: createdAllocations }
-    const state = { ...this.state }
+    const state = copy(this.state)
     state.clusterClasses.map(c => {
       if (c.metadata.name === newBindingWrapper.spec.class.name) {
         c.bindings.push(newBindingWrapper)

@@ -9,6 +9,7 @@ const { Header, Content } = Layout
 import User from '../lib/components/User'
 import SiderMenu from '../lib/components/SiderMenu'
 import redirect from '../lib/utils/redirect'
+import copy from '../lib/utils/object-copy'
 import apiRequest from '../lib/utils/api-request'
 import { hub, hubApi } from '../config'
 import OrgService from '../server/services/org'
@@ -61,11 +62,13 @@ class MyApp extends App {
   }
 
   onSiderCollapse = siderCollapsed => {
-    this.setState({ ...this.state, siderCollapsed })
+    const state = copy(this.state)
+    state.siderCollapsed = siderCollapsed
+    this.setState(state)
   }
 
   teamAdded = (team) => {
-    const state = { ...this.state }
+    const state = copy(this.state)
     state.userTeams.push(team)
     this.setState(state)
   }
