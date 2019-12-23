@@ -3,11 +3,14 @@ import PropTypes from 'prop-types'
 import axios from 'axios'
 import moment from 'moment'
 import Link from 'next/link'
-import { Typography, Card, List, Tag, Button, Avatar, Popconfirm, message, Icon, Modal } from 'antd'
+import { Typography, Card, List, Tag, Button, Avatar, Popconfirm, message, Icon, Modal, Select } from 'antd'
 const { Paragraph, Text, Title } = Typography
+const { Option } = Select
 
 import Breadcrumb from '../../lib/components/Breadcrumb'
 import apiRequest from '../../lib/utils/api-request'
+import copy from '../../lib/utils/object-copy'
+import asyncForEach from '../../lib/utils/async-foreach'
 
 class TeamDashboard extends React.Component {
   static propTypes = {
@@ -17,17 +20,13 @@ class TeamDashboard extends React.Component {
     resources: PropTypes.object.isRequired
   }
 
-  state = {
-    teamName: this.props.team.metadata.name,
-    members: this.props.members
-  }
-
-  componentDidUpdate(props, state) {
-    if (this.props.team.metadata.name !== state.teamName) {
-      this.setState({
-        teamName: this.props.team.metadata.name,
-        members: props.members
-      })
+  constructor(props) {
+    super(props)
+    this.state = {
+      teamName: props.team.metadata.name,
+      members: props.members,
+      allUsers: [],
+      membersToAdd: []
     }
   }
 
@@ -53,15 +52,66 @@ class TeamDashboard extends React.Component {
     }
   }
 
+  getAllUsers = async () => {
+    const users = await apiRequest(null, 'get', '/users')
+    if (users.items) {
+      return users.items.map(user => user.spec.username).filter(user => user !== 'admin')
+    }
+    return []
+  }
+
+  componentDidMount() {
+    return this.getAllUsers()
+      .then(users => {
+        const state = copy(this.state)
+        state.allUsers = users
+        this.setState(state)
+      })
+  }
+
+  componentDidUpdate(props, state) {
+    if (this.props.team.metadata.name !== state.teamName) {
+      const state = copy(this.state)
+      state.teamName = this.props.team.metadata.name
+      state.members = props.members
+      this.getAllUsers()
+        .then(users => {
+          state.allUsers = users
+        })
+      this.setState(state)
+    }
+  }
+
+  addTeamMembersUpdated = (membersToAdd) => {
+    const state = copy(this.state)
+    state.membersToAdd = membersToAdd
+    this.setState(state)
+  }
+
+  addTeamMembers = async () => {
+    const state = copy(this.state)
+    const members = state.members
+
+    await asyncForEach(this.state.membersToAdd, async member => {
+      await apiRequest(null, 'put', `/teams/${this.props.team.metadata.name}/members/${member}`)
+      message.success(`Team member added: ${member}`)
+      members.items.push(member)
+    })
+
+    state.membersToAdd = []
+    this.setState(state)
+  }
+
   deleteTeamMember = (member) => {
     return async () => {
       const team = this.props.team.metadata.name
       try {
         await apiRequest(null, 'delete', `/teams/${team}/members/${member}`)
-        const members = this.state.members
+        const state = copy(this.state)
+        const members = state.members
         members.items = members.items.filter(m => m !== member)
-        this.setState({ teamName: this.state.teamName, members })
-        message.success('Team member deleted')
+        this.setState(state)
+        message.success(`Team member deleted: ${member}`)
       } catch (err) {
         console.error('Error deleting team member', err)
         message.error('Error deleting team member, please try again.')
@@ -92,6 +142,8 @@ class TeamDashboard extends React.Component {
   }
 
   render() {
+    const teamMembers = ['ADD_USER', ...this.state.members.items]
+
     const memberActions = (member) => {
       const deleteAction = (
         <Popconfirm
@@ -101,7 +153,7 @@ class TeamDashboard extends React.Component {
           okText="Yes"
           cancelText="No"
         >
-          <a>Delete user</a>
+          <a>Remove</a>
         </Popconfirm>
       )
       if (member !== this.props.user.username) {
@@ -113,6 +165,8 @@ class TeamDashboard extends React.Component {
     const memberName = (member) => (
       <Text>{member} {member === this.props.user.username ? <Tag>You</Tag>: null}</Text>
     )
+
+    const membersAvailableToAdd = this.state.allUsers.filter(user => !this.state.members.items.includes(user))
 
     const clusters = this.props.resources.items.filter(r => r.kind === 'Kubernetes')
 
@@ -127,16 +181,34 @@ class TeamDashboard extends React.Component {
       <div>
         <Breadcrumb items={[{text: this.props.team.spec.summary}]} />
         <Paragraph strong>{this.props.team.spec.description}</Paragraph>
-        <Card title="Team members" style={{ marginBottom: '16px' }}>
+        <Card className="team-members" title="Team members" style={{ marginBottom: '16px' }}>
           <List
-            dataSource={this.state.members.items}
-            renderItem={m => (
-              <div>
-                <List.Item actions={memberActions(m)}>
+            dataSource={teamMembers}
+            renderItem={m => {
+              if (m === 'ADD_USER') {
+                return <List.Item style={{ paddingTop: '0' }} actions={[<Button key="add" type="primary" onClick={this.addTeamMembers}>Add</Button>]}>
+                  <List.Item.Meta
+                    title={
+                      <Select
+                        mode="multiple"
+                        placeholder="Add existing users to this team"
+                        onChange={this.addTeamMembersUpdated}
+                        style={{ width: '100%' }}
+                        value={this.state.membersToAdd}
+                      >
+                        {membersAvailableToAdd.map((user, idx) => (
+                          <Option key={idx} value={user}>{user}</Option>
+                        ))}
+                      </Select>
+                    }
+                  />
+                </List.Item>
+              } else {
+                return <List.Item actions={memberActions(m)}>
                   <List.Item.Meta avatar={<Avatar icon="user" />} title={memberName(m)} />
                 </List.Item>
-              </div>
-            )}
+              }
+            }}
           >
           </List>
         </Card>
