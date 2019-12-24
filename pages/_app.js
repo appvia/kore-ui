@@ -1,8 +1,8 @@
 import React from 'react'
 import App from 'next/app'
 import Head from 'next/head'
+import Router from 'next/router'
 import axios from 'axios'
-
 import { Layout } from 'antd'
 const { Header, Content } = Layout
 
@@ -13,6 +13,11 @@ import copy from '../lib/utils/object-copy'
 import apiRequest from '../lib/utils/api-request'
 import { hub, hubApi } from '../config'
 import OrgService from '../server/services/org'
+import gtag from '../lib/utils/gtag'
+
+Router.events.on('routeChangeComplete', url => {
+  gtag.pageView(url)
+})
 
 class MyApp extends App {
   state = {
@@ -82,6 +87,20 @@ class MyApp extends App {
     return (
       <div>
         <Head>
+          <script
+            async
+            src={`https://www.googletagmanager.com/gtm.js?id=${gtag.GTM_ID}`}
+          />
+          <script
+            dangerouslySetInnerHTML={{
+              __html: `
+            window.dataLayer = window.dataLayer || [];
+            function gtag(){dataLayer.push(arguments);}
+            gtag('js', new Date());
+            gtag('config', '${gtag.GTM_ID}');
+          `,
+            }}
+          />
           <title>{props.title || 'Appvia Hub'}</title>
           <meta charSet="utf-8"/>
           <meta name="viewport" content="initial-scale=1.0, width=device-width"/>
