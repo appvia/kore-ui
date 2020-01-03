@@ -17,7 +17,7 @@ describe('User', () => {
   it('renders nothing when there is no user', () => {
     user = null
     const userComponent = mount(<User user={user} />)
-    expect(userComponent.find('.user')).toHaveLength(0)
+    expect(userComponent.isEmptyRender()).toBe(true)
   })
 
   it('displays username and admin tag', () => {
