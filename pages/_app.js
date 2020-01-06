@@ -101,7 +101,7 @@ class MyApp extends App {
           `,
             }}
           />
-          <title>{props.title || 'Appvia Hub'}</title>
+          <title>{props.title || 'Appvia Kore'}</title>
           <meta charSet="utf-8"/>
           <meta name="viewport" content="initial-scale=1.0, width=device-width"/>
         </Head>

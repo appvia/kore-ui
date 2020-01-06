@@ -7,6 +7,12 @@ module.exports = {
       ttlInSeconds: 1200
     }
   },
+  auth: {
+    url: process.env.AUTH_URL || 'http://localhost:5556',
+    callbackUrl: (process.env.AUTH_URL || 'http://localhost:5556') + '/callback',
+    clientId: process.env.AUTH_CLIENT_ID || '12393b111ae937e32181',
+    clientSecret: process.env.AUTH_CLIENT_SECRET || 'ZXhhbXBsZS1hcHAtc2VjcmV0'
+  },
   hub: {
     baseUrl: process.env.HUB_BASE_URL || 'http://localhost:3000',
     hubAdminTeamName: 'hub-admin',

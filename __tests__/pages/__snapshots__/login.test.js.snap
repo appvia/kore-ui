@@ -58,7 +58,7 @@ exports[`Snapshot testing shows login 1`] = `
             type="button"
           >
             <a
-              href="/login/my-provider"
+              href="/login/auth?provider=default-myprovider"
             >
               Login with 
               My Provider

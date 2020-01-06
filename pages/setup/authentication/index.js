@@ -7,12 +7,12 @@ const SetupAuthIndexPage = () => (
   <div>
     <Result
       icon={<Icon type="smile" theme="twoTone" />}
-      title="Welcome to the Hub!"
+      title="Welcome to Appvia Kore!"
       subTitle="Authentication is not currently configured"
       extra={[
-        <Paragraph key="para1">This must be done before any teams can start using the hub</Paragraph>,
+        <Paragraph key="para1">This must be done before any teams can start using Kore</Paragraph>,
         <Button key="button1" type="primary">
-          <Link href="/setup/auth/configure">
+          <Link href="/setup/authentication/choose">
             <a>Begin setup</a>
           </Link>
         </Button>
@@ -27,7 +27,7 @@ const SetupAuthIndexPage = () => (
 )
 
 SetupAuthIndexPage.staticProps = {
-  title: 'No authentication provider configured',
+  title: 'No authentication configured',
   unrestrictedPage: true
 }
 
