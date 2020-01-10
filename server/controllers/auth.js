@@ -2,22 +2,44 @@ const Router = require('express').Router
 const passport = require('passport')
 const app = require('../next')
 
-function getLogin(authService) {
+function getLogin(openIdClient, authService) {
   return async (req, res, next) => {
     try {
+      const { authUrl, nonce } = openIdClient.localUserAuth()
+      const localAuthUrl = await authService.generateLocalAuthPostUrl(authUrl)
       const authProvider = await authService.getDefaultConfiguredIdp()
-      if (!authProvider) {
-        return res.redirect('/setup/authentication')
-      }
       req.authProvider = authProvider
-      return app.render(req, res, '/login', req.query)
+      req.localAuthUrl = localAuthUrl
+      req.session.nonce = nonce
+      req.session.save(async () => {
+        return app.render(req, res, '/login', req.query)
+      })
     } catch (err) {
       return next(err)
     }
   }
 }
 
-function getAuthCallback(orgService, hubConfig) {
+function handleAuthLocalCallback(openIdClient) {
+  return async (req, res, next) => {
+    const nonce = req.session.nonce
+    delete req.session.nonce
+    try {
+      const claims = await openIdClient.localUserAuthCallback(req, nonce)
+      req.logIn(claims, (err) => {
+        if (err) {
+          return next(err)
+        }
+        req.session.save(next)
+      })
+    } catch (err) {
+      console.error('Error handling local auth callback, redirecting back to login', err)
+      res.redirect('/login')
+    }
+  }
+}
+
+function getAuthCallback(orgService, authService, hubConfig) {
   return async (req, res) => {
     const user = req.session.passport.user
     user.username = user.preferred_username || user.email.substr(0, user.email.indexOf('@'))
@@ -29,11 +51,16 @@ function getAuthCallback(orgService, hubConfig) {
     /* eslint-enable require-atomic-updates */
     let redirectPath = '/'
     if (req.session.passport.user.isAdmin) {
-      // this is hard-coded to check for GKE binding, but this will need to be more flexible in the future
-      const bindings = await orgService.getTeamBindings(hubConfig.hubAdminTeamName)
-      const gkeClassBindings = bindings.items.filter(binding => binding.spec.class.kind === 'Class' && binding.spec.class.name === 'gke')
-      if (gkeClassBindings.length === 0) {
-        redirectPath = '/setup/hub'
+      const authProvider = await authService.getDefaultConfiguredIdp()
+      if (!authProvider) {
+        redirectPath = '/setup/authentication'
+      } else {
+        // this is hard-coded to check for GKE binding, but this will need to be more flexible in the future
+        const bindings = await orgService.getTeamBindings(hubConfig.hubAdminTeamName)
+        const gkeClassBindings = bindings.items.filter(binding => binding.spec.class.kind === 'Class' && binding.spec.class.name === 'gke')
+        if (gkeClassBindings.length === 0) {
+          redirectPath = '/setup/hub'
+        }
       }
     }
     req.session.save(function() {
@@ -68,9 +95,10 @@ function postLoginAuthConfigure(authService) {
 
 function initRouter({ authService, orgService, hubConfig, openIdClient }) {
   const router = Router()
-  router.get('/login', getLogin(authService))
+  router.get('/login', getLogin(openIdClient, authService))
   router.get('/login/auth', (req, res) => passport.authenticate(openIdClient.strategyName, { connector_id: req.query.provider })(req, res))
-  router.get('/auth/callback', passport.authenticate(openIdClient.strategyName, { failureRedirect: '/login' }), getAuthCallback(orgService, hubConfig))
+  router.get('/auth/callback', passport.authenticate(openIdClient.strategyName, { failureRedirect: '/login' }), getAuthCallback(orgService, authService, hubConfig))
+  router.get('/auth/local/callback', handleAuthLocalCallback(openIdClient), getAuthCallback(orgService, authService, hubConfig))
   router.post('/login/auth/configure', postLoginAuthConfigure(authService))
   router.get('/logout', getLogout())
   return router

@@ -56,7 +56,7 @@ class MyApp extends App {
     }
     const user = await MyApp.getUserSession(ctx.req)
     if (!user) {
-      return redirect(ctx.res, '/logout', true)
+      return redirect(ctx.res, '/login', true)
     }
     if (Component.getInitialProps) {
       const initialProps = await Component.getInitialProps(ctx)

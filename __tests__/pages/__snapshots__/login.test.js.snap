@@ -44,26 +44,42 @@ exports[`Snapshot testing shows login 1`] = `
           className="ant-card-body"
           style={Object {}}
         >
-          <p>
-            Login using the configured Identity Provider below
-          </p>
-          <button
-            className="ant-btn ant-btn-primary"
-            onClick={[Function]}
-            style={
-              Object {
-                "margin": "5px",
+          <div>
+            <p>
+              Login using the configured Identity Provider below
+            </p>
+            <button
+              className="ant-btn ant-btn-primary"
+              onClick={[Function]}
+              style={
+                Object {
+                  "margin": "5px",
+                }
               }
-            }
-            type="button"
-          >
-            <a
-              href="/login/auth?provider=default-myprovider"
+              type="button"
             >
-              Login with 
-              My Provider
-            </a>
-          </button>
+              <a
+                href="/login/auth?provider=default-myprovider"
+              >
+                Login with 
+                My Provider
+              </a>
+            </button>
+            <button
+              className="ant-btn"
+              onClick={[Function]}
+              style={
+                Object {
+                  "marginLeft": "10px",
+                }
+              }
+              type="button"
+            >
+              <span>
+                Local user login
+              </span>
+            </button>
+          </div>
         </div>
       </div>
     </div>

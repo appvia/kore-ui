@@ -17,7 +17,7 @@ const GitHubSetupComplete = () => (
 
 GitHubSetupComplete.staticProps = {
   title: 'GitHub setup complete',
-  unrestrictedPage: true
+  hideSider: true
 }
 
 export default GitHubSetupComplete

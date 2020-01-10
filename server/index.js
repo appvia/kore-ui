@@ -26,8 +26,8 @@ app.prepare().then(() => {
       ttl: config.server.session.ttlInSeconds
     }),
     secret: config.server.session.sessionSecret,
-    resave: true,
-    saveUninitialized: false
+    resave: false,
+    saveUninitialized: true
   }))
 
   server.use(passport.initialize())

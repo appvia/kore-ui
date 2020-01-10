@@ -49,6 +49,12 @@ class AuthService {
       return Promise.reject(err)
     }
   }
+
+  async generateLocalAuthPostUrl(authUrl) {
+    const url = new URL(authUrl)
+    const response = await axios.get(authUrl)
+    return url.origin + response.request.path
+  }
 }
 
 module.exports = AuthService

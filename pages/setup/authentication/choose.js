@@ -64,7 +64,7 @@ const ChooseAuthPage = () => (
 
 ChooseAuthPage.staticProps = {
   title: 'Setup authentication',
-  unrestrictedPage: true
+  hideSider: true
 }
 
 export default ChooseAuthPage

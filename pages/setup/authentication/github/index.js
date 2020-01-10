@@ -43,7 +43,7 @@ const WrappedConfigureHubForm = Form.create({ name: 'configure_hub' })(Configure
 class GithubSetupPage extends React.Component {
   static staticProps = {
     title: 'Configure authentication provider',
-    unrestrictedPage: true,
+    hideSider: true,
     authUrl: auth.url,
     authCallbackUrl: auth.callbackUrl
   }

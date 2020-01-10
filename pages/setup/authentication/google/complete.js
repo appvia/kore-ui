@@ -17,7 +17,7 @@ const GoogleSetupComplete = () => (
 
 GoogleSetupComplete.staticProps = {
   title: 'Google setup complete',
-  unrestrictedPage: true
+  hideSider: true
 }
 
 export default GoogleSetupComplete

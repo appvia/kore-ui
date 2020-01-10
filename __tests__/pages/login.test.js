@@ -1,4 +1,4 @@
-import { shallow } from 'enzyme'
+import { mount } from 'enzyme'
 import renderer from 'react-test-renderer'
 
 import Login from '../../pages/login'
@@ -17,7 +17,7 @@ const authProvider = {
 
 describe('Login', () => {
   it('shows login for auth provider', () => {
-    const app = shallow(<Login authProvider={authProvider} connectorId="default-myprovider" />)
+    const app = mount(<Login authProvider={authProvider} connectorId="default-myprovider" localAuthUrl="http://auth.local" />)
 
     expect(app.find('Card').prop('title')).toEqual('Login')
     expect(app.find('Button a').prop('href')).toEqual('/login/auth?provider=default-myprovider')
@@ -27,7 +27,7 @@ describe('Login', () => {
 
 describe('Snapshot testing', () => {
   it('shows login', () => {
-    const component = renderer.create(<Login authProvider={authProvider} connectorId="default-myprovider" />)
+    const component = renderer.create(<Login authProvider={authProvider} connectorId="default-myprovider" localAuthUrl="http://auth.local" />)
     const tree = component.toJSON()
     expect(tree).toMatchSnapshot()
   })

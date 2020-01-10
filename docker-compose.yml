@@ -12,6 +12,7 @@ services:
       KUBE_API_SERVER: http://kube-apiserver:8080
       DEX_PUBLIC_URL: http://localhost:5556
       DEX_GRPC_SERVER: dex-operator
+      HUB_ADMIN_PASS: Pa55w0rd
     ports:
       - 10080:10080
     restart: always
