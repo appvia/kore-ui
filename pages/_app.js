@@ -107,7 +107,7 @@ class MyApp extends App {
         </Head>
         <Layout style={{minHeight:'100vh'}}>
           <Header style={{backgroundColor: '#002140'}}>
-            <div style={{color: '#FFF', float: 'left', fontSize: '18px', marginLeft: '-25px'}}>Konduktor</div>
+            <div style={{color: '#FFF', float: 'left', fontSize: '18px', marginLeft: '-25px'}}>Kore</div>
             <User user={props.user}/>
           </Header>
           <Layout hasSider="true" style={{minHeight:'100vh'}}>
