@@ -10,11 +10,20 @@ class OpenIdClient {
     this.clientId = clientId
     this.clientSecret = clientSecret
     this.authService = authService
-    this.authClientCreated = false
+    this.initialised = false
   }
 
   async init() {
-    await this.createAuthClient()
+    try {
+      await this.setupAuthClient()
+    } catch (err) {
+      console.error('Unable to initialise openIdClient, this will be retried later')
+      return Promise.resolve()
+    }
+  }
+
+  async setupAuthClient() {
+    await this.authService.setAuthClient()
     const issuer = await Issuer.discover(this.authUrl)
     this.client = new issuer.Client({
       client_id: this.clientId,
@@ -23,17 +32,7 @@ class OpenIdClient {
       response_types: ['code']
     })
     this.setupPassport()
-  }
-
-  async createAuthClient() {
-    try {
-      await this.authService.setAuthClient()
-      this.authClientCreated = true
-      console.log('Auth client created successfully')
-    } catch (err) {
-      console.error('Unable to create auth client, this will be retried later')
-      return Promise.resolve()
-    }
+    this.initialised = true
   }
 
   setupPassport() {

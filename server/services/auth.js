@@ -29,6 +29,7 @@ class AuthService {
   async setAuthClient() {
     try {
       await axios.put(`${this.hubApi.url}/idp/clients/hub-ui`, IDPClient, this.requestOptions)
+      console.log('Auth client created successfully')
     } catch (err) {
       console.error('Error setting auth client from API', err)
       return Promise.reject(err)
