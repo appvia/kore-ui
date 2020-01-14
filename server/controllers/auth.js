@@ -2,13 +2,17 @@ const Router = require('express').Router
 const passport = require('passport')
 const app = require('../next')
 
-function ensureAuthClient(openIdClient) {
+function ensureOpenIdClientInitialised(openIdClient) {
   return async (req, res, next) => {
-    if (openIdClient.authClientCreated) {
+    if (openIdClient.initialised) {
       return next()
     }
-    await openIdClient.createAuthClient()
-    return next()
+    try {
+      await openIdClient.setupAuthClient()
+      next()
+    } catch (err) {
+      next(err)
+    }
   }
 }
 
@@ -105,11 +109,11 @@ function postLoginAuthConfigure(authService) {
 
 function initRouter({ authService, orgService, hubConfig, openIdClient }) {
   const router = Router()
-  router.get('/login', ensureAuthClient(openIdClient), getLogin(openIdClient, authService))
-  router.get('/login/auth', ensureAuthClient(openIdClient), (req, res) => passport.authenticate(openIdClient.strategyName, { connector_id: req.query.provider })(req, res))
-  router.get('/auth/callback', ensureAuthClient(openIdClient), passport.authenticate(openIdClient.strategyName, { failureRedirect: '/login' }), getAuthCallback(orgService, authService, hubConfig))
-  router.get('/auth/local/callback', ensureAuthClient(openIdClient), handleAuthLocalCallback(openIdClient), getAuthCallback(orgService, authService, hubConfig))
-  router.post('/login/auth/configure', ensureAuthClient(openIdClient), postLoginAuthConfigure(authService))
+  router.get('/login', ensureOpenIdClientInitialised(openIdClient), getLogin(openIdClient, authService))
+  router.get('/login/auth', ensureOpenIdClientInitialised(openIdClient), (req, res) => passport.authenticate(openIdClient.strategyName, { connector_id: req.query.provider })(req, res))
+  router.get('/auth/callback', ensureOpenIdClientInitialised(openIdClient), passport.authenticate(openIdClient.strategyName, { failureRedirect: '/login' }), getAuthCallback(orgService, authService, hubConfig))
+  router.get('/auth/local/callback', ensureOpenIdClientInitialised(openIdClient), handleAuthLocalCallback(openIdClient), getAuthCallback(orgService, authService, hubConfig))
+  router.post('/login/auth/configure', ensureOpenIdClientInitialised(openIdClient), postLoginAuthConfigure(authService))
   router.get('/logout', getLogout())
   return router
 }
