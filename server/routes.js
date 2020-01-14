@@ -20,7 +20,7 @@ openIdClient.init()
     router.use(require('./controllers/apiproxy').initRouter({ ensureAuthenticated, hubApi: config.hubApi }))
   })
   .catch(err => {
-    console.error('Error initialising openid client', err)
+    console.error('Unexpected error occurred during openIdClient initialisation', err)
   })
 
 module.exports = router
