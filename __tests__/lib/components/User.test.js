@@ -8,8 +8,8 @@ describe('User', () => {
 
   beforeEach(() => {
     user = {
-      username: 'jbloggs',
-      displayName: 'Joe Bloggs',
+      preferred_username: 'jbloggs',
+      name: 'Joe Bloggs',
       isAdmin: true
     }
   })
@@ -38,8 +38,8 @@ describe('Snapshot testing', () => {
 
   beforeEach(() => {
     user = {
-      username: 'jbloggs',
-      displayName: 'Joe Bloggs',
+      preferred_username: 'jbloggs',
+      name: 'Joe Bloggs',
       isAdmin: true
     }
   })

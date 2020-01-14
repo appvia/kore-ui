@@ -7,7 +7,7 @@ const SetupHubIndexPage = ({ user }) => (
   <div>
     <Result
       icon={<Icon type="smile" theme="twoTone" />}
-      title={`Welcome to the Hub, ${user.displayName}!`}
+      title={`Welcome to Appvia Kore, ${user.name}!`}
       subTitle="As the first user you are now an administrator and are responsible for the initial setup"
       extra={[
         <Button key="buttonBegin" type="primary">
@@ -31,7 +31,7 @@ const SetupHubIndexPage = ({ user }) => (
 )
 
 SetupHubIndexPage.staticProps = {
-  title: 'Welcome. Initial Hub setup',
+  title: 'Welcome. Initial Appvia Kore setup',
   hideSider: true
 }
 

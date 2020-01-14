@@ -132,7 +132,7 @@ describe('App', () => {
         expect(props).toEqual({ pageProps: staticProps })
       })
 
-      it('redirects to logout if session user is not found', async () => {
+      it('redirects to login if session user is not found', async () => {
         App.getUserSession.mockResolvedValue(false)
         const params = {
           Component: {},
@@ -140,7 +140,7 @@ describe('App', () => {
         }
         await App.getInitialProps(params)
         expect(redirect).toHaveBeenCalledTimes(1)
-        expect(redirect).toHaveBeenCalledWith(undefined, '/logout', true)
+        expect(redirect).toHaveBeenCalledWith(undefined, '/login', true)
       })
 
       it('returns props, including pageProps, user and userTeams', async () => {
