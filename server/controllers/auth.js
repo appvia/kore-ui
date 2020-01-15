@@ -4,6 +4,7 @@ const app = require('../next')
 
 function ensureOpenIdClientInitialised(openIdClient) {
   return async (req, res, next) => {
+    req.strategyName = openIdClient.strategyName
     if (openIdClient.initialised) {
       return next()
     }
@@ -110,8 +111,8 @@ function postLoginAuthConfigure(authService) {
 function initRouter({ authService, orgService, hubConfig, openIdClient }) {
   const router = Router()
   router.get('/login', ensureOpenIdClientInitialised(openIdClient), getLogin(openIdClient, authService))
-  router.get('/login/auth', ensureOpenIdClientInitialised(openIdClient), (req, res) => passport.authenticate(openIdClient.strategyName, { connector_id: req.query.provider })(req, res))
-  router.get('/auth/callback', ensureOpenIdClientInitialised(openIdClient), passport.authenticate(openIdClient.strategyName, { failureRedirect: '/login' }), getAuthCallback(orgService, authService, hubConfig))
+  router.get('/login/auth', ensureOpenIdClientInitialised(openIdClient), (req, res) => passport.authenticate(req.strategyName, { connector_id: req.query.provider })(req, res))
+  router.get('/auth/callback', ensureOpenIdClientInitialised(openIdClient), (req, res, next) => passport.authenticate(req.strategyName, { failureRedirect: '/login' })(req, res, next), getAuthCallback(orgService, authService, hubConfig))
   router.get('/auth/local/callback', ensureOpenIdClientInitialised(openIdClient), handleAuthLocalCallback(openIdClient), getAuthCallback(orgService, authService, hubConfig))
   router.post('/login/auth/configure', ensureOpenIdClientInitialised(openIdClient), postLoginAuthConfigure(authService))
   router.get('/logout', getLogout())
