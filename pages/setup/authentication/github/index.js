@@ -2,7 +2,7 @@ import * as React from 'react'
 import axios from 'axios'
 import PropTypes from 'prop-types'
 import { Typography, Steps, Button, Alert, Form, Input, Card } from 'antd'
-import { hub, auth } from '../../../../config'
+import { auth } from '../../../../config'
 import CopyTextWithLabel from '../../../../lib/components/CopyTextWithLabel'
 import copy from '../../../../lib/utils/object-copy'
 import redirect from '../../../../lib/utils/redirect'
@@ -85,7 +85,7 @@ class GithubSetupPage extends React.Component {
           clientSecret
         }
       }
-      await axios.post(`${hub.baseUrl}/login/auth/configure`, body)
+      await axios.post(`${window.location.origin}/login/auth/configure`, body)
       return redirect(null, '/setup/authentication/github/complete')
     } catch (err) {
       console.error('Error submitting form', err)

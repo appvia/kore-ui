@@ -164,7 +164,7 @@ class GoogleSetupPage extends React.Component {
           clientSecret
         }
       }
-      await axios.post(`${hub.baseUrl}/login/auth/configure`, body)
+      await axios.post(`${window.location.origin}/login/auth/configure`, body)
       return redirect(null, '/setup/authentication/google/complete')
     } catch (err) {
       console.error('Error submitting form', err)
