@@ -1,6 +1,5 @@
 import axios from 'axios'
 import App from '../../pages/_app'
-import { hub } from '../../config'
 import OrgService from '../../server/services/org'
 import apiRequest from '../../lib/utils/api-request'
 import redirect from '../../lib/utils/redirect'
@@ -58,7 +57,7 @@ describe('App', () => {
 
           const userSession = await App.getUserSession()
           expect(axios.get).toHaveBeenCalledTimes(1)
-          expect(axios.get).toHaveBeenCalledWith(`${hub.baseUrl}/session/user`)
+          expect(axios.get).toHaveBeenCalledWith(`${window.location.origin}/session/user`)
           expect(userSession).toEqual(userSession)
         })
 
