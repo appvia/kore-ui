@@ -77,6 +77,11 @@ class MyApp extends App {
     const props = { ...this.props, ...this.props.pageProps }
     const isAdmin = Boolean(props.user && props.user.isAdmin)
     const hideSider = Boolean(props.hideSider || props.unrestrictedPage)
+    const hidePage = Boolean(!props.unrestrictedPage && !props.user)
+
+    if (hidePage) {
+      return null
+    }
 
     return (
       <div>
