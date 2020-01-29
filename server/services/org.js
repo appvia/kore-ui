@@ -7,7 +7,8 @@ class OrgService {
     this.hubApi = hubApi
     this.requestOptions = {
       headers: {
-        'X-Identity': 'admin'
+        'X-Identity': 'admin',
+        'Authorization': `Bearer ${hubApi.token}`
       }
     }
   }
@@ -16,18 +17,20 @@ class OrgService {
     this.requestOptions.headers['X-Identity'] = username
   }
 
-  async getOrCreateUser(username) {
+  async getOrCreateUser(user) {
     try {
-      const userResource = await User(username)
-      console.log(`*** putting user ${username}`, userResource)
-      this.requestOptions.headers['X-Identity'] = username
-      const userResult = await axios.put(`${this.hubApi.url}/users/${username}`, userResource, this.requestOptions)
+      const userResource = await User(user)
+      console.log(`*** putting user ${user.username}`, userResource)
+      this.requestOptions.headers['X-Identity'] = user.username
+      const userResult = await axios.put(`${this.hubApi.url}/users/${user.username}`, userResource, this.requestOptions)
       const adminTeamMembers = await this.getTeamMembers(hub.hubAdminTeamName)
       if (adminTeamMembers.length === 1) {
         await this.addUserToTeam(hub.hubAdminTeamName, userResource.spec.username)
       }
-      const teams = await this.getUserTeams(username)
-      return { ...userResult.data, teams }
+      const userToReturn = userResult.data
+      userToReturn.teams = await this.getUserTeams(user.username)
+      userToReturn.isAdmin = this.isAdmin(userToReturn)
+      return userToReturn
     } catch (err) {
       console.error('Error in getOrCreateUser from API', err)
       return Promise.reject(err)
@@ -42,7 +45,7 @@ class OrgService {
   /* eslint-enable require-atomic-updates */
 
   isAdmin(user) {
-    return (user.teams || []).includes(hub.hubAdminTeamName)
+    return (user.teams || []).filter(t => t.metadata && t.metadata.name === hub.hubAdminTeamName).length > 0
   }
 
   async getTeamMembers(team) {

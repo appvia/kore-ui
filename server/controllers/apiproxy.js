@@ -7,7 +7,12 @@ function apiProxy(hubApi) {
   return async (req, res) => {
     const method = req.method.toLowerCase()
     const apiUrlPath = req.originalUrl.replace('/apiproxy', '')
-    const options = { headers: { 'X-Identity': req.session.passport.user.username }}
+    const options = {
+      headers: {
+        'X-Identity': req.session.passport.user.username,
+        'Authorization': `Bearer ${hubApi.token}`
+      }
+    }
     try {
       const result = await axios[method](
         `${hubApi.url}${apiUrlPath}`,

@@ -70,40 +70,13 @@ describe('App', () => {
       })
     })
 
-    describe('#getUserTeamsDetails', () => {
-      const allTeams = [{
-        metadata: { name: 'hub-admin' },
-        spec: { summary: 'Hub Admins' }
-      }, {
-        metadata: { name: 'team-a' },
-        spec: { summary: 'Team A' }
-      }, {
-        metadata: { name: 'team-b' },
-        spec: { summary: 'Team B' }
-      }]
-
-      it('returns detailed data for the users teams', async () => {
-        apiRequest.mockResolvedValue({ items: allTeams })
-        const userTeams = await App.getUserTeamsDetails(undefined, ['team-a', 'team-b'])
-        expect(userTeams).toHaveLength(2)
-        expect(userTeams[0].metadata.name).toBe('team-a')
-        expect(userTeams[1].metadata.name).toBe('team-b')
-      })
-
-      it('filters out the hub-admin team', async () => {
-        apiRequest.mockResolvedValue({ items: allTeams })
-        const userTeams = await App.getUserTeamsDetails(undefined, ['hub-admin'])
-        expect(userTeams).toHaveLength(0)
-      })
-    })
-
     describe('#getInitialProps', () => {
       const staticProps = {
         unrestrictedPage: true,
         otherProp: 'value'
       }
       const user = { username: 'bob' }
-      const userTeams = { items: [] }
+      const userTeams = []
       const getUserSessionOriginal = App.getUserSession
       const getUserTeamsDetailsOriginal = App.getUserTeamsDetails
 
