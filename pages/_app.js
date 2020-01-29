@@ -10,7 +10,6 @@ import User from '../lib/components/User'
 import SiderMenu from '../lib/components/SiderMenu'
 import redirect from '../lib/utils/redirect'
 import copy from '../lib/utils/object-copy'
-import apiRequest from '../lib/utils/api-request'
 import { hub, hubApi } from '../config'
 import OrgService from '../server/services/org'
 import gtag from '../lib/utils/gtag'
@@ -44,11 +43,6 @@ class MyApp extends App {
     }
   }
 
-  static async getUserTeamsDetails(req, userTeams) {
-    const teams = await apiRequest(req, 'get', '/teams')
-    return (teams.items || []).filter(t => userTeams.includes(t.metadata.name) && t.metadata.name !== hub.hubAdminTeamName)
-  }
-
   static async getInitialProps({ Component, ctx }) {
     let pageProps = ((Component.staticProps && typeof Component.staticProps === 'function') ? Component.staticProps(ctx) : Component.staticProps) || {}
     if (pageProps.unrestrictedPage) {
@@ -62,7 +56,7 @@ class MyApp extends App {
       const initialProps = await Component.getInitialProps(ctx)
       pageProps = { ...pageProps, ...initialProps }
     }
-    const userTeams = await MyApp.getUserTeamsDetails(ctx.req, user.teams)
+    const userTeams = (user.teams || []).filter(t => t.metadata.name !== hub.hubAdminTeamName)
     return { pageProps, user, userTeams }
   }
 

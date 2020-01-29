@@ -4,9 +4,10 @@ import copy from '../lib/utils/object-copy'
 
 class LoginPage extends React.Component {
   static propTypes = {
-    localAuthUrl: PropTypes.string.isRequired,
+    localAuthUrl: PropTypes.string,
     authProvider: PropTypes.object,
-    connectorId: PropTypes.string
+    connectorId: PropTypes.string,
+    override: PropTypes.bool
   }
 
   static staticProps = ({ req }) => {
@@ -19,12 +20,13 @@ class LoginPage extends React.Component {
       unrestrictedPage: true,
       localAuthUrl: req.localAuthUrl,
       authProvider: req.authProvider,
-      connectorId
+      connectorId,
+      override: req.query.override === 'true'
     }
   }
 
   state = {
-    showLoginForm: !this.props.authProvider
+    showLoginForm: !this.props.authProvider && !this.props.override
   }
 
   showLoginForm = () => {
@@ -34,7 +36,7 @@ class LoginPage extends React.Component {
   }
 
   render() {
-    const { authProvider, connectorId, localAuthUrl } = this.props
+    const { authProvider, connectorId, localAuthUrl, override } = this.props
 
     return (
       <div style={{ background: '#fff', padding: 24, minHeight: 280 }}>
@@ -73,6 +75,13 @@ class LoginPage extends React.Component {
                       </div>
                     </Col>
                   </Row>
+                </form>
+              ) : null}
+              {override ? (
+                <form action="/login" method="post">
+                  <input type="hidden" id="email" name="email" value="joe.bloggs@appvia.io" />
+                  <input type="hidden" id="name" name="name" value="Joe Bloggs" />
+                  <input className="ant-btn" type="submit" value="Joe Bloggs" />
                 </form>
               ) : null}
             </Card>

@@ -2,8 +2,20 @@ const Router = require('express').Router
 const passport = require('passport')
 const app = require('../next')
 
+// this is a temporary patch to login users without properly authenticating
+passport.serializeUser(function(user, cb) {
+  cb(null, user)
+})
+passport.deserializeUser(function(obj, cb) {
+  cb(null, obj)
+})
+
 function ensureOpenIdClientInitialised(openIdClient) {
   return async (req, res, next) => {
+    // this is a temporary patch to login users without properly authenticating
+    if (req.query.override === 'true') {
+      return next()
+    }
     req.strategyName = openIdClient.strategyName
     if (openIdClient.initialised) {
       return next()
@@ -19,19 +31,38 @@ function ensureOpenIdClientInitialised(openIdClient) {
 
 function getLogin(openIdClient, authService) {
   return async (req, res, next) => {
+    if (req.query.override === 'true') {
+      return app.render(req, res, '/login', req.query)
+    }
     try {
       const { authUrl, nonce } = openIdClient.localUserAuth()
       const localAuthUrl = await authService.generateLocalAuthPostUrl(authUrl)
       const authProvider = await authService.getDefaultConfiguredIdp()
+      /* eslint-disable require-atomic-updates */
       req.authProvider = authProvider
       req.localAuthUrl = localAuthUrl
       req.session.nonce = nonce
+      /* eslint-disable require-atomic-updates */
       req.session.save(async () => {
         return app.render(req, res, '/login', req.query)
       })
     } catch (err) {
       return next(err)
     }
+  }
+}
+
+// this is a temporary function to login users without properly authenticating
+function postLoginOverride() {
+  return async (req, res, next) => {
+    const user = req.body
+    req.logIn(user, (err) => {
+      if (err) {
+        return next(err)
+      }
+      req.override = true
+      req.session.save(next)
+    })
   }
 }
 
@@ -59,13 +90,13 @@ function getAuthCallback(orgService, authService, hubConfig) {
     const user = req.session.passport.user
     user.username = user.preferred_username || user.email.substr(0, user.email.indexOf('@'))
     orgService.setXIdentityHeader(user.username)
-    const userInfo = await orgService.getOrCreateUser(user.username)
+    const userInfo = await orgService.getOrCreateUser(user)
     /* eslint-disable require-atomic-updates */
     req.session.passport.user.teams = userInfo.teams || []
-    req.session.passport.user.isAdmin = orgService.isAdmin(userInfo)
+    req.session.passport.user.isAdmin = userInfo.isAdmin
     /* eslint-enable require-atomic-updates */
     let redirectPath = '/'
-    if (req.session.passport.user.isAdmin) {
+    if (req.session.passport.user.isAdmin && !req.override) {
       const authProvider = await authService.getDefaultConfiguredIdp()
       if (!authProvider) {
         redirectPath = '/setup/authentication'
@@ -116,6 +147,9 @@ function initRouter({ authService, orgService, hubConfig, openIdClient }) {
   router.get('/auth/local/callback', ensureOpenIdClientInitialised(openIdClient), handleAuthLocalCallback(openIdClient), getAuthCallback(orgService, authService, hubConfig))
   router.post('/login/auth/configure', ensureOpenIdClientInitialised(openIdClient), postLoginAuthConfigure(authService))
   router.get('/logout', getLogout())
+
+  // this is a temporary route to login users without properly authenticating
+  router.post('/login', postLoginOverride(), getAuthCallback(orgService, authService, hubConfig))
   return router
 }
 

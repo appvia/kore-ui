@@ -18,7 +18,11 @@ docker:
 	@echo "--> Building the docker image"
 	docker build -t ${REGISTRY}/${AUTHOR}/${NAME}:${VERSION} .
 
-deps-start:
+generate-dex-config:
+	@echo "--> Generating Dex config file from template"
+	@cat ../hub-apiserver/hack/setup/dex/config-template.yaml | sed "s~{{LOCALHOST_DNS}}~localhost~g" > ../hub-apiserver/hack/setup/dex/config.yaml
+
+deps-start: generate-dex-config
 	@echo "--> Pulling images"
 	@docker-compose \
 		--file ../hub-apiserver/hack/compose/kube.yml \

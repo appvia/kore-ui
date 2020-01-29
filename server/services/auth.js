@@ -8,7 +8,8 @@ class AuthService {
     this.baseUrl = baseUrl
     this.requestOptions = {
       headers: {
-        'X-Identity': 'admin'
+        'X-Identity': 'admin',
+        'Authorization': `Bearer ${hubApi.token}`
       }
     }
   }

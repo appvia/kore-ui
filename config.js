@@ -19,6 +19,7 @@ module.exports = {
     gtmId: 'GTM-T9THH55'
   },
   hubApi: {
-    url: process.env.HUB_API_URL || 'http://localhost:10080/api/v1alpha1'
+    url: process.env.HUB_API_URL || 'http://localhost:10080/api/v1alpha1',
+    token: process.env.HUB_API_TOKEN || 'password'
   }
 }
