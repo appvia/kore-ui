@@ -1,4 +1,4 @@
-# Hub UI
+# Kore UI
 
 The UI is build using next.js with an ExpressJS server.
 
