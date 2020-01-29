@@ -89,7 +89,6 @@ function getAuthCallback(orgService, authService, hubConfig) {
   return async (req, res) => {
     const user = req.session.passport.user
     user.username = user.preferred_username || user.email.substr(0, user.email.indexOf('@'))
-    orgService.setXIdentityHeader(user.username)
     const userInfo = await orgService.getOrCreateUser(user)
     /* eslint-disable require-atomic-updates */
     req.session.passport.user.teams = userInfo.teams || []
@@ -102,7 +101,7 @@ function getAuthCallback(orgService, authService, hubConfig) {
         redirectPath = '/setup/authentication'
       } else {
         // this is hard-coded to check for GKE binding, but this will need to be more flexible in the future
-        const bindings = await orgService.getTeamBindings(hubConfig.hubAdminTeamName)
+        const bindings = await orgService.getTeamBindings(hubConfig.hubAdminTeamName, user.username)
         const gkeClassBindings = bindings.items.filter(binding => binding.spec.class.kind === 'Class' && binding.spec.class.name === 'gke')
         if (gkeClassBindings.length === 0) {
           redirectPath = '/setup/hub'

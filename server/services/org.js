@@ -5,30 +5,26 @@ const { hub } = require('../../config')
 class OrgService {
   constructor(hubApi) {
     this.hubApi = hubApi
-    this.requestOptions = {
-      headers: {
-        'X-Identity': 'admin',
-        'Authorization': `Bearer ${hubApi.token}`
-      }
-    }
   }
 
-  setXIdentityHeader(username) {
-    this.requestOptions.headers['X-Identity'] = username
+  getHeaders(username) {
+    return {
+      'X-Identity': username,
+      'Authorization': `Bearer ${this.hubApi.token}`
+    }
   }
 
   async getOrCreateUser(user) {
     try {
       const userResource = await User(user)
       console.log(`*** putting user ${user.username}`, userResource)
-      this.requestOptions.headers['X-Identity'] = user.username
-      const userResult = await axios.put(`${this.hubApi.url}/users/${user.username}`, userResource, this.requestOptions)
-      const adminTeamMembers = await this.getTeamMembers(hub.hubAdminTeamName)
+      const userResult = await axios.put(`${this.hubApi.url}/users/${user.username}`, userResource, { headers: this.getHeaders(user.username) })
+      const adminTeamMembers = await this.getTeamMembers(hub.hubAdminTeamName, user.username)
       if (adminTeamMembers.length === 1) {
-        await this.addUserToTeam(hub.hubAdminTeamName, userResource.spec.username)
+        await this.addUserToTeam(hub.hubAdminTeamName, user.username, user.username)
       }
       const userToReturn = userResult.data
-      userToReturn.teams = await this.getUserTeams(user.username)
+      userToReturn.teams = await this.getUserTeams(user.username, user.username)
       userToReturn.isAdmin = this.isAdmin(userToReturn)
       return userToReturn
     } catch (err) {
@@ -39,7 +35,7 @@ class OrgService {
 
   /* eslint-disable require-atomic-updates */
   async refreshUser(user) {
-    user.teams = await this.getUserTeams(user.username)
+    user.teams = await this.getUserTeams(user.username, user.username)
     user.isAdmin = this.isAdmin(user)
   }
   /* eslint-enable require-atomic-updates */
@@ -48,9 +44,9 @@ class OrgService {
     return (user.teams || []).filter(t => t.metadata && t.metadata.name === hub.hubAdminTeamName).length > 0
   }
 
-  async getTeamMembers(team) {
+  async getTeamMembers(team, requestingUsername) {
     try {
-      const result = await axios.get(`${this.hubApi.url}/teams/${team}/members`, this.requestOptions)
+      const result = await axios.get(`${this.hubApi.url}/teams/${team}/members`, { headers: this.getHeaders(requestingUsername) })
       console.log(`*** found team members for team: ${team}`, result.data.items)
       return result.data.items
     } catch (err) {
@@ -59,21 +55,20 @@ class OrgService {
     }
   }
 
-  async addUserToTeam(team, username) {
+  async addUserToTeam(team, username, requestingUsername) {
     console.log(`*** adding user ${username} to team ${team}`)
-    const options = { ...this.requestOptions }
-    options.headers['Content-Type'] = 'application/json'
+    const headers = { ...this.getHeaders(requestingUsername), 'Content-Type': 'application/json' }
     try {
-      await axios.put(`${this.hubApi.url}/teams/${team}/members/${username}`, undefined, this.requestOptions)
+      await axios.put(`${this.hubApi.url}/teams/${team}/members/${username}`, undefined, { headers })
     } catch (err) {
       console.error('Error adding user to team', err)
       return Promise.reject(err)
     }
   }
 
-  async getUserTeams(username) {
+  async getUserTeams(username, requestingUsername) {
     try {
-      const result = await axios.get(`${this.hubApi.url}/users/${username}/teams`, this.requestOptions)
+      const result = await axios.get(`${this.hubApi.url}/users/${username}/teams`, { headers: this.getHeaders(requestingUsername) })
       return result.data.items
     } catch (err) {
       console.error('Error getting teams for user', err)
@@ -81,9 +76,9 @@ class OrgService {
     }
   }
 
-  async getTeamBindings(team) {
+  async getTeamBindings(team, requestingUsername) {
     try {
-      const result = await axios.get(`${this.hubApi.url}/teams/${team}/bindings`, this.requestOptions)
+      const result = await axios.get(`${this.hubApi.url}/teams/${team}/bindings`, { headers: this.getHeaders(requestingUsername) })
       return result.data
     } catch (err) {
       if (err.response && err.response.status === 404) {
