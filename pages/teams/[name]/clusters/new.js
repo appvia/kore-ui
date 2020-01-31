@@ -12,21 +12,56 @@ class NewTeamClusterPage extends React.Component {
   static propTypes = {
     user: PropTypes.object.isRequired,
     team: PropTypes.object.isRequired,
-    resources: PropTypes.object.isRequired,
+    clusters: PropTypes.object.isRequired,
     plans: PropTypes.object.isRequired,
     providers: PropTypes.array.isRequired
   }
 
   static async getPageData(req, name) {
     const getTeam = () => apiRequest(req, 'get', `/teams/${name}`)
-    const getTeamResources = () => apiRequest(req, 'get', `/teams/${name}/resources`)
+    const getTeamClusters = () => apiRequest(req, 'get', `/teams/${name}/clusters`)
     const getPlans = () => apiRequest(req, 'get', '/plans')
-    const getAvailable = () => apiRequest(req, 'get', `/teams/${name}/available`)
+    const getAvailable = () => apiRequest(req, 'get', `/teams/${name}/allocations?assigned=true`)
 
-    return axios.all([getTeam(), getTeamResources(), getPlans(), getAvailable()])
-      .then(axios.spread(function (team, resources, plans, available) {
-        const providers = available.items.filter(a => a.spec.category === 'cluster')
-        return { team, resources, plans, providers }
+    return axios.all([getTeam(), getTeamClusters(), getPlans(), getAvailable()])
+      .then(axios.spread(function (team, clusters, plans, available) {
+        plans.items.push({
+          metadata: {
+            name: 'gke-dev-cluster'
+          },
+          spec: {
+            'description': 'Dev Cluster',
+            values: {
+              'version': '1.14.8-gke.33',
+              'size': 1,
+              'maxSize': 10,
+              'diskSize': 100,
+              'imageType': 'COS',
+              'machineType': 'n1-standard-2',
+              'authorizedMasterNetworks': [
+                {
+                  'name': 'default',
+                  'cidr': '0.0.0.0/0'
+                }
+              ],
+              'network': 'default',
+              'subnetwork': 'default',
+              'enableAutorepair': true,
+              'enableAutoscaler': true,
+              'enableAutoUpgrade': false,
+              'enableHorizontalPodAutoscaler': false,
+              'enableHTTPLoadBalancer': true,
+              'enableIstio': false,
+              'enableStackDriverLogging': false,
+              'enableStackDriverMetrics': false,
+              'enablePrivateNetwork': true,
+              'masterIPV4Cidr': '172.16.0.0/28',
+              'maintenanceWindow': '03:00'
+            }
+          }
+        })
+        const providers = available.items.filter(a => a.spec.resource.kind === 'GKECredentials')
+        return { team, clusters, plans, providers }
       }))
       .catch(err => {
         throw new Error(err.message)
@@ -43,7 +78,7 @@ class NewTeamClusterPage extends React.Component {
 
   render() {
     const teamName = this.props.team.metadata.name
-    const teamClusters = this.props.resources.items.filter(r => r.kind === 'Kubernetes')
+    const teamClusters = this.props.clusters.items
 
     return (
       <div>

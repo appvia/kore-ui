@@ -31,8 +31,8 @@ class NewTeamPage extends React.Component {
     if (attempt > MAX_ATTEMPTS) {
       return []
     }
-    const available = await apiRequest(null, 'get', `/teams/${teamName}/available`)
-    const providers = available.items.filter(a => a.spec.category === 'cluster')
+    const available = await apiRequest(null, 'get', `/teams/${teamName}/allocations?assigned=true`)
+    const providers = (available.items || []).filter(a => a.spec.resource.kind === 'GKECredentials')
     if (providers.length === 0) {
       await new Promise((resolve) => setTimeout(resolve, 1000))
       return await this.waitForAvailableClusterProviders(teamName, attempt + 1)
