@@ -78,11 +78,18 @@ class LoginPage extends React.Component {
                 </form>
               ) : null}
               {override ? (
-                <form action="/login" method="post">
-                  <input type="hidden" id="email" name="email" value="joe.bloggs@appvia.io" />
-                  <input type="hidden" id="name" name="name" value="Joe Bloggs" />
-                  <input className="ant-btn" type="submit" value="Joe Bloggs" />
-                </form>
+                <div>
+                  <form action="/login" method="post">
+                    <input type="hidden" id="email" name="email" value="joe.bloggs@appvia.io" />
+                    <input type="hidden" id="name" name="name" value="Joe Bloggs" />
+                    <input className="ant-btn" type="submit" value="Joe Bloggs" />
+                  </form>
+                  <form action="/login" method="post" style={{ marginTop: '10px' }}>
+                    <input type="hidden" id="email" name="email" value="john.smith@appvia.io" />
+                    <input type="hidden" id="name" name="name" value="John Smith" />
+                    <input className="ant-btn" type="submit" value="John Smith" />
+                  </form>
+                </div>
               ) : null}
             </Card>
           </Col>
