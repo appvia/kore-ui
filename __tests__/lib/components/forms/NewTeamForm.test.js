@@ -31,7 +31,7 @@ describe('NewTeamForm', () => {
 
     describe('#constructor', () => {
       it('sets initial state', () => {
-        expect(newTeamForm.state).toEqual({ buttonText: 'Save',
+        expect(newTeamForm.state).toEqual({
           submitting: false,
           formErrorMessage: false
         })
@@ -82,7 +82,6 @@ describe('NewTeamForm', () => {
       newTeamForm.handleSubmit(event)
       expect(event.preventDefault).toHaveBeenCalledTimes(1)
       expect(newTeamForm.state).toEqual({
-        buttonText: 'Saving...',
         submitting: true,
         formErrorMessage: false
       })
@@ -107,7 +106,6 @@ describe('NewTeamForm', () => {
       expect(apiRequest.mock.calls[0]).toEqual([ null, 'put', '/teams/abc', team ])
       expect(apiRequest.mock.calls[1]).toEqual([ null, 'put', '/teams/abc/members/jbloggs' ])
       expect(newTeamForm.state).toEqual({
-        buttonText: 'Save',
         submitting: false,
         formErrorMessage: false
       })
@@ -122,7 +120,6 @@ describe('NewTeamForm', () => {
       expect(apiRequest).toHaveBeenCalledTimes(1)
       expect(props.handleTeamCreated).toHaveBeenCalledTimes(0)
       expect(newTeamForm.state).toEqual({
-        buttonText: 'Save',
         submitting: false,
         formErrorMessage: 'An error occurred creating the team, please try again'
       })

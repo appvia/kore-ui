@@ -16,6 +16,7 @@ module.exports = {
   hub: {
     baseUrl: process.env.HUB_BASE_URL || 'http://localhost:3000',
     hubAdminTeamName: 'hub-admin',
+    hubDefaultTeamName: 'hub-default',
     gtmId: 'GTM-T9THH55'
   },
   hubApi: {

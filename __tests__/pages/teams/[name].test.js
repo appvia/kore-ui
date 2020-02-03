@@ -14,7 +14,8 @@ const props = {
     spec: { summary: 'A Team' }
   },
   members: { items: ['jbloggs', 'fflintstone'] },
-  resources: { items: [] }
+  clusters: { items: [] },
+  available: { items: [] }
 }
 
 describe('TeamPage', () => {
