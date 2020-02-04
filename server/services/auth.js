@@ -1,6 +1,7 @@
 const axios = require('axios')
 const IDPClient = require('../../lib/crd/IDPClient')
 const IDP = require('../../lib/crd/IDP')
+const copy = require('../../lib/utils/object-copy')
 
 class AuthService {
   constructor(hubApi, baseUrl) {
@@ -52,10 +53,18 @@ class AuthService {
     }
   }
 
-  async generateLocalAuthPostUrl(authUrl) {
-    const url = new URL(authUrl)
-    const response = await axios.get(authUrl)
-    return url.origin + response.request.path
+  async authenticateLocalUser({ username, password }) {
+    try {
+      const options = copy(this.requestOptions)
+      options.auth = { username, password }
+      const result = await axios.get(`${this.hubApi.url}/whoami`, options)
+      return result.data
+    } catch (err) {
+      if (err.response && err.response.status === 401) {
+        return Promise.reject({ code: 'INVALID_CREDENTIALS' })
+      }
+      return Promise.reject({ code: 'SERVER_ERROR' })
+    }
   }
 }
 

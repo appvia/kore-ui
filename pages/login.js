@@ -1,13 +1,12 @@
 import PropTypes from 'prop-types'
-import { Button, Row, Col, Card, Form } from 'antd'
+import { Button, Row, Col, Card, Form, Alert } from 'antd'
 import copy from '../lib/utils/object-copy'
 
 class LoginPage extends React.Component {
   static propTypes = {
-    localAuthUrl: PropTypes.string,
     authProvider: PropTypes.object,
     connectorId: PropTypes.string,
-    override: PropTypes.bool
+    localLoginError: PropTypes.string
   }
 
   static staticProps = ({ req }) => {
@@ -16,17 +15,21 @@ class LoginPage extends React.Component {
       connectorId = `${req.authProvider.metadata.name}-${Object.keys(req.authProvider.spec.config).pop()}`
     }
     return {
-      title: 'Login',
+      title: 'Kore Login',
       unrestrictedPage: true,
-      localAuthUrl: req.localAuthUrl,
       authProvider: req.authProvider,
       connectorId,
-      override: req.query.override === 'true'
+      localLoginError: req.localLoginError || ''
     }
   }
 
+  static errorCodeMessages = {
+    'INVALID_CREDENTIALS': 'Invalid username or password.',
+    'SERVER_ERROR': 'A technical problem occurred, please try again later.'
+  }
+
   state = {
-    showLoginForm: !this.props.authProvider && !this.props.override
+    showLoginForm: !this.props.authProvider
   }
 
   showLoginForm = () => {
@@ -36,7 +39,22 @@ class LoginPage extends React.Component {
   }
 
   render() {
-    const { authProvider, connectorId, localAuthUrl, override } = this.props
+    const { authProvider, connectorId, localLoginError } = this.props
+
+    const formErrorMessage = () => {
+      if (localLoginError) {
+        return (
+          <Alert
+            message={LoginPage.errorCodeMessages[localLoginError]}
+            type="error"
+            showIcon
+            closable
+            style={{ marginBottom: '20px', marginTop: '-20px' }}
+          />
+        )
+      }
+      return null
+    }
 
     return (
       <div style={{ background: '#fff', padding: 24, minHeight: 280 }}>
@@ -53,7 +71,8 @@ class LoginPage extends React.Component {
                 </div>
               ) : null}
               {this.state.showLoginForm ? (
-                <form action={localAuthUrl} method="post" className="ant-form ant-form-inline" style={{ marginTop: '20px' }}>
+                <form action="/login" method="post" className="ant-form ant-form-inline" style={{ marginTop: '20px' }}>
+                  <div>{formErrorMessage()}</div>
                   <Row className="ant-form-item">
                     <Col className="ant-form-item-control-wrapper">
                       <div className="ant-form-item-control">
@@ -76,20 +95,6 @@ class LoginPage extends React.Component {
                     </Col>
                   </Row>
                 </form>
-              ) : null}
-              {override ? (
-                <div>
-                  <form action="/login" method="post">
-                    <input type="hidden" id="email" name="email" value="joe.bloggs@appvia.io" />
-                    <input type="hidden" id="name" name="name" value="Joe Bloggs" />
-                    <input className="ant-btn" type="submit" value="Joe Bloggs" />
-                  </form>
-                  <form action="/login" method="post" style={{ marginTop: '10px' }}>
-                    <input type="hidden" id="email" name="email" value="john.smith@appvia.io" />
-                    <input type="hidden" id="name" name="name" value="John Smith" />
-                    <input className="ant-btn" type="submit" value="John Smith" />
-                  </form>
-                </div>
               ) : null}
             </Card>
           </Col>
