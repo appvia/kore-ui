@@ -23,8 +23,8 @@ jobs:
       - deploy:
           command: |
             docker login -u ${DOCKER_USER} -p ${DOCKER_PASSWORD} quay.io
-            docker build -t quay.io/appvia/hub-ui:${CIRCLE_TAG:-latest} .
-            docker push quay.io/appvia/hub-ui:${CIRCLE_TAG:-latest}
+            docker build -t quay.io/appvia/kore-ui:${CIRCLE_TAG:-latest} .
+            docker push quay.io/appvia/kore-ui:${CIRCLE_TAG:-latest}
 
 workflows:
   version: 2
