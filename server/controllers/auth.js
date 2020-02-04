@@ -33,22 +33,27 @@ function getLogin(authService) {
 }
 
 function postLoginLocalUser(authService) {
-  return async (req, res, next) => {
+  return async (req, res) => {
     const username = req.body.login
     const password = req.body.password
 
     try {
       const user = await authService.authenticateLocalUser({ username, password })
-      return req.logIn(user, (err) => {
+      return req.logIn(user, err => {
         if (err) {
-          return next(err)
+          console.error('Error trying to login user', err)
+          return res.status(500).send()
         }
-        req.override = true
-        req.session.save(next)
+        req.session.save(err => {
+          if (err) {
+            console.error('Error trying to save session after user login', err)
+            return res.status(500).send()
+          }
+          return res.json(user)
+        })
       })
     } catch (err) {
-      req.localLoginError = err.code || 'SERVER_ERROR'
-      return getLogin(authService)(req, res, next)
+      return res.status(err.status).send()
     }
   }
 }
@@ -107,14 +112,18 @@ function postLoginAuthConfigure(authService) {
   }
 }
 
-function initRouter({ authService, orgService, hubConfig, openIdClient }) {
+function initRouter({ authService, orgService, hubConfig, openIdClient, ensureAuthenticated }) {
   const router = Router()
   router.get('/login', ensureOpenIdClientInitialised(openIdClient), getLogin(authService))
   router.get('/login/auth', ensureOpenIdClientInitialised(openIdClient), (req, res) => passport.authenticate(req.strategyName, { connector_id: req.query.provider })(req, res))
   router.get('/auth/callback', ensureOpenIdClientInitialised(openIdClient), (req, res, next) => passport.authenticate(req.strategyName, { failureRedirect: '/login' })(req, res, next), getAuthCallback(orgService, authService, hubConfig))
-  router.post('/login/auth/configure', ensureOpenIdClientInitialised(openIdClient), postLoginAuthConfigure(authService))
   router.get('/logout', getLogout())
-  router.post('/login', postLoginLocalUser(authService, getLogin(authService)), getAuthCallback(orgService, authService, hubConfig))
+  // for configuring auth provider
+  router.post('/login/auth/configure', ensureOpenIdClientInitialised(openIdClient), postLoginAuthConfigure(authService))
+  // for local user authentication
+  router.post('/login', postLoginLocalUser(authService, getLogin(authService)))
+  // this auth route is authenticated, it's called once the local user is verified
+  router.get('/login/process', ensureAuthenticated, getAuthCallback(orgService, authService, hubConfig))
   return router
 }
 

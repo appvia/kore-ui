@@ -13,7 +13,7 @@ const openIdClient = new OpenIdClient(config.hub.baseUrl, config.auth.url, confi
 openIdClient.init()
   .then(() => {
     // auth routes are unrestricted
-    router.use(require('./controllers/auth').initRouter({ authService, orgService, hubConfig: config.hub, openIdClient }))
+    router.use(require('./controllers/auth').initRouter({ authService, orgService, hubConfig: config.hub, openIdClient, ensureAuthenticated }))
 
     // other routes must have an authenticated user
     router.use(require('./controllers/session').initRouter({ ensureAuthenticated, orgService }))

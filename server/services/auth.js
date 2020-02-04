@@ -61,9 +61,9 @@ class AuthService {
       return result.data
     } catch (err) {
       if (err.response && err.response.status === 401) {
-        return Promise.reject({ code: 'INVALID_CREDENTIALS' })
+        return Promise.reject({ status: 401 })
       }
-      return Promise.reject({ code: 'SERVER_ERROR' })
+      return Promise.reject({ status: 500 })
     }
   }
 }
