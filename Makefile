@@ -22,6 +22,16 @@ generate-dex-config:
 	@echo "--> Generating Dex config file from template"
 	@cat ../hub-apiserver/hack/setup/dex/config-template.yaml | sed "s~{{LOCALHOST_DNS}}~localhost~g" > ../hub-apiserver/hack/setup/dex/config.yaml
 
+compose:
+	@echo "--> Pulling images"
+	@docker-compose pull
+	@echo "--> Starting dependencies"
+	@docker-compose up -d
+
+compose-down:
+	@echo "--> Stopping dependencies"
+	@docker-compose down
+
 deps-start: generate-dex-config
 	@echo "--> Pulling images"
 	@docker-compose \
