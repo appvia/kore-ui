@@ -30,6 +30,7 @@ class AuthService {
 
   async setAuthClient() {
     try {
+      console.log('Creating auth client', IDPClient)
       await axios.put(`${this.hubApi.url}/idp/clients/hub-ui`, IDPClient, this.requestOptions)
       console.log('Auth client created successfully')
     } catch (err) {
@@ -46,6 +47,7 @@ class AuthService {
       }
       spec.config[name] = config
       const idp = IDP(spec)
+      console.log('setting default IDP', idp)
       await axios.put(`${this.hubApi.url}/idp/configured/default`, idp, this.requestOptions)
     } catch (err) {
       console.error('Error setting configured auth provider from API', err)
