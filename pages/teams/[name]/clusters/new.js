@@ -25,41 +25,6 @@ class NewTeamClusterPage extends React.Component {
 
     return axios.all([getTeam(), getTeamClusters(), getPlans(), getAvailable()])
       .then(axios.spread(function (team, clusters, plans, available) {
-        plans.items.push({
-          metadata: {
-            name: 'gke-dev-cluster'
-          },
-          spec: {
-            'description': 'Dev Cluster',
-            values: {
-              'version': '1.14.8-gke.33',
-              'size': 1,
-              'maxSize': 10,
-              'diskSize': 100,
-              'imageType': 'COS',
-              'machineType': 'n1-standard-2',
-              'authorizedMasterNetworks': [
-                {
-                  'name': 'default',
-                  'cidr': '0.0.0.0/0'
-                }
-              ],
-              'network': 'default',
-              'subnetwork': 'default',
-              'enableAutorepair': true,
-              'enableAutoscaler': true,
-              'enableAutoUpgrade': false,
-              'enableHorizontalPodAutoscaler': false,
-              'enableHTTPLoadBalancer': true,
-              'enableIstio': false,
-              'enableStackDriverLogging': false,
-              'enableStackDriverMetrics': false,
-              'enablePrivateNetwork': true,
-              'masterIPV4Cidr': '172.16.0.0/28',
-              'maintenanceWindow': '03:00'
-            }
-          }
-        })
         const providers = available.items.filter(a => a.spec.resource.kind === 'GKECredentials')
         return { team, clusters, plans, providers }
       }))
