@@ -1,4 +1,4 @@
-NAME=hub-ui
+NAME=kore-ui
 AUTHOR ?= appvia
 REGISTRY=quay.io
 VERSION ?= latest
