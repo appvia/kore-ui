@@ -88,6 +88,19 @@ class OrgService {
       return Promise.reject(err)
     }
   }
+
+  async getTeamGkeCredentials(team, requestingUsername) {
+    try {
+      const result = await axios.get(`${this.hubApi.url}/teams/${team}/gkecredentials`, { headers: this.getHeaders(requestingUsername) })
+      return result.data
+    } catch (err) {
+      if (err.response && err.response.status === 404) {
+        return null
+      }
+      console.error('Error getting team GKE credentials from API', err)
+      return Promise.reject(err)
+    }
+  }
 }
 
 module.exports = OrgService

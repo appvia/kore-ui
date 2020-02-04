@@ -3,8 +3,8 @@ import PropTypes from 'prop-types'
 import axios from 'axios'
 import moment from 'moment'
 import Link from 'next/link'
-import { Typography, Card, List, Tag, Button, Avatar, Popconfirm, message, Icon, Modal, Select } from 'antd'
-const { Paragraph, Text, Title } = Typography
+import { Typography, Card, List, Tag, Button, Avatar, Popconfirm, message, Select } from 'antd'
+const { Paragraph, Text } = Typography
 const { Option } = Select
 
 import Breadcrumb from '../../lib/components/Breadcrumb'
@@ -17,7 +17,8 @@ class TeamDashboard extends React.Component {
     team: PropTypes.object.isRequired,
     members: PropTypes.object.isRequired,
     user: PropTypes.object.isRequired,
-    resources: PropTypes.object.isRequired
+    clusters: PropTypes.object.isRequired,
+    available: PropTypes.object.isRequired
   }
 
   constructor(props) {
@@ -33,11 +34,12 @@ class TeamDashboard extends React.Component {
   static async getTeamDetails(req, name) {
     const getTeam = () => apiRequest(req, 'get', `/teams/${name}`)
     const getTeamMembers = () => apiRequest(req, 'get', `/teams/${name}/members`)
-    const getTeamResources = () => apiRequest(req, 'get', `/teams/${name}/resources`)
+    const getTeamClusters = () => apiRequest(req, 'get', `/teams/${name}/clusters`)
+    const getAvailable = () => apiRequest(req, 'get', `/teams/${name}/allocations?assigned=true`)
 
-    return axios.all([getTeam(), getTeamMembers(), getTeamResources()])
-      .then(axios.spread(function (team, members, resources) {
-        return { team, members, resources }
+    return axios.all([getTeam(), getTeamMembers(), getTeamClusters(), getAvailable()])
+      .then(axios.spread(function (team, members, clusters, available) {
+        return { team, members, clusters, available }
       }))
       .catch(err => {
         throw new Error(err.message)
@@ -119,28 +121,6 @@ class TeamDashboard extends React.Component {
     }
   }
 
-  revealClusterCreds = cluster => {
-    return () => (
-      Modal.info({
-        title: (
-          <Title level={4}>Access: <Text style={{fontFamily: 'monospace'}}>{cluster.metadata.name}</Text></Title>
-        ),
-        content: (
-          <div>
-            <Text strong>API endpoint</Text>
-            <Paragraph copyable>{cluster.spec.endpoint}</Paragraph>
-            <Text strong>CA Certificate</Text>
-            <Paragraph copyable>{cluster.spec.caCertificate}</Paragraph>
-            <Text strong>Token</Text>
-            <Paragraph copyable>{cluster.spec.token}</Paragraph>
-          </div>
-        ),
-        width: 800,
-        onOk() {}
-      })
-    )
-  }
-
   render() {
     const teamMembers = ['ADD_USER', ...this.state.members.items]
 
@@ -148,7 +128,7 @@ class TeamDashboard extends React.Component {
       const deleteAction = (
         <Popconfirm
           key="delete"
-          title="Are you sure delete this user?"
+          title="Are you sure you want to delete this user?"
           onConfirm={this.deleteTeamMember(member)}
           okText="Yes"
           cancelText="No"
@@ -168,12 +148,8 @@ class TeamDashboard extends React.Component {
 
     const membersAvailableToAdd = this.state.allUsers.filter(user => !this.state.members.items.includes(user))
 
-    const clusters = this.props.resources.items.filter(r => r.kind === 'Kubernetes')
-
-    const clusterActions = (cluster) => {
-      if (cluster.status.status === 'Success') {
-        return [<Text key="access"><a key="show_creds" onClick={this.revealClusterCreds(cluster)}><Icon type="eye" theme="filled"/> Access</a></Text>]
-      }
+    const clusterActions = () => {
+      // no actions at present
       return []
     }
 
@@ -224,15 +200,15 @@ class TeamDashboard extends React.Component {
           }
         >
           <List
-            dataSource={clusters}
+            dataSource={this.props.clusters.items}
             renderItem={cluster => {
-              const useResource = this.props.resources.items.find(resource => resource.kind === cluster.spec.use.kind && resource.metadata.name === cluster.spec.use.name)
+              const provider = this.props.available.items.find(a => a.metadata.name === cluster.spec.provider.name)
               const created = moment(cluster.metadata.creationTimestamp).fromNow()
               return (
-                <List.Item actions={clusterActions(cluster)}>
+                <List.Item actions={clusterActions()}>
                   <List.Item.Meta
                     avatar={<Avatar icon="cluster" />}
-                    title={<Text>{useResource.spec.description}<Text style={{ fontFamily: 'monospace', marginLeft: '15px' }}>{cluster.metadata.name}</Text></Text>}
+                    title={<Text>{provider.spec.name} <Text style={{ fontFamily: 'monospace', marginLeft: '15px' }}>{cluster.metadata.name}</Text></Text>}
                     description={<Text type='secondary'>Created {created}</Text>}
                   />
                   <Tag color="#5cdbd3">{cluster.status.status}</Tag>

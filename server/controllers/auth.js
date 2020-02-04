@@ -91,22 +91,22 @@ function getAuthCallback(orgService, authService, hubConfig) {
     user.username = user.preferred_username || user.email.substr(0, user.email.indexOf('@'))
     const userInfo = await orgService.getOrCreateUser(user)
     /* eslint-disable require-atomic-updates */
-    req.session.passport.user.teams = userInfo.teams || []
-    req.session.passport.user.isAdmin = userInfo.isAdmin
+    user.teams = userInfo.teams || []
+    user.isAdmin = userInfo.isAdmin
     /* eslint-enable require-atomic-updates */
     let redirectPath = '/'
-    if (req.session.passport.user.isAdmin && !req.override) {
-      const authProvider = await authService.getDefaultConfiguredIdp()
-      if (!authProvider) {
-        redirectPath = '/setup/authentication'
-      } else {
-        // this is hard-coded to check for GKE binding, but this will need to be more flexible in the future
-        const bindings = await orgService.getTeamBindings(hubConfig.hubAdminTeamName, user.username)
-        const gkeClassBindings = bindings.items.filter(binding => binding.spec.class.kind === 'Class' && binding.spec.class.name === 'gke')
-        if (gkeClassBindings.length === 0) {
-          redirectPath = '/setup/hub'
-        }
+    if (user.isAdmin) {
+      // TODO: uncomment when we are able to use Auth again
+      // const authProvider = await authService.getDefaultConfiguredIdp()
+      // if (!authProvider) {
+      //   redirectPath = '/setup/authentication'
+      // } else {
+      // this is hard-coded to check for GKE credentials, but this will need to be more flexible in the future
+      const gkeCredentials = await orgService.getTeamGkeCredentials(hubConfig.hubAdminTeamName, user.username)
+      if (gkeCredentials.items.length === 0) {
+        redirectPath = '/setup/hub'
       }
+      // }
     }
     req.session.save(function() {
       res.redirect(redirectPath)

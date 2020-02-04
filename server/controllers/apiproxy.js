@@ -16,8 +16,8 @@ function apiProxy(hubApi) {
     try {
       const result = await axios[method](
         `${hubApi.url}${apiUrlPath}`,
-        method === 'get' ? options : req.body,
-        method !== 'get' ? req.body : undefined
+        ['get', 'delete'].includes(method) ? options : req.body,
+        ['get', 'delete'].includes(method) ? undefined : options
       )
       return res.json(result.data)
     } catch (err) {
