@@ -44,7 +44,8 @@ class GoogleSetupPage extends React.Component {
     hideSider: true,
     authUrl: auth.url,
     authCallbackUrl: auth.callbackUrl,
-    hubBaseUrl: hub.baseUrl
+    hubBaseUrl: hub.baseUrl,
+    adminOnly: true
   }
 
   static propTypes = {

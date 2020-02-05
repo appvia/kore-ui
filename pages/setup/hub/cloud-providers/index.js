@@ -12,7 +12,8 @@ class ConfigureCloudProvidersPage extends React.Component {
 
   static staticProps = {
     title: 'Configure cluster providers',
-    hideSider: true
+    hideSider: true,
+    adminOnly: true
   }
 
   handleFormSubmit = () => {

@@ -45,7 +45,8 @@ class GithubSetupPage extends React.Component {
     title: 'Configure authentication provider',
     hideSider: true,
     authUrl: auth.url,
-    authCallbackUrl: auth.callbackUrl
+    authCallbackUrl: auth.callbackUrl,
+    adminOnly: true
   }
 
   static propTypes = {

@@ -26,7 +26,8 @@ const SetupHubCompletePage = () => (
 
 SetupHubCompletePage.staticProps = {
   title: 'Hub setup complete',
-  hideSider: true
+  hideSider: true,
+  adminOnly: true
 }
 
 export default SetupHubCompletePage

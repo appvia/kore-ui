@@ -52,11 +52,14 @@ class MyApp extends App {
     if (!user) {
       return redirect(ctx.res, '/login', true)
     }
+    const userTeams = (user.teams || []).filter(t => !hub.ignoreTeams.includes(t.metadata.name))
+    if (pageProps.adminOnly && !user.isAdmin) {
+      return redirect(ctx.res, '/')
+    }
     if (Component.getInitialProps) {
       const initialProps = await Component.getInitialProps(ctx)
       pageProps = { ...pageProps, ...initialProps }
     }
-    const userTeams = (user.teams || []).filter(t => !hub.ignoreTeams.includes(t.metadata.name))
     return { pageProps, user, userTeams }
   }
 
