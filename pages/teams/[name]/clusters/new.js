@@ -25,7 +25,7 @@ class NewTeamClusterPage extends React.Component {
 
     return axios.all([getTeam(), getTeamClusters(), getPlans(), getAvailable()])
       .then(axios.spread(function (team, clusters, plans, available) {
-        const providers = available.items.filter(a => a.spec.resource.kind === 'GKECredentials')
+        const providers = (available.items || []).filter(a => a.spec.resource.kind === 'GKECredentials')
         return { team, clusters, plans, providers }
       }))
       .catch(err => {
