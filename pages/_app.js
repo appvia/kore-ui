@@ -56,7 +56,7 @@ class MyApp extends App {
       const initialProps = await Component.getInitialProps(ctx)
       pageProps = { ...pageProps, ...initialProps }
     }
-    const userTeams = (user.teams || []).filter(t => t.metadata.name !== hub.hubAdminTeamName)
+    const userTeams = (user.teams || []).filter(t => !hub.ignoreTeams.includes(t.metadata.name))
     return { pageProps, user, userTeams }
   }
 

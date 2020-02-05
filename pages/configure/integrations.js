@@ -30,7 +30,7 @@ class ConfigureIntegrationsPage extends React.Component {
 
     return axios.all([getGKECredentials(), getTeams(), getAllocations()])
       .then(axios.spread(async function (gkeCredentials, allTeams, allAllocations) {
-        allTeams.items = allTeams.items.filter(t => ![hub.hubAdminTeamName, hub.hubDefaultTeamName].includes(t.metadata.name))
+        allTeams.items = allTeams.items.filter(t => !hub.ignoreTeams.includes(t.metadata.name))
 
         gkeCredentials.items.forEach(gke => {
           gke.allocation = allAllocations.items.find(alloc => alloc.metadata.name === gke.metadata.name)
