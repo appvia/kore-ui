@@ -28,7 +28,8 @@ const SetupAuthIndexPage = () => (
 
 SetupAuthIndexPage.staticProps = {
   title: 'No authentication configured',
-  hideSider: true
+  hideSider: true,
+  adminOnly: true
 }
 
 export default SetupAuthIndexPage

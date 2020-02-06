@@ -32,7 +32,8 @@ const SetupHubIndexPage = ({ user }) => (
 
 SetupHubIndexPage.staticProps = {
   title: 'Welcome. Initial Appvia Kore setup',
-  hideSider: true
+  hideSider: true,
+  adminOnly: true
 }
 
 SetupHubIndexPage.propTypes = {

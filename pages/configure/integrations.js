@@ -23,6 +23,11 @@ class ConfigureIntegrationsPage extends React.Component {
     addNewIntegration: false
   }
 
+  static staticProps = {
+    title: 'Configure integrations',
+    adminOnly: true
+  }
+
   static async getPageData(req) {
     const getTeams = () => apiRequest(req, 'get', '/teams')
     const getGKECredentials = () => apiRequest(req, 'get', `/teams/${hub.hubAdminTeamName}/gkecredentials`)
@@ -45,10 +50,7 @@ class ConfigureIntegrationsPage extends React.Component {
 
   static getInitialProps = async (ctx) => {
     const data = await ConfigureIntegrationsPage.getPageData(ctx.req)
-    return {
-      title: 'Configure integrations',
-      ...data
-    }
+    return data
   }
 
   handleEditIntegrationSave = (updatedIntegration) => {
