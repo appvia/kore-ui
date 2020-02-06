@@ -18,10 +18,6 @@ docker:
 	@echo "--> Building the docker image"
 	docker build -t ${REGISTRY}/${AUTHOR}/${NAME}:${VERSION} .
 
-generate-dex-config:
-	@echo "--> Generating Dex config file from template"
-	@cat ../hub-apiserver/hack/setup/dex/config-template.yaml | sed "s~{{LOCALHOST_DNS}}~localhost~g" > ../hub-apiserver/hack/setup/dex/config.yaml
-
 compose:
 	@echo "--> Pulling images"
 	@docker-compose pull
@@ -32,27 +28,6 @@ compose-down:
 	@echo "--> Stopping dependencies"
 	@docker-compose down
 
-deps-start: generate-dex-config
-	@echo "--> Pulling images"
-	@docker-compose \
-		--file ../hub-apiserver/hack/compose/kube.yml \
-		--file ../hub-apiserver/hack/compose/operators.yml \
-		--file docker-compose.yml pull
-	@echo "--> Starting dependencies"
-	@docker-compose \
-		--file ../hub-apiserver/hack/compose/kube.yml \
-		--file ../hub-apiserver/hack/compose/operators.yml \
-		--file docker-compose.yml up -d
-
-deps-logs:
-	@docker-compose \
-		--file ../hub-apiserver/hack/compose/kube.yml \
-		--file ../hub-apiserver/hack/compose/operators.yml \
-		--file docker-compose.yml logs -f
-
-deps-stop:
+compose-logs:
 	@echo "--> Stopping dependencies"
-	@docker-compose \
-		--file ../hub-apiserver/hack/compose/kube.yml \
-		--file ../hub-apiserver/hack/compose/operators.yml \
-		--file docker-compose.yml down
+	@docker-compose logs -f
