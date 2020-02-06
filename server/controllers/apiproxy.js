@@ -3,19 +3,19 @@ const Router = require('express').Router
 
 const PATH_BLACKLIST = ['/auth']
 
-function apiProxy(hubApi) {
+function apiProxy(koreApi) {
   return async (req, res) => {
     const method = req.method.toLowerCase()
     const apiUrlPath = req.originalUrl.replace('/apiproxy', '')
     const options = {
       headers: {
         'X-Identity': req.session.passport.user.username,
-        'Authorization': `Bearer ${hubApi.token}`
+        'Authorization': `Bearer ${koreApi.token}`
       }
     }
     try {
       const result = await axios[method](
-        `${hubApi.url}${apiUrlPath}`,
+        `${koreApi.url}${apiUrlPath}`,
         ['get', 'delete'].includes(method) ? options : req.body,
         ['get', 'delete'].includes(method) ? undefined : options
       )
@@ -37,9 +37,9 @@ function checkBlacklist(req, res, next) {
   next()
 }
 
-function initRouter({ ensureAuthenticated, hubApi }) {
+function initRouter({ ensureAuthenticated, koreApi }) {
   const router = Router()
-  router.use('/apiproxy/*', ensureAuthenticated, checkBlacklist, apiProxy(hubApi))
+  router.use('/apiproxy/*', ensureAuthenticated, checkBlacklist, apiProxy(koreApi))
   return router
 }
 

@@ -7,7 +7,7 @@ import apiRequest from '../../lib/utils/api-request'
 import copy from '../../lib/utils/object-copy'
 import Breadcrumb from '../../lib/components/Breadcrumb'
 
-import { hub } from '../../config'
+import { kore } from '../../config'
 
 class ConfigureUsersPage extends React.Component {
   static propTypes = {
@@ -28,7 +28,7 @@ class ConfigureUsersPage extends React.Component {
 
   static getInitialProps = async (ctx) => {
     const users = await apiRequest(ctx.req, 'get', '/users')
-    const adminTeamMembers = await apiRequest(ctx.req, 'get', `/teams/${hub.hubAdminTeamName}/members`)
+    const adminTeamMembers = await apiRequest(ctx.req, 'get', `/teams/${kore.koreAdminTeamName}/members`)
     return {
       users: users.items,
       admins: adminTeamMembers.items
@@ -38,7 +38,7 @@ class ConfigureUsersPage extends React.Component {
   makeAdmin = (username) => {
     return async () => {
       try {
-        await apiRequest(null, 'put', `/teams/${hub.hubAdminTeamName}/members/${username}`)
+        await apiRequest(null, 'put', `/teams/${kore.koreAdminTeamName}/members/${username}`)
         const state = copy(this.state)
         state.admins.push(username)
         this.setState(state)
@@ -53,7 +53,7 @@ class ConfigureUsersPage extends React.Component {
   revokeAdmin = (username) => {
     return async () => {
       try {
-        await apiRequest(null, 'delete', `/teams/${hub.hubAdminTeamName}/members/${username}`)
+        await apiRequest(null, 'delete', `/teams/${kore.koreAdminTeamName}/members/${username}`)
         const state = copy(this.state)
         state.admins = state.admins.filter(m => m !== username)
         this.setState(state)

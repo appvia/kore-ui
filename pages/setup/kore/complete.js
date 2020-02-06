@@ -2,12 +2,12 @@ import Link from 'next/link'
 import { Layout, Result, Button } from 'antd'
 const { Footer } = Layout
 
-const SetupHubCompletePage = () => (
+const SetupKoreCompletePage = () => (
   <div>
     <Result
       status="success"
-      title="Hub setup complete"
-      subTitle="You have configured the minimum settings in order to work with the hub"
+      title="Kore setup complete"
+      subTitle="You have configured the minimum settings in order to work with Kore"
       extra={[
         <Button type="primary" key="buttonContinue">
           <Link href="/">
@@ -24,10 +24,10 @@ const SetupHubCompletePage = () => (
   </div>
 )
 
-SetupHubCompletePage.staticProps = {
-  title: 'Hub setup complete',
+SetupKoreCompletePage.staticProps = {
+  title: 'Kore setup complete',
   hideSider: true,
   adminOnly: true
 }
 
-export default SetupHubCompletePage
+export default SetupKoreCompletePage
