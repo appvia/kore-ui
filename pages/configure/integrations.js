@@ -9,7 +9,7 @@ import copy from '../../lib/utils/object-copy'
 import Breadcrumb from '../../lib/components/Breadcrumb'
 import GKECredentialsForm from '../../lib/components/forms/GKECredentialsForm'
 
-import { hub } from '../../config'
+import { kore } from '../../config'
 
 class ConfigureIntegrationsPage extends React.Component {
   static propTypes = {
@@ -30,12 +30,12 @@ class ConfigureIntegrationsPage extends React.Component {
 
   static async getPageData(req) {
     const getTeams = () => apiRequest(req, 'get', '/teams')
-    const getGKECredentials = () => apiRequest(req, 'get', `/teams/${hub.hubAdminTeamName}/gkecredentials`)
-    const getAllocations = () => apiRequest(req, 'get', `/teams/${hub.hubAdminTeamName}/allocations`)
+    const getGKECredentials = () => apiRequest(req, 'get', `/teams/${kore.koreAdminTeamName}/gkecredentials`)
+    const getAllocations = () => apiRequest(req, 'get', `/teams/${kore.koreAdminTeamName}/allocations`)
 
     return axios.all([getGKECredentials(), getTeams(), getAllocations()])
       .then(axios.spread(async function (gkeCredentials, allTeams, allAllocations) {
-        allTeams.items = allTeams.items.filter(t => !hub.ignoreTeams.includes(t.metadata.name))
+        allTeams.items = allTeams.items.filter(t => !kore.ignoreTeams.includes(t.metadata.name))
 
         gkeCredentials.items.forEach(gke => {
           gke.allocation = allAllocations.items.find(alloc => alloc.metadata.name === gke.metadata.name)
@@ -135,7 +135,7 @@ class ConfigureIntegrationsPage extends React.Component {
               width={700}
             >
               {this.state.editIntegration.type === 'GKE' ?
-                <GKECredentialsForm team={hub.hubAdminTeamName} allTeams={this.props.allTeams} data={this.state.editIntegration.integration} handleSubmit={this.handleEditIntegrationSave} />
+                <GKECredentialsForm team={kore.koreAdminTeamName} allTeams={this.props.allTeams} data={this.state.editIntegration.integration} handleSubmit={this.handleEditIntegrationSave} />
                 : null}
             </Drawer>
           ) : null}
@@ -147,7 +147,7 @@ class ConfigureIntegrationsPage extends React.Component {
               width={700}
             >
               {this.state.addNewIntegration === 'GKE' ?
-                <GKECredentialsForm team={hub.hubAdminTeamName} allTeams={this.props.allTeams} handleSubmit={this.handleNewIntegrationSave} />
+                <GKECredentialsForm team={kore.koreAdminTeamName} allTeams={this.props.allTeams} handleSubmit={this.handleNewIntegrationSave} />
                 : null}
             </Drawer>
           ) : null}

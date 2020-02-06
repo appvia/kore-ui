@@ -10,7 +10,7 @@ import User from '../lib/components/User'
 import SiderMenu from '../lib/components/SiderMenu'
 import redirect from '../lib/utils/redirect'
 import copy from '../lib/utils/object-copy'
-import { hub, hubApi } from '../config'
+import { kore, koreApi } from '../config'
 import OrgService from '../server/services/org'
 import gtag from '../lib/utils/gtag'
 
@@ -29,7 +29,7 @@ class MyApp extends App {
       const session = req.session
       const user = session && session.passport && session.passport.user
       if (user) {
-        const orgService = new OrgService(hubApi)
+        const orgService = new OrgService(koreApi)
         await orgService.refreshUser(user)
         return user
       }
@@ -52,7 +52,7 @@ class MyApp extends App {
     if (!user) {
       return redirect(ctx.res, '/login', true)
     }
-    const userTeams = (user.teams || []).filter(t => !hub.ignoreTeams.includes(t.metadata.name))
+    const userTeams = (user.teams || []).filter(t => !kore.ignoreTeams.includes(t.metadata.name))
     if (pageProps.adminOnly && !user.isAdmin) {
       return redirect(ctx.res, '/')
     }

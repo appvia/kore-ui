@@ -10,7 +10,7 @@ import redirect from '../../../../lib/utils/redirect'
 const { Step } = Steps
 const { Title, Paragraph, Text } = Typography
 
-class ConfigureHubForm extends React.Component {
+class ConfigureKoreForm extends React.Component {
   static propTypes = {
     form: PropTypes.any.isRequired
   }
@@ -38,7 +38,7 @@ class ConfigureHubForm extends React.Component {
   }
 }
 
-const WrappedConfigureHubForm = Form.create({ name: 'configure_hub' })(ConfigureHubForm)
+const WrappedConfigureKoreForm = Form.create({ name: 'configure_kore' })(ConfigureKoreForm)
 
 class GithubSetupPage extends React.Component {
   static staticProps = {
@@ -58,8 +58,8 @@ class GithubSetupPage extends React.Component {
     super(props)
     this.state = {
       current: 0,
-      configureHubErrorMessage: false,
-      configureHubSubmitting: false
+      configureKoreErrorMessage: false,
+      configureKoreSubmitting: false
     }
   }
 
@@ -75,7 +75,7 @@ class GithubSetupPage extends React.Component {
 
   async configure({ clientID, clientSecret }) {
     const state = copy(this.state)
-    state.configureHubSubmitting = true
+    state.configureKoreSubmitting = true
     this.setState(state)
     try {
       const body = {
@@ -91,8 +91,8 @@ class GithubSetupPage extends React.Component {
     } catch (err) {
       console.error('Error submitting form', err)
       const state = copy(this.state)
-      state.configureHubSubmitting = false
-      state.configureHubErrorMessage = 'There was a problem saving the configuration, please try again.'
+      state.configureKoreSubmitting = false
+      state.configureKoreErrorMessage = 'There was a problem saving the configuration, please try again.'
       this.setState(state)
     }
   }
@@ -142,21 +142,21 @@ class GithubSetupPage extends React.Component {
             type="info"
           />
           <Card style={{ marginTop: '20px' }}>
-            {this.state.configureHubErrorMessage ? (
+            {this.state.configureKoreErrorMessage ? (
               <Alert
-                message={this.state.configureHubErrorMessage}
+                message={this.state.configureKoreErrorMessage}
                 type="error"
                 showIcon
                 closable
                 style={{ marginBottom: '20px'}}
               />
             ) : null}
-            <WrappedConfigureHubForm wrappedComponentRef={(inst) => this.configureHubFormRef = inst} />
+            <WrappedConfigureKoreForm wrappedComponentRef={(inst) => this.configureKoreFormRef = inst} />
           </Card>
         </div>
       ),
       process: () => {
-        this.configureHubFormRef.props.form.validateFields(async (err, values) => {
+        this.configureKoreFormRef.props.form.validateFields(async (err, values) => {
           if (!err) {
             await this.configure(values)
           }
@@ -182,7 +182,7 @@ class GithubSetupPage extends React.Component {
               <Button type="primary" onClick={() => this.next()}>Next</Button>
             )}
             {current === this.steps.length - 1 && (
-              <Button type="primary" loading={this.state.configureHubSubmitting} onClick={() => this.next()}>Save</Button>
+              <Button type="primary" loading={this.state.configureKoreSubmitting} onClick={() => this.next()}>Save</Button>
             )}
             {current > 0 && (
               <Button style={{ marginLeft: 8 }} onClick={() => this.prev()}>Previous</Button>

@@ -1,7 +1,7 @@
 import * as React from 'react'
 import axios from 'axios'
 import PropTypes from 'prop-types'
-import { hub, auth } from '../../../../config'
+import { kore, auth } from '../../../../config'
 import { Typography, Steps, Button, Alert, Row, Col, Form, Input, Card, List, Icon } from 'antd'
 import CopyTextWithLabel from '../../../../lib/components/CopyTextWithLabel'
 import copy from '../../../../lib/utils/object-copy'
@@ -9,7 +9,7 @@ import redirect from '../../../../lib/utils/redirect'
 const { Step } = Steps
 const { Title, Paragraph, Text } = Typography
 
-class ConfigureHubForm extends React.Component {
+class ConfigureKoreForm extends React.Component {
   static propTypes = {
     form: PropTypes.any.isRequired
   }
@@ -36,7 +36,7 @@ class ConfigureHubForm extends React.Component {
   }
 }
 
-const WrappedConfigureHubForm = Form.create({ name: 'configure_hub' })(ConfigureHubForm)
+const WrappedConfigureKoreForm = Form.create({ name: 'configure_kore' })(ConfigureKoreForm)
 
 class GoogleSetupPage extends React.Component {
   static staticProps = {
@@ -44,22 +44,22 @@ class GoogleSetupPage extends React.Component {
     hideSider: true,
     authUrl: auth.url,
     authCallbackUrl: auth.callbackUrl,
-    hubBaseUrl: hub.baseUrl,
+    baseUrl: kore.baseUrl,
     adminOnly: true
   }
 
   static propTypes = {
     authUrl: PropTypes.string.isRequired,
     authCallbackUrl: PropTypes.string.isRequired,
-    hubBaseUrl: PropTypes.string.isRequired
+    baseUrl: PropTypes.string.isRequired
   }
 
   constructor(props) {
     super(props)
     this.state = {
       current: 0,
-      configureHubErrorMessage: false,
-      configureHubSubmitting: false,
+      configureKoreErrorMessage: false,
+      configureKoreSubmitting: false,
       setupGoogle: [
         {
           step: 1,
@@ -93,8 +93,8 @@ class GoogleSetupPage extends React.Component {
                     </Col>
                   </Row>
                 </div>
-                <CopyTextWithLabel label="Application homepage link" text={this.props.hubBaseUrl} />
-                <CopyTextWithLabel label="Application Privacy Policy link" text={this.props.hubBaseUrl} />
+                <CopyTextWithLabel label="Application homepage link" text={this.props.baseUrl} />
+                <CopyTextWithLabel label="Application Privacy Policy link" text={this.props.baseUrl} />
               </Paragraph>
               <Paragraph>Click <Text strong>Save</Text> once complete.</Paragraph>
             </div>
@@ -154,7 +154,7 @@ class GoogleSetupPage extends React.Component {
 
   async configure({ clientID, clientSecret }) {
     const state = copy(this.state)
-    state.configureHubSubmitting = true
+    state.configureKoreSubmitting = true
     this.setState(state)
     try {
       const body = {
@@ -170,8 +170,8 @@ class GoogleSetupPage extends React.Component {
     } catch (err) {
       console.error('Error submitting form', err)
       const state = copy(this.state)
-      state.configureHubSubmitting = false
-      state.configureHubErrorMessage = 'There was a problem saving the configuration, please try again.'
+      state.configureKoreSubmitting = false
+      state.configureKoreErrorMessage = 'There was a problem saving the configuration, please try again.'
       this.setState(state)
     }
   }
@@ -240,12 +240,12 @@ class GoogleSetupPage extends React.Component {
             type="info"
           />
           <Card style={{ marginTop: '20px' }}>
-            <WrappedConfigureHubForm wrappedComponentRef={(inst) => this.configureHubFormRef = inst} />
+            <WrappedConfigureKoreForm wrappedComponentRef={(inst) => this.configureKoreFormRef = inst} />
           </Card>
         </div>
       ),
       process: () => {
-        this.configureHubFormRef.props.form.validateFields(async (err, values) => {
+        this.configureKoreFormRef.props.form.validateFields(async (err, values) => {
           if (!err) {
             await this.configure(values)
           }
@@ -271,7 +271,7 @@ class GoogleSetupPage extends React.Component {
               <Button type="primary" disabled={this.disableNextButton(current)} onClick={() => this.next()}>Next</Button>
             )}
             {current === this.steps.length - 1 && (
-              <Button type="primary" loading={this.state.configureHubSubmitting} onClick={() => this.next()}>Save</Button>
+              <Button type="primary" loading={this.state.configureKoreSubmitting} onClick={() => this.next()}>Save</Button>
             )}
             {current > 0 && (
               <Button style={{ marginLeft: 8 }} onClick={() => this.prev()}>Previous</Button>

@@ -8,19 +8,19 @@ module.exports = {
     }
   },
   auth: {
-    url: process.env.AUTH_URL || 'http://localhost:5556',
-    callbackUrl: (process.env.AUTH_URL || 'http://localhost:5556') + '/callback',
-    clientId: process.env.AUTH_CLIENT_ID || '12393b111ae937e32181',
-    clientSecret: process.env.AUTH_CLIENT_SECRET || 'ZXhhbXBsZS1hcHAtc2VjcmV0'
+    url: process.env.DEX_PUBLIC_URL || 'http://localhost:5556',
+    callbackUrl: (process.env.DEX_PUBLIC_URL || 'http://localhost:5556') + '/callback',
+    clientId: process.env.KORE_UI_CLIENT_ID || '12393b111ae937e32181',
+    clientSecret: process.env.KORE_UI_CLIENT_SECRET || 'ZXhhbXBsZS1hcHAtc2VjcmV0'
   },
-  hub: {
-    baseUrl: process.env.HUB_BASE_URL || 'http://localhost:3000',
-    hubAdminTeamName: 'kore-admin',
+  kore: {
+    baseUrl: process.env.KORE_BASE_URL || 'http://localhost:3000',
+    koreAdminTeamName: 'kore-admin',
     ignoreTeams: ['kore-admin', 'kore-default'],
     gtmId: 'GTM-T9THH55'
   },
-  hubApi: {
-    url: process.env.HUB_API_URL || 'http://localhost:10080/api/v1alpha1',
-    token: process.env.HUB_API_TOKEN || 'password'
+  koreApi: {
+    url: process.env.KORE_API_URL || 'http://localhost:10080/api/v1alpha1',
+    token: process.env.KORE_API_TOKEN || 'password'
   }
 }

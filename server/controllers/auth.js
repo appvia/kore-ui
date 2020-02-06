@@ -58,7 +58,7 @@ function postLoginLocalUser(authService) {
   }
 }
 
-function getAuthCallback(orgService, authService, hubConfig) {
+function getAuthCallback(orgService, authService, koreConfig) {
   return async (req, res) => {
     const user = req.session.passport.user
     if (!user.username) {
@@ -76,9 +76,9 @@ function getAuthCallback(orgService, authService, hubConfig) {
         redirectPath = '/setup/authentication'
       } else {
         // this is hard-coded to check for GKE credentials, but this will need to be more flexible in the future
-        const gkeCredentials = await orgService.getTeamGkeCredentials(hubConfig.hubAdminTeamName, user.username)
+        const gkeCredentials = await orgService.getTeamGkeCredentials(koreConfig.koreAdminTeamName, user.username)
         if (gkeCredentials.items.length === 0) {
-          redirectPath = '/setup/hub'
+          redirectPath = '/setup/kore'
         }
       }
     }
@@ -112,18 +112,18 @@ function postLoginAuthConfigure(authService) {
   }
 }
 
-function initRouter({ authService, orgService, hubConfig, openIdClient, ensureAuthenticated }) {
+function initRouter({ authService, orgService, koreConfig, openIdClient, ensureAuthenticated }) {
   const router = Router()
   router.get('/login', ensureOpenIdClientInitialised(openIdClient), getLogin(authService))
   router.get('/login/auth', ensureOpenIdClientInitialised(openIdClient), (req, res) => passport.authenticate(req.strategyName, { connector_id: req.query.provider })(req, res))
-  router.get('/auth/callback', ensureOpenIdClientInitialised(openIdClient), (req, res, next) => passport.authenticate(req.strategyName, { failureRedirect: '/login' })(req, res, next), getAuthCallback(orgService, authService, hubConfig))
+  router.get('/auth/callback', ensureOpenIdClientInitialised(openIdClient), (req, res, next) => passport.authenticate(req.strategyName, { failureRedirect: '/login' })(req, res, next), getAuthCallback(orgService, authService, koreConfig))
   router.get('/logout', getLogout())
   // for configuring auth provider
   router.post('/login/auth/configure', ensureOpenIdClientInitialised(openIdClient), postLoginAuthConfigure(authService))
   // for local user authentication
   router.post('/login', postLoginLocalUser(authService, getLogin(authService)))
   // this auth route is authenticated, it's called once the local user is verified
-  router.get('/login/process', ensureAuthenticated, getAuthCallback(orgService, authService, hubConfig))
+  router.get('/login/process', ensureAuthenticated, getAuthCallback(orgService, authService, koreConfig))
   return router
 }
 

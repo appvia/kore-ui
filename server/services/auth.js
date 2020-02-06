@@ -4,20 +4,20 @@ const IDP = require('../../lib/crd/IDP')
 const copy = require('../../lib/utils/object-copy')
 
 class AuthService {
-  constructor(hubApi, baseUrl) {
-    this.hubApi = hubApi
+  constructor(koreApi, baseUrl) {
+    this.koreApi = koreApi
     this.baseUrl = baseUrl
     this.requestOptions = {
       headers: {
         'X-Identity': 'admin',
-        'Authorization': `Bearer ${hubApi.token}`
+        'Authorization': `Bearer ${koreApi.token}`
       }
     }
   }
 
   async getDefaultConfiguredIdp() {
     try {
-      const result = await axios.get(`${this.hubApi.url}/idp/default`, this.requestOptions)
+      const result = await axios.get(`${this.koreApi.url}/idp/default`, this.requestOptions)
       return result.data
     } catch (err) {
       if (err.response && err.response.status === 404) {
@@ -30,7 +30,7 @@ class AuthService {
 
   async setAuthClient() {
     try {
-      await axios.put(`${this.hubApi.url}/idp/clients/hub-ui`, IDPClient, this.requestOptions)
+      await axios.put(`${this.koreApi.url}/idp/clients/kore-ui`, IDPClient, this.requestOptions)
       console.log('Auth client created successfully')
     } catch (err) {
       console.error('Error setting auth client from API', err)
@@ -46,7 +46,7 @@ class AuthService {
       }
       spec.config[name] = config
       const idp = IDP(spec)
-      await axios.put(`${this.hubApi.url}/idp/configured/default`, idp, this.requestOptions)
+      await axios.put(`${this.koreApi.url}/idp/configured/default`, idp, this.requestOptions)
     } catch (err) {
       console.error('Error setting configured auth provider from API', err)
       return Promise.reject(err)
@@ -57,7 +57,7 @@ class AuthService {
     try {
       const options = copy(this.requestOptions)
       options.auth = { username, password }
-      const result = await axios.get(`${this.hubApi.url}/whoami`, options)
+      const result = await axios.get(`${this.koreApi.url}/whoami`, options)
       return result.data
     } catch (err) {
       if (err.response && err.response.status === 401) {
