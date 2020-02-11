@@ -3,11 +3,12 @@ import PropTypes from 'prop-types'
 import axios from 'axios'
 import moment from 'moment'
 import Link from 'next/link'
-import { Typography, Card, List, Tag, Button, Avatar, Popconfirm, message, Select } from 'antd'
+import { Typography, Card, List, Tag, Button, Avatar, Popconfirm, message, Select, Drawer, Badge } from 'antd'
 const { Paragraph, Text } = Typography
 const { Option } = Select
 
 import Breadcrumb from '../../lib/components/Breadcrumb'
+import NamespaceClaimForm from '../../lib/components/forms/NamespaceClaimForm'
 import apiRequest from '../../lib/utils/api-request'
 import copy from '../../lib/utils/object-copy'
 import asyncForEach from '../../lib/utils/async-foreach'
@@ -18,7 +19,12 @@ class TeamDashboard extends React.Component {
     members: PropTypes.object.isRequired,
     user: PropTypes.object.isRequired,
     clusters: PropTypes.object.isRequired,
+    namespaceClaims: PropTypes.object.isRequired,
     available: PropTypes.object.isRequired
+  }
+
+  static staticProps = {
+    title: 'Team dashboard'
   }
 
   constructor(props) {
@@ -27,7 +33,9 @@ class TeamDashboard extends React.Component {
       teamName: props.team.metadata.name,
       members: props.members,
       allUsers: [],
-      membersToAdd: []
+      membersToAdd: [],
+      createNamespace: false,
+      namespaceClaims: props.namespaceClaims
     }
   }
 
@@ -35,11 +43,12 @@ class TeamDashboard extends React.Component {
     const getTeam = () => apiRequest(req, 'get', `/teams/${name}`)
     const getTeamMembers = () => apiRequest(req, 'get', `/teams/${name}/members`)
     const getTeamClusters = () => apiRequest(req, 'get', `/teams/${name}/clusters`)
+    const getNamespaceClaims = () => apiRequest(req, 'get', `/teams/${name}/namespaceclaims`)
     const getAvailable = () => apiRequest(req, 'get', `/teams/${name}/allocations?assigned=true`)
 
-    return axios.all([getTeam(), getTeamMembers(), getTeamClusters(), getAvailable()])
-      .then(axios.spread(function (team, members, clusters, available) {
-        return { team, members, clusters, available }
+    return axios.all([getTeam(), getTeamMembers(), getTeamClusters(), getNamespaceClaims(), getAvailable()])
+      .then(axios.spread(function (team, members, clusters, namespaceClaims, available) {
+        return { team, members, clusters, namespaceClaims, available }
       }))
       .catch(err => {
         throw new Error(err.message)
@@ -48,10 +57,7 @@ class TeamDashboard extends React.Component {
 
   static getInitialProps = async (ctx) => {
     const teamDetails = await TeamDashboard.getTeamDetails(ctx.req, ctx.query.name)
-    return {
-      title: 'Team dashboard',
-      ...teamDetails
-    }
+    return teamDetails
   }
 
   getAllUsers = async () => {
@@ -76,11 +82,12 @@ class TeamDashboard extends React.Component {
       const state = copy(this.state)
       state.teamName = this.props.team.metadata.name
       state.members = props.members
+      state.namespaceClaims = props.namespaceClaims
       this.getAllUsers()
         .then(users => {
           state.allUsers = users
+          this.setState(state)
         })
-      this.setState(state)
     }
   }
 
@@ -121,8 +128,26 @@ class TeamDashboard extends React.Component {
     }
   }
 
+  createNamespace = (value) => {
+    return () => {
+      const state = copy(this.state)
+      state.createNamespace = value
+      this.setState(state)
+    }
+  }
+
+  handleNamespaceCreated = namespaceClaim => {
+    const state = copy(this.state)
+    state.createNamespace = false
+    state.namespaceClaims.items.push(namespaceClaim)
+    this.setState(state)
+    message.success(`Namespace "${namespaceClaim.spec.name}" created on cluster "${namespaceClaim.spec.cluster.name}"`)
+  }
+
   render() {
-    const teamMembers = ['ADD_USER', ...this.state.members.items]
+    const { members, namespaceClaims, allUsers, membersToAdd, createNamespace } = this.state
+    const { team, user, clusters, available } = this.props
+    const teamMembers = ['ADD_USER', ...members.items]
 
     const memberActions = (member) => {
       const deleteAction = (
@@ -136,28 +161,37 @@ class TeamDashboard extends React.Component {
           <a>Remove</a>
         </Popconfirm>
       )
-      if (member !== this.props.user.username) {
+      if (member !== user.username) {
         return [deleteAction]
       }
       return []
     }
 
     const memberName = (member) => (
-      <Text>{member} {member === this.props.user.username ? <Tag>You</Tag>: null}</Text>
+      <Text>{member} {member === user.username ? <Tag>You</Tag>: null}</Text>
     )
 
-    const membersAvailableToAdd = this.state.allUsers.filter(user => !this.state.members.items.includes(user))
+    const membersAvailableToAdd = allUsers.filter(user => !members.items.includes(user))
 
     const clusterActions = () => {
       // no actions at present
       return []
     }
 
+    const clusterProviderIconSrcMap = {
+      'GKECredentials': '/static/GKE.png',
+      'EKSCredentials': '/static/EKS.png'
+    }
+
     return (
       <div>
-        <Breadcrumb items={[{text: this.props.team.spec.summary}]} />
-        <Paragraph strong>{this.props.team.spec.description}</Paragraph>
-        <Card className="team-members" title="Team members" style={{ marginBottom: '16px' }}>
+        <Breadcrumb items={[{text: team.spec.summary}]} />
+        <Paragraph strong>{team.spec.description}</Paragraph>
+        <Card
+          title={<div><Text style={{ marginRight: '10px' }}>Team members</Text><Badge count={members.items.length} /></div>}
+          style={{ marginBottom: '16px' }}
+          className="team-members"
+        >
           <List
             dataSource={teamMembers}
             renderItem={m => {
@@ -170,7 +204,7 @@ class TeamDashboard extends React.Component {
                         placeholder="Add existing users to this team"
                         onChange={this.addTeamMembersUpdated}
                         style={{ width: '100%' }}
-                        value={this.state.membersToAdd}
+                        value={membersToAdd}
                       >
                         {membersAvailableToAdd.map((user, idx) => (
                           <Option key={idx} value={user}>{user}</Option>
@@ -189,25 +223,25 @@ class TeamDashboard extends React.Component {
           </List>
         </Card>
         <Card
-          title="Clusters"
+          title={<div><Text style={{ marginRight: '10px' }}>Clusters</Text><Badge count={clusters.items.length} /></div>}
           style={{ marginBottom: '20px' }}
           extra={
             <Button type="primary">
-              <Link href="/teams/[name]/clusters/new" as={`/teams/${this.props.team.metadata.name}/clusters/new`}>
+              <Link href="/teams/[name]/clusters/new" as={`/teams/${team.metadata.name}/clusters/new`}>
                 <a>+ New Cluster</a>
               </Link>
             </Button>
           }
         >
           <List
-            dataSource={this.props.clusters.items}
+            dataSource={clusters.items}
             renderItem={cluster => {
-              const provider = this.props.available.items.find(a => a.metadata.name === cluster.spec.provider.name)
+              const provider = available.items.find(a => a.metadata.name === cluster.spec.provider.name)
               const created = moment(cluster.metadata.creationTimestamp).fromNow()
               return (
                 <List.Item actions={clusterActions()}>
                   <List.Item.Meta
-                    avatar={<Avatar icon="cluster" />}
+                    avatar={<img src={clusterProviderIconSrcMap[provider.spec.resource.kind]} height="32px" />}
                     title={<Text>{provider.spec.name} <Text style={{ fontFamily: 'monospace', marginLeft: '15px' }}>{cluster.metadata.name}</Text></Text>}
                     description={<Text type='secondary'>Created {created}</Text>}
                   />
@@ -218,6 +252,44 @@ class TeamDashboard extends React.Component {
           >
           </List>
         </Card>
+
+        <Card
+          title={<div><Text style={{ marginRight: '10px' }}>Namespaces</Text><Badge count={namespaceClaims.items.length} /></div>}
+          style={{ marginBottom: '20px' }}
+          extra={clusters.items.length > 0 ? <Button type="primary" onClick={this.createNamespace(true)}>+ New Namespace</Button> : null}
+        >
+
+          <List
+            dataSource={namespaceClaims.items}
+            renderItem={namespaceClaim => {
+              const clusterName = namespaceClaim.spec.cluster.name
+              const created = moment(namespaceClaim.metadata.creationTimestamp).fromNow()
+              return (
+                <List.Item>
+                  <List.Item.Meta
+                    avatar={<Avatar icon="block" />}
+                    title={<Text>{namespaceClaim.metadata.name} <Text style={{ fontFamily: 'monospace', marginLeft: '15px' }}>{clusterName}</Text></Text>}
+                    description={<Text type='secondary'>Created {created}</Text>}
+                  />
+                  <Tag color="#5cdbd3">{namespaceClaim.status.status || 'Pending'}</Tag>
+                </List.Item>
+              )
+            }}
+          >
+          </List>
+        </Card>
+
+        <Drawer
+          title="Create namespace"
+          placement="right"
+          closable={false}
+          onClose={this.createNamespace(false)}
+          visible={createNamespace}
+          width={700}
+        >
+          <NamespaceClaimForm team={team.metadata.name} clusters={clusters} handleSubmit={this.handleNamespaceCreated} handleCancel={this.createNamespace(false)}/>
+        </Drawer>
+
       </div>
     )
   }
