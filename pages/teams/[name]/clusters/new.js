@@ -12,21 +12,20 @@ class NewTeamClusterPage extends React.Component {
   static propTypes = {
     user: PropTypes.object.isRequired,
     team: PropTypes.object.isRequired,
-    clusters: PropTypes.object.isRequired,
-    plans: PropTypes.object.isRequired,
-    providers: PropTypes.array.isRequired
+    clusters: PropTypes.object.isRequired
+  }
+
+  static staticProps = {
+    title: 'New team cluster'
   }
 
   static async getPageData(req, name) {
     const getTeam = () => apiRequest(req, 'get', `/teams/${name}`)
     const getTeamClusters = () => apiRequest(req, 'get', `/teams/${name}/clusters`)
-    const getPlans = () => apiRequest(req, 'get', '/plans')
-    const getAvailable = () => apiRequest(req, 'get', `/teams/${name}/allocations?assigned=true`)
 
-    return axios.all([getTeam(), getTeamClusters(), getPlans(), getAvailable()])
-      .then(axios.spread(function (team, clusters, plans, available) {
-        const providers = (available.items || []).filter(a => a.spec.resource.kind === 'GKECredentials')
-        return { team, clusters, plans, providers }
+    return axios.all([getTeam(), getTeamClusters()])
+      .then(axios.spread(function (team, clusters) {
+        return { team, clusters }
       }))
       .catch(err => {
         throw new Error(err.message)
@@ -35,10 +34,7 @@ class NewTeamClusterPage extends React.Component {
 
   static getInitialProps = async (ctx) => {
     const data = await NewTeamClusterPage.getPageData(ctx.req, ctx.query.name)
-    return {
-      title: 'New cluster',
-      ...data
-    }
+    return data
   }
 
   render() {
@@ -57,8 +53,6 @@ class NewTeamClusterPage extends React.Component {
         <ClusterBuildForm
           user={this.props.user}
           team={this.props.team}
-          plans={this.props.plans}
-          providers={this.props.providers}
           teamClusters={teamClusters}
           skipButtonText="Cancel"
         />
