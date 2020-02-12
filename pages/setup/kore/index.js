@@ -7,7 +7,7 @@ const SetupKoreIndexPage = ({ user }) => (
   <div>
     <Result
       icon={<Icon type="smile" theme="twoTone" />}
-      title={`Welcome to Kore, ${user.name || user.username}!`}
+      title={`Welcome to Kore, ${user.displayName || user.name || user.username}!`}
       subTitle="As the first user you are now an administrator and are responsible for the initial setup"
       extra={[
         <Button key="buttonBegin" type="primary">

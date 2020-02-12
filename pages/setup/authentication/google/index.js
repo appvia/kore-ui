@@ -42,8 +42,8 @@ class GoogleSetupPage extends React.Component {
   static staticProps = {
     title: 'Configure authentication provider',
     hideSider: true,
-    authUrl: auth.url,
-    authCallbackUrl: auth.callbackUrl,
+    authUrl: auth.openid.url,
+    authCallbackUrl: auth.openid.callbackURL,
     baseUrl: kore.baseUrl,
     adminOnly: true
   }

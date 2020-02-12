@@ -8,7 +8,8 @@ class LoginPage extends React.Component {
   static propTypes = {
     form: PropTypes.object.isRequired,
     authProvider: PropTypes.object,
-    connectorId: PropTypes.string
+    connectorId: PropTypes.string,
+    embeddedAuth: PropTypes.bool
   }
 
   static staticProps = ({ req }) => {
@@ -21,6 +22,7 @@ class LoginPage extends React.Component {
       unrestrictedPage: true,
       authProvider: req.authProvider,
       connectorId,
+      embeddedAuth: req.embeddedAuth || false
     }
   }
 
@@ -30,7 +32,7 @@ class LoginPage extends React.Component {
   }
 
   state = {
-    showLoginForm: !this.props.authProvider,
+    showLoginForm: !this.props.authProvider && this.props.embeddedAuth,
     submitting: false,
     localLoginErrorCode: false
   }
@@ -70,7 +72,7 @@ class LoginPage extends React.Component {
   }
 
   render() {
-    const { authProvider, connectorId } = this.props
+    const { authProvider, connectorId, embeddedAuth } = this.props
     const { getFieldDecorator, getFieldsError, getFieldError, isFieldTouched } = this.props.form
 
     const formErrorMessage = () => {
@@ -96,11 +98,12 @@ class LoginPage extends React.Component {
         <Row type="flex" justify="center">
           <Col>
             <Card title="Login" style={{ textAlign: 'center' }}>
-              {authProvider ? (
+              {authProvider || !embeddedAuth ? (
                 <div>
                   <p>Login using the configured Identity Provider below</p>
                   <Button style={{ margin: '5px' }} type="primary">
-                    <a href={`/login/auth?provider=${connectorId}`}>Login with {authProvider.spec.displayName}</a>
+                    {authProvider ? <a href={`/login/auth?provider=${connectorId}`}>Login with {authProvider.spec.displayName}</a> : null }
+                    {!embeddedAuth ? <a href="/login/auth">Login with Identity Provider</a> : null }
                   </Button>
                   <Button style={{ marginLeft: '10px' }} onClick={this.showLoginForm}>Local user login</Button>
                 </div>
