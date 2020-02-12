@@ -3,7 +3,7 @@ import PropTypes from 'prop-types'
 import axios from 'axios'
 import moment from 'moment'
 import Link from 'next/link'
-import { Typography, Card, List, Tag, Button, Avatar, Popconfirm, message, Select, Drawer, Badge } from 'antd'
+import { Typography, Card, List, Tag, Button, Avatar, Icon, Popconfirm, message, Select, Drawer, Badge, Modal } from 'antd'
 const { Paragraph, Text } = Typography
 const { Option } = Select
 
@@ -34,6 +34,7 @@ class TeamDashboard extends React.Component {
       members: props.members,
       allUsers: [],
       membersToAdd: [],
+      clusters: props.clusters,
       createNamespace: false,
       namespaceClaims: props.namespaceClaims
     }
@@ -55,7 +56,7 @@ class TeamDashboard extends React.Component {
       })
   }
 
-  static getInitialProps = async (ctx) => {
+  static getInitialProps = async ctx => {
     const teamDetails = await TeamDashboard.getTeamDetails(ctx.req, ctx.query.name)
     return teamDetails
   }
@@ -82,6 +83,7 @@ class TeamDashboard extends React.Component {
       const state = copy(this.state)
       state.teamName = this.props.team.metadata.name
       state.members = props.members
+      state.clusters = props.clusters
       state.namespaceClaims = props.namespaceClaims
       this.getAllUsers()
         .then(users => {
@@ -91,7 +93,7 @@ class TeamDashboard extends React.Component {
     }
   }
 
-  addTeamMembersUpdated = (membersToAdd) => {
+  addTeamMembersUpdated = membersToAdd => {
     const state = copy(this.state)
     state.membersToAdd = membersToAdd
     this.setState(state)
@@ -111,7 +113,7 @@ class TeamDashboard extends React.Component {
     this.setState(state)
   }
 
-  deleteTeamMember = (member) => {
+  deleteTeamMember = member => {
     return async () => {
       const team = this.props.team.metadata.name
       try {
@@ -128,7 +130,42 @@ class TeamDashboard extends React.Component {
     }
   }
 
-  createNamespace = (value) => {
+  deleteCluster = cluster => {
+    return async () => {
+      const clusterNamespaces = this.state.namespaceClaims.items.filter(nc => nc.spec.cluster.name === cluster.metadata.name)
+      if (clusterNamespaces.length > 0) {
+        return Modal.warning({
+          title: 'Warning: cluster cannot be deleted',
+          content: (
+            <div>
+              <Paragraph strong>The cluster namespaces must be deleted first</Paragraph>
+              <List
+                size="small"
+                dataSource={clusterNamespaces}
+                renderItem={ns => <List.Item>{ns.metadata.name}</List.Item>}
+              />
+            </div>
+          ),
+          onOk() {}
+        })
+      }
+
+      const team = this.props.team.metadata.name
+      try {
+        await apiRequest(null, 'delete', `/teams/${team}/clusters/${cluster.metadata.name}`)
+        await apiRequest(null, 'delete', `/teams/${team}/gkes/${cluster.metadata.name}`)
+        const state = copy(this.state)
+        state.clusters.items = state.clusters.items.filter(c => c.metadata.name !== cluster.metadata.name)
+        this.setState(state)
+        message.loading(`Cluster deletion requested: ${cluster.metadata.name}`)
+      } catch (err) {
+        console.error('Error deleting cluster', err)
+        message.error('Error deleting cluster, please try again.')
+      }
+    }
+  }
+
+  createNamespace = value => {
     return () => {
       const state = copy(this.state)
       state.createNamespace = value
@@ -144,12 +181,28 @@ class TeamDashboard extends React.Component {
     message.success(`Namespace "${namespaceClaim.spec.name}" created on cluster "${namespaceClaim.spec.cluster.name}"`)
   }
 
+  deleteNamespace = namespace => {
+    return async () => {
+      const team = this.props.team.metadata.name
+      try {
+        await apiRequest(null, 'delete', `/teams/${team}/namespaceclaims/${namespace.metadata.name}`)
+        const state = copy(this.state)
+        state.namespaceClaims.items = state.namespaceClaims.items.filter(nc => nc.metadata.name !== namespace.metadata.name)
+        this.setState(state)
+        message.success(`Namespace deleted: ${namespace.spec.name}`)
+      } catch (err) {
+        console.error('Error deleting namespace', err)
+        message.error('Error deleting namespace, please try again.')
+      }
+    }
+  }
+
   render() {
-    const { members, namespaceClaims, allUsers, membersToAdd, createNamespace } = this.state
-    const { team, user, clusters, available } = this.props
+    const { members, namespaceClaims, allUsers, membersToAdd, createNamespace, clusters } = this.state
+    const { team, user, available } = this.props
     const teamMembers = ['ADD_USER', ...members.items]
 
-    const memberActions = (member) => {
+    const memberActions = member => {
       const deleteAction = (
         <Popconfirm
           key="delete"
@@ -167,15 +220,52 @@ class TeamDashboard extends React.Component {
       return []
     }
 
-    const memberName = (member) => (
+    const memberName = member => (
       <Text>{member} {member === user.username ? <Tag>You</Tag>: null}</Text>
     )
 
     const membersAvailableToAdd = allUsers.filter(user => !members.items.includes(user))
 
-    const clusterActions = () => {
-      // no actions at present
-      return []
+    const clusterActions = cluster => {
+      const actions = []
+      const status = cluster.status.status || 'Pending'
+      if (status === 'Success') {
+        const deleteAction = (
+          <Popconfirm
+            key="delete"
+            title="Are you sure you want to delete this cluster?"
+            onConfirm={this.deleteCluster(cluster)}
+            okText="Yes"
+            cancelText="No"
+          >
+            <a><Icon type="delete" /></a>
+          </Popconfirm>
+        )
+        actions.push(deleteAction)
+      }
+      actions.push(<Tag color="#5cdbd3">{status}</Tag>)
+      return actions
+    }
+
+    const namespaceClaimActions = namespaceClaim => {
+      const actions = []
+      const status = namespaceClaim.status.status || 'Pending'
+      if (status === 'Success') {
+        const deleteAction = (
+          <Popconfirm
+            key="delete"
+            title="Are you sure you want to delete this namespace?"
+            onConfirm={this.deleteNamespace(namespaceClaim)}
+            okText="Yes"
+            cancelText="No"
+          >
+            <a><Icon type="delete" /></a>
+          </Popconfirm>
+        )
+        actions.push(deleteAction)
+      }
+      actions.push(<Tag color="#5cdbd3">{status}</Tag>)
+      return actions
     }
 
     const clusterProviderIconSrcMap = {
@@ -188,7 +278,7 @@ class TeamDashboard extends React.Component {
         <Breadcrumb items={[{text: team.spec.summary}]} />
         <Paragraph strong>{team.spec.description}</Paragraph>
         <Card
-          title={<div><Text style={{ marginRight: '10px' }}>Team members</Text><Badge count={members.items.length} /></div>}
+          title={<div><Text style={{ marginRight: '10px' }}>Team members</Text><Badge style={{ backgroundColor: '#1890ff' }} count={members.items.length} /></div>}
           style={{ marginBottom: '16px' }}
           className="team-members"
         >
@@ -223,12 +313,12 @@ class TeamDashboard extends React.Component {
           </List>
         </Card>
         <Card
-          title={<div><Text style={{ marginRight: '10px' }}>Clusters</Text><Badge count={clusters.items.length} /></div>}
+          title={<div><Text style={{ marginRight: '10px' }}>Clusters</Text><Badge style={{ backgroundColor: '#1890ff' }} count={clusters.items.length} /></div>}
           style={{ marginBottom: '20px' }}
           extra={
             <Button type="primary">
               <Link href="/teams/[name]/clusters/new" as={`/teams/${team.metadata.name}/clusters/new`}>
-                <a>+ New Cluster</a>
+                <a>+ New</a>
               </Link>
             </Button>
           }
@@ -239,13 +329,12 @@ class TeamDashboard extends React.Component {
               const provider = available.items.find(a => a.metadata.name === cluster.spec.provider.name)
               const created = moment(cluster.metadata.creationTimestamp).fromNow()
               return (
-                <List.Item actions={clusterActions()}>
+                <List.Item actions={clusterActions(cluster)}>
                   <List.Item.Meta
                     avatar={<img src={clusterProviderIconSrcMap[provider.spec.resource.kind]} height="32px" />}
                     title={<Text>{provider.spec.name} <Text style={{ fontFamily: 'monospace', marginLeft: '15px' }}>{cluster.metadata.name}</Text></Text>}
                     description={<Text type='secondary'>Created {created}</Text>}
                   />
-                  <Tag color="#5cdbd3">{cluster.status.status}</Tag>
                 </List.Item>
               )
             }}
@@ -254,9 +343,9 @@ class TeamDashboard extends React.Component {
         </Card>
 
         <Card
-          title={<div><Text style={{ marginRight: '10px' }}>Namespaces</Text><Badge count={namespaceClaims.items.length} /></div>}
+          title={<div><Text style={{ marginRight: '10px' }}>Namespaces</Text><Badge style={{ backgroundColor: '#1890ff' }} count={namespaceClaims.items.length} /></div>}
           style={{ marginBottom: '20px' }}
-          extra={clusters.items.length > 0 ? <Button type="primary" onClick={this.createNamespace(true)}>+ New Namespace</Button> : null}
+          extra={clusters.items.length > 0 ? <Button type="primary" onClick={this.createNamespace(true)}>+ New</Button> : null}
         >
 
           <List
@@ -265,13 +354,12 @@ class TeamDashboard extends React.Component {
               const clusterName = namespaceClaim.spec.cluster.name
               const created = moment(namespaceClaim.metadata.creationTimestamp).fromNow()
               return (
-                <List.Item>
+                <List.Item actions={namespaceClaimActions(namespaceClaim)}>
                   <List.Item.Meta
                     avatar={<Avatar icon="block" />}
                     title={<Text>{namespaceClaim.metadata.name} <Text style={{ fontFamily: 'monospace', marginLeft: '15px' }}>{clusterName}</Text></Text>}
                     description={<Text type='secondary'>Created {created}</Text>}
                   />
-                  <Tag color="#5cdbd3">{namespaceClaim.status.status || 'Pending'}</Tag>
                 </List.Item>
               )
             }}
