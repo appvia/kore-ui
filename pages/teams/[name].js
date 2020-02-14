@@ -1,13 +1,13 @@
 import React from 'react'
 import PropTypes from 'prop-types'
 import axios from 'axios'
-import moment from 'moment'
 import Link from 'next/link'
-import { Typography, Card, List, Tag, Button, Avatar, Icon, Popconfirm, message, Select, Drawer, Badge, Modal, Timeline, Popover } from 'antd'
+import { Typography, Card, List, Tag, Button, Avatar, Popconfirm, message, Select, Drawer, Badge } from 'antd'
 const { Paragraph, Text } = Typography
 const { Option } = Select
 
 import Breadcrumb from '../../lib/components/Breadcrumb'
+import Cluster from '../../lib/components/team/Cluster'
 import NamespaceClaim from '../../lib/components/team/NamespaceClaim'
 import NamespaceClaimForm from '../../lib/components/forms/NamespaceClaimForm'
 import apiRequest from '../../lib/utils/api-request'
@@ -131,39 +131,11 @@ class TeamDashboard extends React.Component {
     }
   }
 
-  deleteCluster = cluster => {
-    return async () => {
-      const clusterNamespaces = this.state.namespaceClaims.items.filter(nc => nc.spec.cluster.name === cluster.metadata.name)
-      if (clusterNamespaces.length > 0) {
-        return Modal.warning({
-          title: 'Warning: cluster cannot be deleted',
-          content: (
-            <div>
-              <Paragraph strong>The cluster namespaces must be deleted first</Paragraph>
-              <List
-                size="small"
-                dataSource={clusterNamespaces}
-                renderItem={ns => <List.Item>{ns.metadata.name}</List.Item>}
-              />
-            </div>
-          ),
-          onOk() {}
-        })
-      }
-
-      const team = this.props.team.metadata.name
-      try {
-        await apiRequest(null, 'delete', `/teams/${team}/clusters/${cluster.metadata.name}`)
-        await apiRequest(null, 'delete', `/teams/${team}/gkes/${cluster.metadata.name}`)
-        const state = copy(this.state)
-        state.clusters.items = state.clusters.items.filter(c => c.metadata.name !== cluster.metadata.name)
-        this.setState(state)
-        message.loading(`Cluster deletion requested: ${cluster.metadata.name}`)
-      } catch (err) {
-        console.error('Error deleting cluster', err)
-        message.error('Error deleting cluster, please try again.')
-      }
-    }
+  handleClusterDeleted = cluster => {
+    const state = copy(this.state)
+    state.clusters.items = state.clusters.items.filter(c => c.metadata.name !== cluster.metadata.name)
+    this.setState(state)
+    message.loading(`Cluster deletion requested: ${cluster.metadata.name}`)
   }
 
   createNamespace = value => {
@@ -194,9 +166,6 @@ class TeamDashboard extends React.Component {
     const { team, user, available } = this.props
     const teamMembers = ['ADD_USER', ...members.items]
 
-    const statusColorMap = { 'Success': 'green', 'Pending': 'orange' }
-    const statusTag = (status) => <Tag color={statusColorMap[status] || 'red'}>{status === 'Pending' ? <Icon type="loading" /> : null} {status}</Tag>
-
     const memberActions = member => {
       const deleteAction = (
         <Popconfirm
@@ -220,81 +189,6 @@ class TeamDashboard extends React.Component {
     )
 
     const membersAvailableToAdd = allUsers.filter(user => !members.items.includes(user))
-
-    const clusterActions = cluster => {
-      const actions = []
-      const status = cluster.status.status || 'Pending'
-      if (status === 'Success') {
-        const deleteAction = (
-          <Popconfirm
-            key="delete"
-            title="Are you sure you want to delete this cluster?"
-            onConfirm={this.deleteCluster(cluster)}
-            okText="Yes"
-            cancelText="No"
-          >
-            <a><Icon type="delete" /></a>
-          </Popconfirm>
-        )
-        actions.push(deleteAction)
-      }
-
-      if (cluster.status.components) {
-        actions.push(
-          <Popover placement="left" content={
-            <Timeline
-              pending={!status || status === 'Pending'}
-              style={{
-                marginTop: '25px',
-                marginLeft: '10px',
-                marginRight: '10px',
-                marginBottom: status !== 'Pending' ? '-30px' : '0'
-              }}>
-              {cluster.status.components.map((c, idx) =>
-                <Timeline.Item key={idx} color={statusColorMap[c.status] || 'red'}>
-                  <Text strong>{c.status}: </Text><Text>{c.message}</Text>
-                </Timeline.Item>
-              )}
-            </Timeline>
-          }>
-            {statusTag(status)}
-          </Popover>
-        )
-      } else {
-        actions.push(statusTag(status))
-      }
-
-      if (cluster.status.components) {
-        actions.push(
-          <Popover placement="left" content={
-            <Timeline
-              pending={!status || status === 'Pending'}
-              style={{
-                marginTop: '25px',
-                marginLeft: '10px',
-                marginRight: '10px',
-                marginBottom: status !== 'Pending' ? '-30px' : '0'
-              }}>
-              {cluster.status.components.map((c, idx) =>
-                <Timeline.Item key={idx} color={statusColorMap[c.status] || 'red'}>
-                  <Text strong>{c.status}: </Text><Text>{c.message}</Text>
-                </Timeline.Item>
-              )}
-            </Timeline>
-          }>
-            {statusTag(status)}
-          </Popover>
-        )
-      } else {
-        actions.push(statusTag(status))
-      }
-      return actions
-    }
-
-    const clusterProviderIconSrcMap = {
-      'GKECredentials': '/static/images/GKE.png',
-      'EKSCredentials': '/static/images/EKS.png'
-    }
 
     return (
       <div>
@@ -350,15 +244,9 @@ class TeamDashboard extends React.Component {
             dataSource={clusters.items}
             renderItem={cluster => {
               const provider = available.items.find(a => a.metadata.name === cluster.spec.provider.name)
-              const created = moment(cluster.metadata.creationTimestamp).fromNow()
+              const namespaceClaims = (this.state.namespaceClaims.items || []).filter(nc => nc.spec.cluster.name === cluster.metadata.name)
               return (
-                <List.Item actions={clusterActions(cluster)}>
-                  <List.Item.Meta
-                    avatar={<img src={clusterProviderIconSrcMap[provider.spec.resource.kind]} height="32px" />}
-                    title={<Text>{provider.spec.name} <Text style={{ fontFamily: 'monospace', marginLeft: '15px' }}>{cluster.metadata.name}</Text></Text>}
-                    description={<Text type='secondary'>Created {created}</Text>}
-                  />
-                </List.Item>
+                <Cluster team={this.props.team.metadata.name} cluster={cluster} provider={provider} namespaceClaims={namespaceClaims} handleDelete={this.handleClusterDeleted} />
               )
             }}
           >
