@@ -3,7 +3,7 @@ import PropTypes from 'prop-types'
 import axios from 'axios'
 import moment from 'moment'
 import Link from 'next/link'
-import { Typography, Card, List, Tag, Button, Avatar, Icon, Popconfirm, message, Select, Drawer, Badge, Modal } from 'antd'
+import { Typography, Card, List, Tag, Button, Avatar, Icon, Popconfirm, message, Select, Drawer, Badge, Modal, Timeline, Popover } from 'antd'
 const { Paragraph, Text } = Typography
 const { Option } = Select
 
@@ -202,6 +202,9 @@ class TeamDashboard extends React.Component {
     const { team, user, available } = this.props
     const teamMembers = ['ADD_USER', ...members.items]
 
+    const statusColorMap = { 'Success': 'green', 'Pending': 'orange' }
+    const statusTag = (status) => <Tag color={statusColorMap[status] || 'red'}>{status === 'Pending' ? <Icon type="loading" /> : null} {status}</Tag>
+
     const memberActions = member => {
       const deleteAction = (
         <Popconfirm
@@ -243,7 +246,31 @@ class TeamDashboard extends React.Component {
         )
         actions.push(deleteAction)
       }
-      actions.push(<Tag color="#5cdbd3">{status}</Tag>)
+
+      if (cluster.status.components) {
+        actions.push(
+          <Popover placement="left" content={
+            <Timeline
+              pending={!status || status === 'Pending'}
+              style={{
+                marginTop: '25px',
+                marginLeft: '10px',
+                marginRight: '10px',
+                marginBottom: status !== 'Pending' ? '-30px' : '0'
+              }}>
+              {cluster.status.components.map((c, idx) =>
+                <Timeline.Item key={idx} color={statusColorMap[c.status] || 'red'}>
+                  <Text strong>{c.status}: </Text><Text>{c.message}</Text>
+                </Timeline.Item>
+              )}
+            </Timeline>
+          }>
+            {statusTag(status)}
+          </Popover>
+        )
+      } else {
+        actions.push(statusTag(status))
+      }
       return actions
     }
 
@@ -264,7 +291,7 @@ class TeamDashboard extends React.Component {
         )
         actions.push(deleteAction)
       }
-      actions.push(<Tag color="#5cdbd3">{status}</Tag>)
+      actions.push(statusTag(status))
       return actions
     }
 
