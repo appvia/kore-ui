@@ -8,10 +8,13 @@ module.exports = {
     }
   },
   auth: {
-    url: process.env.DEX_PUBLIC_URL || 'http://localhost:5556',
-    callbackUrl: (process.env.DEX_PUBLIC_URL || 'http://localhost:5556') + '/callback',
-    clientId: process.env.KORE_UI_CLIENT_ID || '12393b111ae937e32181',
-    clientSecret: process.env.KORE_UI_CLIENT_SECRET || 'ZXhhbXBsZS1hcHAtc2VjcmV0'
+    embedded: process.env.KORE_UI_USE_EMBEDDED_AUTH === 'true' || false,
+    openid: {
+      url: process.env.KORE_UI_OPENID_URL || 'https://my-openid-domain.com',
+      callbackURL: process.env.KORE_UI_OPENID_CALLBACK_URL || 'http://localhost:3000/auth/callback',
+      clientID: process.env.KORE_UI_OPENID_CLIENT_ID || 'my-openid-client-id',
+      clientSecret: process.env.KORE_UI_OPENID_CLIENT_SECRET || 'my-openid-client-secret'
+    }
   },
   kore: {
     baseUrl: process.env.KORE_BASE_URL || 'http://localhost:3000',

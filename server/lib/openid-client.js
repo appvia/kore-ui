@@ -3,11 +3,12 @@ const { Issuer, Strategy } = require('openid-client')
 
 class OpenIdClient {
 
-  constructor(baseUrl, authUrl, clientId, clientSecret, authService) {
+  constructor(baseUrl, openidConfig, embeddedAuth, authService) {
     this.redirectUrl = `${baseUrl}/auth/callback`
-    this.authUrl = authUrl
-    this.clientId = clientId
-    this.clientSecret = clientSecret
+    this.authUrl = openidConfig.url
+    this.clientId = openidConfig.clientID
+    this.clientSecret = openidConfig.clientSecret
+    this.embeddedAuth = embeddedAuth
     this.authService = authService
     this.initialised = false
   }
@@ -22,7 +23,9 @@ class OpenIdClient {
   }
 
   async setupAuthClient() {
-    await this.authService.setAuthClient()
+    if (this.embeddedAuth) {
+      await this.authService.setAuthClient()
+    }
     const issuer = await Issuer.discover(this.authUrl)
     this.client = new issuer.Client({
       client_id: this.clientId,

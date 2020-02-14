@@ -29,7 +29,6 @@
     "null-loader": "^3.0.0",
     "openid-client": "^3.10.0",
     "passport": "^0.4.0",
-    "passport-github": "^1.1.0",
     "prop-types": "^15.7.2",
     "react": "^16.10.1",
     "react-dom": "^16.10.1",

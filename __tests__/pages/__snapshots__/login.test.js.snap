@@ -1,6 +1,92 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
-exports[`Snapshot testing shows login 1`] = `
+exports[`Snapshot testing shows login not using embedded auth 1`] = `
+<div
+  style={
+    Object {
+      "background": "#fff",
+      "minHeight": 280,
+      "padding": 24,
+    }
+  }
+>
+  <div
+    className="ant-row-flex ant-row-flex-center"
+    style={Object {}}
+  >
+    <div
+      className="ant-col"
+      style={Object {}}
+    >
+      <div
+        className="ant-card ant-card-bordered"
+        style={
+          Object {
+            "textAlign": "center",
+          }
+        }
+      >
+        <div
+          className="ant-card-head"
+          style={Object {}}
+        >
+          <div
+            className="ant-card-head-wrapper"
+          >
+            <div
+              className="ant-card-head-title"
+            >
+              Login
+            </div>
+          </div>
+        </div>
+        <div
+          className="ant-card-body"
+          style={Object {}}
+        >
+          <div>
+            <p>
+              Login using the configured Identity Provider below
+            </p>
+            <button
+              className="ant-btn ant-btn-primary"
+              onClick={[Function]}
+              style={
+                Object {
+                  "margin": "5px",
+                }
+              }
+              type="button"
+            >
+              <a
+                href="/login/auth"
+              >
+                Login with Identity Provider
+              </a>
+            </button>
+            <button
+              className="ant-btn"
+              onClick={[Function]}
+              style={
+                Object {
+                  "marginLeft": "10px",
+                }
+              }
+              type="button"
+            >
+              <span>
+                Local user login
+              </span>
+            </button>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+`;
+
+exports[`Snapshot testing shows login using embedded auth 1`] = `
 <div
   style={
     Object {
