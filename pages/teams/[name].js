@@ -8,6 +8,7 @@ const { Paragraph, Text } = Typography
 const { Option } = Select
 
 import Breadcrumb from '../../lib/components/Breadcrumb'
+import NamespaceClaim from '../../lib/components/team/NamespaceClaim'
 import NamespaceClaimForm from '../../lib/components/forms/NamespaceClaimForm'
 import apiRequest from '../../lib/utils/api-request'
 import copy from '../../lib/utils/object-copy'
@@ -181,20 +182,11 @@ class TeamDashboard extends React.Component {
     message.success(`Namespace "${namespaceClaim.spec.name}" created on cluster "${namespaceClaim.spec.cluster.name}"`)
   }
 
-  deleteNamespace = namespace => {
-    return async () => {
-      const team = this.props.team.metadata.name
-      try {
-        await apiRequest(null, 'delete', `/teams/${team}/namespaceclaims/${namespace.metadata.name}`)
-        const state = copy(this.state)
-        state.namespaceClaims.items = state.namespaceClaims.items.filter(nc => nc.metadata.name !== namespace.metadata.name)
-        this.setState(state)
-        message.success(`Namespace deleted: ${namespace.spec.name}`)
-      } catch (err) {
-        console.error('Error deleting namespace', err)
-        message.error('Error deleting namespace, please try again.')
-      }
-    }
+  handleNamespaceDeleted = namespaceClaim => {
+    const state = copy(this.state)
+    state.namespaceClaims.items = state.namespaceClaims.items.filter(nc => nc.metadata.name !== namespaceClaim.metadata.name)
+    this.setState(state)
+    message.success(`Namespace deleted: ${namespaceClaim.spec.name}`)
   }
 
   render() {
@@ -271,27 +263,31 @@ class TeamDashboard extends React.Component {
       } else {
         actions.push(statusTag(status))
       }
-      return actions
-    }
 
-    const namespaceClaimActions = namespaceClaim => {
-      const actions = []
-      const status = namespaceClaim.status.status || 'Pending'
-      if (status === 'Success') {
-        const deleteAction = (
-          <Popconfirm
-            key="delete"
-            title="Are you sure you want to delete this namespace?"
-            onConfirm={this.deleteNamespace(namespaceClaim)}
-            okText="Yes"
-            cancelText="No"
-          >
-            <a><Icon type="delete" /></a>
-          </Popconfirm>
+      if (cluster.status.components) {
+        actions.push(
+          <Popover placement="left" content={
+            <Timeline
+              pending={!status || status === 'Pending'}
+              style={{
+                marginTop: '25px',
+                marginLeft: '10px',
+                marginRight: '10px',
+                marginBottom: status !== 'Pending' ? '-30px' : '0'
+              }}>
+              {cluster.status.components.map((c, idx) =>
+                <Timeline.Item key={idx} color={statusColorMap[c.status] || 'red'}>
+                  <Text strong>{c.status}: </Text><Text>{c.message}</Text>
+                </Timeline.Item>
+              )}
+            </Timeline>
+          }>
+            {statusTag(status)}
+          </Popover>
         )
-        actions.push(deleteAction)
+      } else {
+        actions.push(statusTag(status))
       }
-      actions.push(statusTag(status))
       return actions
     }
 
@@ -374,22 +370,11 @@ class TeamDashboard extends React.Component {
           style={{ marginBottom: '20px' }}
           extra={clusters.items.length > 0 ? <Button type="primary" onClick={this.createNamespace(true)}>+ New</Button> : null}
         >
-
           <List
             dataSource={namespaceClaims.items}
-            renderItem={namespaceClaim => {
-              const clusterName = namespaceClaim.spec.cluster.name
-              const created = moment(namespaceClaim.metadata.creationTimestamp).fromNow()
-              return (
-                <List.Item actions={namespaceClaimActions(namespaceClaim)}>
-                  <List.Item.Meta
-                    avatar={<Avatar icon="block" />}
-                    title={<Text>{namespaceClaim.metadata.name} <Text style={{ fontFamily: 'monospace', marginLeft: '15px' }}>{clusterName}</Text></Text>}
-                    description={<Text type='secondary'>Created {created}</Text>}
-                  />
-                </List.Item>
-              )
-            }}
+            renderItem={namespaceClaim =>
+              <NamespaceClaim team={this.props.team.metadata.name} namespaceClaim={namespaceClaim} handleDelete={this.handleNamespaceDeleted} />
+            }
           >
           </List>
         </Card>
