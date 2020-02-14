@@ -10,10 +10,10 @@ module.exports = {
   auth: {
     embedded: process.env.KORE_UI_USE_EMBEDDED_AUTH === 'true' || false,
     openid: {
-      url: process.env.KORE_UI_OPENID_URL || 'https://my-openid-domain.com',
-      callbackURL: process.env.KORE_UI_OPENID_CALLBACK_URL || 'http://localhost:3000/auth/callback',
-      clientID: process.env.KORE_UI_OPENID_CLIENT_ID || 'my-openid-client-id',
-      clientSecret: process.env.KORE_UI_OPENID_CLIENT_SECRET || 'my-openid-client-secret'
+      url: process.env.KORE_DISCOVERY_URL || 'https://my-openid-domain.com',
+      callbackURL: process.env.KORE_CALLBACK_URL || 'http://localhost:3000/auth/callback',
+      clientID: process.env.KORE_CLIENT_ID || 'my-openid-client-id',
+      clientSecret: process.env.KORE_CLIENT_SECRET || 'my-openid-client-secret'
     }
   },
   kore: {
