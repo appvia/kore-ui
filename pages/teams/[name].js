@@ -269,8 +269,8 @@ class TeamDashboard extends React.Component {
     }
 
     const clusterProviderIconSrcMap = {
-      'GKECredentials': '/static/GKE.png',
-      'EKSCredentials': '/static/EKS.png'
+      'GKECredentials': '/static/images/GKE.png',
+      'EKSCredentials': '/static/images/EKS.png'
     }
 
     return (
