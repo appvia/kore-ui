@@ -13,7 +13,8 @@ module.exports = {
       url: process.env.KORE_DISCOVERY_URL || 'https://my-openid-domain.com',
       callbackURL: process.env.KORE_CALLBACK_URL || 'http://localhost:3000/auth/callback',
       clientID: process.env.KORE_CLIENT_ID || 'my-openid-client-id',
-      clientSecret: process.env.KORE_CLIENT_SECRET || 'my-openid-client-secret'
+      clientSecret: process.env.KORE_CLIENT_SECRET || 'my-openid-client-secret',
+      userClaimsOrder: process.env.KORE_USER_CLAIMS || 'preferred_username,email,name,username'
     }
   },
   kore: {

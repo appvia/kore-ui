@@ -17,14 +17,14 @@ class OrgService {
   async getOrCreateUser(user) {
     try {
       const userResource = await User(user)
-      console.log(`*** putting user ${user.username}`, userResource)
-      const userResult = await axios.put(`${this.koreApi.url}/users/${user.username}`, userResource, { headers: this.getHeaders(user.username) })
-      const adminTeamMembers = await this.getTeamMembers(kore.koreAdminTeamName, user.username)
+      console.log(`*** putting user ${user.id}`, userResource)
+      const userResult = await axios.put(`${this.koreApi.url}/users/${user.id}`, userResource, { headers: this.getHeaders(user.id) })
+      const adminTeamMembers = await this.getTeamMembers(kore.koreAdminTeamName, user.id)
       if (adminTeamMembers.length === 1) {
-        await this.addUserToTeam(kore.koreAdminTeamName, user.username, user.username)
+        await this.addUserToTeam(kore.koreAdminTeamName, user.id, user.id)
       }
       const userToReturn = userResult.data
-      userToReturn.teams = await this.getUserTeams(user.username, user.username)
+      userToReturn.teams = await this.getUserTeams(user.id, user.id)
       userToReturn.isAdmin = this.isAdmin(userToReturn)
       return userToReturn
     } catch (err) {
@@ -35,7 +35,7 @@ class OrgService {
 
   /* eslint-disable require-atomic-updates */
   async refreshUser(user) {
-    user.teams = await this.getUserTeams(user.username, user.username)
+    user.teams = await this.getUserTeams(user.id, user.id)
     user.isAdmin = this.isAdmin(user)
   }
   /* eslint-enable require-atomic-updates */
