@@ -40,6 +40,10 @@ Once this is complete, you can install and run the Kore UI as follows
 ```bash
 # run dependencies
 make compose
+# set environment variables
+export KORE_DISCOVERY_URL=https://<your-openid-domain>
+export KORE_CLIENT_ID=<your-openid-client-id>
+export KORE_CLIENT_SECRET=<your-openid-client-secret>
 # install and run the UI
 npm install
 npm run dev
