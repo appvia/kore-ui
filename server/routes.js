@@ -9,10 +9,11 @@ const ensureAuthenticated = require('./middleware/ensure-authenticated')
 const koreConfig = config.kore
 const koreApi = config.koreApi
 const embeddedAuth = config.auth.embedded
+const userClaimsOrder = config.auth.openid.userClaimsOrder.split(',')
 
 const authService = new AuthService(config.koreApi, config.kore.baseUrl)
 const orgService = new OrgService(config.koreApi)
-const authCallback = require('./middleware/auth-callback')(orgService, authService, koreConfig, embeddedAuth)
+const authCallback = require('./middleware/auth-callback')(orgService, authService, koreConfig, userClaimsOrder, embeddedAuth)
 
 const openIdClient = new OpenIdClient(config.kore.baseUrl, config.auth.openid, embeddedAuth, authService)
 openIdClient.init()

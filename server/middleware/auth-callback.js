@@ -1,9 +1,10 @@
-module.exports = (orgService, authService, koreConfig, embeddedAuth) => {
+module.exports = (orgService, authService, koreConfig, userClaimsOrder, embeddedAuth) => {
   return async (req, res) => {
     const user = req.session.passport.user
-    if (!user.username) {
-      user.username = user.preferred_username || user.email.substr(0, user.email.indexOf('@'))
-    }
+    userClaimsOrder.some(c => {
+      user.id = user[c]
+      return user.id
+    })
     const userInfo = await orgService.getOrCreateUser(user)
     /* eslint-disable require-atomic-updates */
     user.teams = userInfo.teams || []
