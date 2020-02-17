@@ -131,13 +131,6 @@ class TeamDashboard extends React.Component {
     }
   }
 
-  handleClusterDeleted = cluster => {
-    const state = copy(this.state)
-    state.clusters.items = state.clusters.items.filter(c => c.metadata.name !== cluster.metadata.name)
-    this.setState(state)
-    message.loading(`Cluster deletion requested: ${cluster.metadata.name}`)
-  }
-
   createNamespace = value => {
     return () => {
       const state = copy(this.state)
@@ -156,9 +149,9 @@ class TeamDashboard extends React.Component {
 
   handleNamespaceDeleted = namespaceClaim => {
     const state = copy(this.state)
-    state.namespaceClaims.items = state.namespaceClaims.items.filter(nc => nc.metadata.name !== namespaceClaim.metadata.name)
+    const deletedNc = state.namespaceClaims.items.find(nc => nc.metadata.name === namespaceClaim.metadata.name)
+    deletedNc.deleted = true
     this.setState(state)
-    message.success(`Namespace deleted: ${namespaceClaim.spec.name}`)
   }
 
   render() {
@@ -244,7 +237,7 @@ class TeamDashboard extends React.Component {
             dataSource={clusters.items}
             renderItem={cluster => {
               const provider = available.items.find(a => a.metadata.name === cluster.spec.provider.name)
-              const namespaceClaims = (this.state.namespaceClaims.items || []).filter(nc => nc.spec.cluster.name === cluster.metadata.name)
+              const namespaceClaims = (this.state.namespaceClaims.items || []).filter(nc => nc.spec.cluster.name === cluster.metadata.name && !nc.deleted)
               return (
                 <Cluster team={this.props.team.metadata.name} cluster={cluster} provider={provider} namespaceClaims={namespaceClaims} handleDelete={this.handleClusterDeleted} />
               )
@@ -259,7 +252,7 @@ class TeamDashboard extends React.Component {
           extra={clusters.items.length > 0 ? <Button type="primary" onClick={this.createNamespace(true)}>+ New</Button> : null}
         >
           <List
-            dataSource={namespaceClaims.items}
+            dataSource={namespaceClaims.items.filter(nc => !nc.deleted)}
             renderItem={namespaceClaim =>
               <NamespaceClaim team={this.props.team.metadata.name} namespaceClaim={namespaceClaim} handleDelete={this.handleNamespaceDeleted} />
             }
