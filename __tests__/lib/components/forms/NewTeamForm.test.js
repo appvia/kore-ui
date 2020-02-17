@@ -21,7 +21,7 @@ describe('NewTeamForm', () => {
         validateFields: jest.fn()
       },
       handleTeamCreated: jest.fn(),
-      user: { username: 'jbloggs' },
+      user: { id: 'jbloggs' },
       team: false
     }
     wrapper = mount(<NewTeamForm wrappedComponentRef={component => newTeamForm = component} {...props} />)

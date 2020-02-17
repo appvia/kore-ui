@@ -8,7 +8,7 @@ import copy from '../../../lib/utils/object-copy'
 jest.mock('../../../lib/utils/api-request')
 
 const props = {
-  user: { username: 'jbloggs' },
+  user: { id: 'jbloggs' },
   team: {
     metadata: { name: 'a-team' },
     spec: { summary: 'A Team' }
