@@ -9,7 +9,7 @@ function apiProxy(koreApi) {
     const apiUrlPath = req.originalUrl.replace('/apiproxy', '')
     const options = {
       headers: {
-        'X-Identity': req.session.passport.user.username,
+        'X-Identity': req.session.passport.user.id,
         'Authorization': `Bearer ${koreApi.token}`
       }
     }
