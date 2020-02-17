@@ -151,7 +151,7 @@ class TeamDashboard extends React.Component {
     state.createNamespace = false
     state.namespaceClaims.items.push(namespaceClaim)
     this.setState(state)
-    message.success(`Namespace "${namespaceClaim.spec.name}" created on cluster "${namespaceClaim.spec.cluster.name}"`)
+    message.loading(`Namespace "${namespaceClaim.spec.name}" requested on cluster "${namespaceClaim.spec.cluster.name}"`)
   }
 
   handleNamespaceDeleted = namespaceClaim => {
