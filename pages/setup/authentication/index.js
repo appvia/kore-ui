@@ -1,6 +1,5 @@
 import Link from 'next/link'
-import { Layout, Typography, Result, Icon, Button } from 'antd'
-const { Footer } = Layout
+import { Typography, Result, Icon, Button } from 'antd'
 const { Paragraph } = Typography
 
 const SetupAuthIndexPage = () => (
@@ -18,11 +17,6 @@ const SetupAuthIndexPage = () => (
         </Button>
       ]}
     />
-    <Footer style={{textAlign: 'center', backgroundColor: '#fff'}}>
-      <span>
-        For more information read the <a href="#">Documentation</a>
-      </span>
-    </Footer>
   </div>
 )
 

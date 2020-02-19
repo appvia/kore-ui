@@ -1,6 +1,5 @@
 import React from 'react'
-import { Layout, Typography, Card } from 'antd'
-const { Footer } = Layout
+import { Typography, Card } from 'antd'
 const { Title, Paragraph } = Typography
 
 import redirect from '../../../../lib/utils/redirect'
@@ -44,18 +43,11 @@ class ConfigureCloudProvidersPage extends React.Component {
         <div style={{ marginTop: '20px', marginBottom: '20px' }}>
           <CloudSelector selectedCloud={selectedCloud} handleSelectCloud={this.handleSelectCloud} />
         </div>
-
         { selectedCloud === 'GKE' ? (
           <Card title="Enter GKE credentials" style={{ paddingBottom: '0' }}>
             <GKECredentialsForm team={kore.koreAdminTeamName} handleSubmit={this.handleFormSubmit} />
           </Card>
         ) : null }
-
-        <Footer style={{textAlign: 'center', backgroundColor: '#fff'}}>
-          <span>
-            For more information read the <a href="#">Documentation</a>
-          </span>
-        </Footer>
       </div>
     )
   }

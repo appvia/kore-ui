@@ -1,8 +1,7 @@
 import React from 'react'
 import PropTypes from 'prop-types'
 import Link from 'next/link'
-import { Layout, Typography, Button } from 'antd'
-const { Footer } = Layout
+import { Typography, Button } from 'antd'
 const { Title, Paragraph, Text } = Typography
 
 import NewTeamForm from '../../lib/components/forms/NewTeamForm'
@@ -64,11 +63,6 @@ class NewTeamPage extends React.Component {
             />
           </div>
         ) : null}
-        <Footer style={{textAlign: 'center', backgroundColor: '#fff'}}>
-          <span>
-            For more information read the <a href="#">Documentation</a>
-          </span>
-        </Footer>
       </div>
     )
   }
