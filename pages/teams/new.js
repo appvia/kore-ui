@@ -1,8 +1,9 @@
 import React from 'react'
 import PropTypes from 'prop-types'
-import { Layout, Typography } from 'antd'
+import Link from 'next/link'
+import { Layout, Typography, Button } from 'antd'
 const { Footer } = Layout
-const { Title } = Typography
+const { Title, Paragraph, Text } = Typography
 
 import NewTeamForm from '../../lib/components/forms/NewTeamForm'
 import ClusterBuildForm from '../../lib/components/forms/ClusterBuildForm'
@@ -33,21 +34,35 @@ class NewTeamPage extends React.Component {
   }
 
   render() {
+    const { user } = this.props
+    const { team } = this.state
+
     return (
       <div>
         <Breadcrumb items={[{text: 'New team'}]} />
         <Title>New Team</Title>
         <NewTeamForm
-          user={this.props.user}
-          team={this.state.team}
+          user={user}
+          team={team}
           handleTeamCreated={this.handleTeamCreated}
         />
-        {this.state.team ? (
-          <ClusterBuildForm
-            user={this.props.user}
-            team={this.state.team}
-            teamClusters={[]}
-          />
+        {team ? (
+          <div>
+            <Paragraph>
+              <Text>Choose your cloud provider below to build a cluster</Text>
+              <Text strong> OR </Text>
+              <Button type="secondary" style={{ marginLeft: '2px', paddingLeft: '10px', paddingRight: '10px' }}>
+                <Link href="/teams/[name]" as={`/teams/${team.metadata.name}`}>
+                  <a>Skip cluster build</a>
+                </Link>
+              </Button>
+            </Paragraph>
+            <ClusterBuildForm
+              user={user}
+              team={team}
+              teamClusters={[]}
+            />
+          </div>
         ) : null}
         <Footer style={{textAlign: 'center', backgroundColor: '#fff'}}>
           <span>
