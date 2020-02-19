@@ -108,7 +108,7 @@ class ConfigureIntegrationsPage extends React.Component {
     return (
       <div>
         <Breadcrumb items={[{text: 'Configure'}, {text: 'Integrations'}]} />
-        <Card title="GKE cluster providers" extra={<Button type="primary" onClick={this.addNewIntegration}>+ New</Button>}>
+        <Card title="GKE credentials" extra={<Button type="primary" onClick={this.addNewIntegration}>+ New</Button>}>
           <List
             dataSource={this.state.gkeCredentials.items}
             renderItem={gke =>
@@ -141,7 +141,7 @@ class ConfigureIntegrationsPage extends React.Component {
           ) : null}
           {this.state.addNewIntegration ? (
             <Drawer
-              title={<Title level={4}>New {this.state.addNewIntegration} provider</Title>}
+              title={<Title level={4}>New {this.state.addNewIntegration} credentials</Title>}
               visible={!!this.state.addNewIntegration}
               onClose={this.clearAddNewIntegration}
               width={700}
