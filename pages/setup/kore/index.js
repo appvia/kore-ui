@@ -1,7 +1,6 @@
 import Link from 'next/link'
 import PropTypes from 'prop-types'
-import { Layout, Result, Icon, Button } from 'antd'
-const { Footer } = Layout
+import { Result, Icon, Button } from 'antd'
 
 const SetupKoreIndexPage = ({ user }) => (
   <div>
@@ -22,11 +21,6 @@ const SetupKoreIndexPage = ({ user }) => (
         </Button>
       ]}
     />
-    <Footer style={{textAlign: 'center', backgroundColor: '#fff'}}>
-      <span>
-        For more information read the <a href="#">Documentation</a>
-      </span>
-    </Footer>
   </div>
 )
 

@@ -1,6 +1,5 @@
 import Link from 'next/link'
-import { Layout, Result, Button } from 'antd'
-const { Footer } = Layout
+import { Result, Button } from 'antd'
 
 const SetupKoreCompletePage = () => (
   <div>
@@ -16,11 +15,6 @@ const SetupKoreCompletePage = () => (
         </Button>
       ]}
     />
-    <Footer style={{textAlign: 'center', backgroundColor: '#fff'}}>
-      <span>
-        For more information read the <a href="#">Documentation</a>
-      </span>
-    </Footer>
   </div>
 )
 
