@@ -1,6 +1,7 @@
 module.exports = (orgService, authService, koreConfig, userClaimsOrder, embeddedAuth) => {
   return async (req, res) => {
-    const user = req.session.passport.user
+    const session = req.session
+    const user = session.passport.user
     userClaimsOrder.some(c => {
       user.id = user[c]
       return user.id
@@ -10,6 +11,10 @@ module.exports = (orgService, authService, koreConfig, userClaimsOrder, embedded
     user.teams = userInfo.teams || []
     user.isAdmin = userInfo.isAdmin
     /* eslint-enable require-atomic-updates */
+    if (session.requestedPath) {
+      return res.redirect(session.requestedPath)
+    }
+
     let redirectPath = '/'
     if (user.isAdmin) {
       if (embeddedAuth) {

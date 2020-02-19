@@ -36,9 +36,9 @@ function checkBlacklist(req, res, next) {
   next()
 }
 
-function initRouter({ ensureAuthenticated, koreApi }) {
+function initRouter({ ensureAuthenticated, ensureUserCurrent, koreApi }) {
   const router = Router()
-  router.use('/apiproxy/*', ensureAuthenticated, checkBlacklist, apiProxy(koreApi))
+  router.use('/apiproxy/*', ensureAuthenticated, checkBlacklist, ensureUserCurrent, apiProxy(koreApi))
   return router
 }
 

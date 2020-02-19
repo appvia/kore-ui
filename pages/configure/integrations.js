@@ -28,10 +28,10 @@ class ConfigureIntegrationsPage extends React.Component {
     adminOnly: true
   }
 
-  static async getPageData(req) {
-    const getTeams = () => apiRequest(req, 'get', '/teams')
-    const getGKECredentials = () => apiRequest(req, 'get', `/teams/${kore.koreAdminTeamName}/gkecredentials`)
-    const getAllocations = () => apiRequest(req, 'get', `/teams/${kore.koreAdminTeamName}/allocations`)
+  static async getPageData({ req, res }) {
+    const getTeams = () => apiRequest({ req, res }, 'get', '/teams')
+    const getGKECredentials = () => apiRequest({ req, res }, 'get', `/teams/${kore.koreAdminTeamName}/gkecredentials`)
+    const getAllocations = () => apiRequest({ req, res }, 'get', `/teams/${kore.koreAdminTeamName}/allocations`)
 
     return axios.all([getGKECredentials(), getTeams(), getAllocations()])
       .then(axios.spread(async function (gkeCredentials, allTeams, allAllocations) {
@@ -49,7 +49,7 @@ class ConfigureIntegrationsPage extends React.Component {
   }
 
   static getInitialProps = async (ctx) => {
-    const data = await ConfigureIntegrationsPage.getPageData(ctx.req)
+    const data = await ConfigureIntegrationsPage.getPageData(ctx)
     return data
   }
 

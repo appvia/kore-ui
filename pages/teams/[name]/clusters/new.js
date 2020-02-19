@@ -19,9 +19,10 @@ class NewTeamClusterPage extends React.Component {
     title: 'New team cluster'
   }
 
-  static async getPageData(req, name) {
-    const getTeam = () => apiRequest(req, 'get', `/teams/${name}`)
-    const getTeamClusters = () => apiRequest(req, 'get', `/teams/${name}/clusters`)
+  static async getPageData({ req, res, query }) {
+    const name = query.name
+    const getTeam = () => apiRequest({ req, res }, 'get', `/teams/${name}`)
+    const getTeamClusters = () => apiRequest({ req, res }, 'get', `/teams/${name}/clusters`)
 
     return axios.all([getTeam(), getTeamClusters()])
       .then(axios.spread(function (team, clusters) {
@@ -33,7 +34,7 @@ class NewTeamClusterPage extends React.Component {
   }
 
   static getInitialProps = async (ctx) => {
-    const data = await NewTeamClusterPage.getPageData(ctx.req, ctx.query.name)
+    const data = await NewTeamClusterPage.getPageData(ctx)
     return data
   }
 
