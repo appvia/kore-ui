@@ -2,6 +2,7 @@ import React from 'react'
 import App from 'next/app'
 import Head from 'next/head'
 import Router from 'next/router'
+import Link from 'next/link'
 import axios from 'axios'
 import { Layout } from 'antd'
 const { Header, Content } = Layout
@@ -62,7 +63,7 @@ class MyApp extends App {
       return redirect(ctx.res, '/')
     }
     if (Component.getInitialProps) {
-      const initialProps = await Component.getInitialProps(ctx)
+      const initialProps = await Component.getInitialProps({ ...ctx, user })
       pageProps = { ...pageProps, ...initialProps }
     }
     return { pageProps, user, userTeams }
@@ -138,7 +139,11 @@ class MyApp extends App {
         </Head>
         <Layout style={{minHeight:'100vh'}}>
           <Header style={{backgroundColor: '#002140'}}>
-            <div style={{color: '#FFF', float: 'left', fontSize: '18px', marginLeft: '-25px'}}>Kore</div>
+            <div style={{color: '#FFF', float: 'left', fontSize: '18px', marginLeft: '-25px'}}>
+              <Link href="/">
+                <a style={{ color: '#FFF' }}>Kore</a>
+              </Link>
+            </div>
             <User user={props.user}/>
           </Header>
           <Layout hasSider="true" style={{minHeight:'100vh'}}>
