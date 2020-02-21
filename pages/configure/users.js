@@ -27,8 +27,8 @@ class ConfigureUsersPage extends React.Component {
   }
 
   static getInitialProps = async (ctx) => {
-    const users = await apiRequest(ctx.req, 'get', '/users')
-    const adminTeamMembers = await apiRequest(ctx.req, 'get', `/teams/${kore.koreAdminTeamName}/members`)
+    const users = await apiRequest(ctx, 'get', '/users')
+    const adminTeamMembers = await apiRequest(ctx, 'get', `/teams/${kore.koreAdminTeamName}/members`)
     return {
       users: users.items,
       admins: adminTeamMembers.items

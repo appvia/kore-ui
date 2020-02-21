@@ -18,6 +18,12 @@ function getLogin(authService, embeddedAuth) {
   }
 }
 
+function getLoginRefresh(req, res) {
+  const authProvider = req.session.authProvider
+  const authUrl = `/login/auth${authProvider ? `?provider=${authProvider}` : ''}`
+  return res.redirect(authUrl)
+}
+
 function postLoginAuthConfigure(authService) {
   return async (req, res) => {
     try {
@@ -29,10 +35,25 @@ function postLoginAuthConfigure(authService) {
   }
 }
 
+function persistProviderUsed(req, res, next) {
+  if (!req.query.provider) {
+    return next()
+  }
+
+  req.session.authProvider = req.query.provider
+  req.session.save(err => {
+    if (err) {
+      return next(err)
+    }
+    next()
+  })
+}
+
 function initRouter({ authService, ensureOpenIdClient, embeddedAuth, authCallback }) {
   const router = Router()
   router.get('/login', ensureOpenIdClient, getLogin(authService, embeddedAuth))
-  router.get('/login/auth', ensureOpenIdClient, (req, res) => passport.authenticate(req.strategyName, { connector_id: req.query.provider })(req, res))
+  router.get('/login/refresh', ensureOpenIdClient, getLoginRefresh)
+  router.get('/login/auth', ensureOpenIdClient, persistProviderUsed, (req, res) => passport.authenticate(req.strategyName, { connector_id: req.query.provider })(req, res))
   router.get('/auth/callback', ensureOpenIdClient, (req, res, next) => passport.authenticate(req.strategyName, { failureRedirect: '/login' })(req, res, next), authCallback)
   // for configuring auth provider
   router.post('/login/auth/configure', ensureOpenIdClient, postLoginAuthConfigure(authService))

@@ -36,12 +36,12 @@ describe('App', () => {
 
         it('returns false if no user session exists', async () => {
           delete req.session
-          const userSession = await App.getUserSession(req)
+          const userSession = await App.getUserSession({ req })
           expect(userSession).toBe(false)
         })
 
         it('refreshes the user object and returns it', async () => {
-          const userSession = await App.getUserSession(req)
+          const userSession = await App.getUserSession({ req })
           expect(OrgService).toHaveBeenCalledTimes(1)
           const mockOrgServiceInstance = OrgService.mock.instances[0]
           const mockRefreshUser = mockOrgServiceInstance.refreshUser
@@ -55,9 +55,9 @@ describe('App', () => {
         it('makes request to get user session', async () => {
           axios.get.mockResolvedValue({ data: sessionUser })
 
-          const userSession = await App.getUserSession()
+          const userSession = await App.getUserSession({ asPath: '/requested-path' })
           expect(axios.get).toHaveBeenCalledTimes(1)
-          expect(axios.get).toHaveBeenCalledWith(`${window.location.origin}/session/user`)
+          expect(axios.get).toHaveBeenCalledWith(`${window.location.origin}/session/user?requestedPath=/requested-path`)
           expect(userSession).toEqual(userSession)
         })
 
@@ -112,7 +112,7 @@ describe('App', () => {
         }
         await App.getInitialProps(params)
         expect(redirect).toHaveBeenCalledTimes(1)
-        expect(redirect).toHaveBeenCalledWith(undefined, '/login', true)
+        expect(redirect).toHaveBeenCalledWith(undefined, '/login/refresh', true)
       })
 
       it('returns props, including pageProps, user and userTeams', async () => {

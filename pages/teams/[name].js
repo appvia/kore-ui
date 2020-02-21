@@ -41,12 +41,13 @@ class TeamDashboard extends React.Component {
     }
   }
 
-  static async getTeamDetails(req, name) {
-    const getTeam = () => apiRequest(req, 'get', `/teams/${name}`)
-    const getTeamMembers = () => apiRequest(req, 'get', `/teams/${name}/members`)
-    const getTeamClusters = () => apiRequest(req, 'get', `/teams/${name}/clusters`)
-    const getNamespaceClaims = () => apiRequest(req, 'get', `/teams/${name}/namespaceclaims`)
-    const getAvailable = () => apiRequest(req, 'get', `/teams/${name}/allocations?assigned=true`)
+  static async getTeamDetails({ req, res, query }) {
+    const name = query.name
+    const getTeam = () => apiRequest({ req, res }, 'get', `/teams/${name}`)
+    const getTeamMembers = () => apiRequest({ req, res }, 'get', `/teams/${name}/members`)
+    const getTeamClusters = () => apiRequest({ req, res }, 'get', `/teams/${name}/clusters`)
+    const getNamespaceClaims = () => apiRequest({ req, res }, 'get', `/teams/${name}/namespaceclaims`)
+    const getAvailable = () => apiRequest({ req, res }, 'get', `/teams/${name}/allocations?assigned=true`)
 
     return axios.all([getTeam(), getTeamMembers(), getTeamClusters(), getNamespaceClaims(), getAvailable()])
       .then(axios.spread(function (team, members, clusters, namespaceClaims, available) {
@@ -58,7 +59,7 @@ class TeamDashboard extends React.Component {
   }
 
   static getInitialProps = async ctx => {
-    const teamDetails = await TeamDashboard.getTeamDetails(ctx.req, ctx.query.name)
+    const teamDetails = await TeamDashboard.getTeamDetails(ctx, ctx.query.name)
     return teamDetails
   }
 

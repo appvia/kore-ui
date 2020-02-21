@@ -52,7 +52,7 @@ class OpenIdClient {
         scope: 'openid email profile',
       }
     }, function(tokenSet, cb) {
-      return cb(null, tokenSet.claims())
+      return cb(null, { ...tokenSet.claims(), ...tokenSet })
     })
     this.strategyName = strategy.name
     passport.use(strategy)

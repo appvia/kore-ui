@@ -12,6 +12,7 @@ import redirect from '../lib/utils/redirect'
 import copy from '../lib/utils/object-copy'
 import { kore, koreApi, server } from '../config'
 import OrgService from '../server/services/org'
+import userExpired from '../server/lib/user-expired'
 import gtag from '../lib/utils/gtag'
 
 Router.events.on('routeChangeComplete', url => {
@@ -19,11 +20,20 @@ Router.events.on('routeChangeComplete', url => {
 })
 
 class MyApp extends App {
-  static async getUserSession(req) {
+  static async getUserSession(ctx) {
+    const req = ctx && ctx.req
+    const res = ctx && ctx.res
+    const asPath = ctx && ctx.asPath
     if (req) {
       const session = req.session
       const user = session && session.passport && session.passport.user
       if (user) {
+        session.requestedPath = asPath
+
+        if (userExpired(session.passport.user)) {
+          return res.redirect('/login/refresh')
+        }
+
         const orgService = new OrgService(koreApi)
         await orgService.refreshUser(user)
         return user
@@ -31,7 +41,7 @@ class MyApp extends App {
       return false
     }
     try {
-      const result = await axios.get(`${window.location.origin}/session/user`)
+      const result = await axios.get(`${window.location.origin}/session/user?requestedPath=${asPath}`)
       return result.data
     } catch (err) {
       return false
@@ -43,9 +53,9 @@ class MyApp extends App {
     if (pageProps.unrestrictedPage) {
       return { pageProps }
     }
-    const user = await MyApp.getUserSession(ctx.req)
+    const user = await MyApp.getUserSession(ctx)
     if (!user) {
-      return redirect(ctx.res, '/login', true)
+      return redirect(ctx.res, '/login/refresh', true)
     }
     const userTeams = (user.teams || []).filter(t => !kore.ignoreTeams.includes(t.metadata.name))
     if (pageProps.adminOnly && !user.isAdmin) {
@@ -64,7 +74,7 @@ class MyApp extends App {
 
   setSessionTimeout() {
     clearInterval(this.interval)
-    if (!this.props.pageProps.unrestrictedPage) {
+    if (this.props.pageProps && !this.props.pageProps.unrestrictedPage) {
       // using session TTL + 5 seconds
       const intervalMs = (server.session.ttlInSeconds + 5) * 1000
       this.interval = setInterval(async () => {

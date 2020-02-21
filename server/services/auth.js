@@ -9,7 +9,6 @@ class AuthService {
     this.baseUrl = baseUrl
     this.requestOptions = {
       headers: {
-        'X-Identity': 'admin',
         'Authorization': `Bearer ${koreApi.token}`
       }
     }

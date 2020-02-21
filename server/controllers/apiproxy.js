@@ -9,8 +9,7 @@ function apiProxy(koreApi) {
     const apiUrlPath = req.originalUrl.replace('/apiproxy', '')
     const options = {
       headers: {
-        'X-Identity': req.session.passport.user.id,
-        'Authorization': `Bearer ${koreApi.token}`
+        'Authorization': `Bearer ${req.session.passport.user.id_token}`
       }
     }
     try {
@@ -37,9 +36,9 @@ function checkBlacklist(req, res, next) {
   next()
 }
 
-function initRouter({ ensureAuthenticated, koreApi }) {
+function initRouter({ ensureAuthenticated, ensureUserCurrent, koreApi }) {
   const router = Router()
-  router.use('/apiproxy/*', ensureAuthenticated, checkBlacklist, apiProxy(koreApi))
+  router.use('/apiproxy/*', ensureAuthenticated, checkBlacklist, ensureUserCurrent, apiProxy(koreApi))
   return router
 }
 
