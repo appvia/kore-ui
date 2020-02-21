@@ -12,6 +12,8 @@ function postLoginLocalUser(authService) {
           console.error('Error trying to login user', err)
           return res.status(500).send()
         }
+        req.session.localUser = true
+        req.session.passport.user.id_token = authService.koreApi.token
         req.session.save(err => {
           if (err) {
             console.error('Error trying to save session after user login', err)

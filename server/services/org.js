@@ -17,10 +17,10 @@ class OrgService {
     try {
       const userResource = await User(user)
       console.log(`*** putting user ${user.id}`, userResource)
-      const userResult = await axios.put(`${this.koreApi.url}/users/${user.id}`, userResource, { headers: this.getHeaders(user.id_token) })
-      const adminTeamMembers = await this.getTeamMembers(kore.koreAdminTeamName, user.id_token)
+      const userResult = await axios.put(`${this.koreApi.url}/users/${user.id}`, userResource, { headers: this.getHeaders(this.koreApi.token) })
+      const adminTeamMembers = await this.getTeamMembers(kore.koreAdminTeamName, this.koreApi.token)
       if (adminTeamMembers.length === 1) {
-        await this.addUserToTeam(kore.koreAdminTeamName, user.id, user.id_token)
+        await this.addUserToTeam(kore.koreAdminTeamName, user.id, this.koreApi.token)
       }
       const userToReturn = userResult.data
       userToReturn.teams = await this.getUserTeams(user.id, user.id_token)
