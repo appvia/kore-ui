@@ -56,7 +56,7 @@ class MyApp extends App {
     }
     const user = await MyApp.getUserSession(ctx)
     if (!user) {
-      return redirect(ctx.res, '/login/refresh', true)
+      return redirect(ctx.res, `/login/refresh?requestedPath=${ctx.asPath}`, true)
     }
     const userTeams = (user.teams || []).filter(t => !kore.ignoreTeams.includes(t.metadata.name))
     if (pageProps.adminOnly && !user.isAdmin) {
