@@ -124,10 +124,10 @@ class TeamDashboard extends React.Component {
         const members = state.members
         members.items = members.items.filter(m => m !== member)
         this.setState(state)
-        message.success(`Team member deleted: ${member}`)
+        message.success(`Team member removed: ${member}`)
       } catch (err) {
-        console.error('Error deleting team member', err)
-        message.error('Error deleting team member, please try again.')
+        console.error('Error removing team member', err)
+        message.error('Error removing team member, please try again.')
       }
     }
   }
@@ -171,7 +171,7 @@ class TeamDashboard extends React.Component {
       const deleteAction = (
         <Popconfirm
           key="delete"
-          title="Are you sure you want to delete this user?"
+          title="Are you sure you want to remove this user?"
           onConfirm={this.deleteTeamMember(member)}
           okText="Yes"
           cancelText="No"
@@ -179,14 +179,14 @@ class TeamDashboard extends React.Component {
           <a>Remove</a>
         </Popconfirm>
       )
-      if (member !== user.username) {
+      if (member !== user.id) {
         return [deleteAction]
       }
       return []
     }
 
     const memberName = member => (
-      <Text>{member} {member === user.username ? <Tag>You</Tag>: null}</Text>
+      <Text>{member} {member === user.id ? <Tag>You</Tag>: null}</Text>
     )
 
     const membersAvailableToAdd = allUsers.filter(user => !members.items.includes(user))
