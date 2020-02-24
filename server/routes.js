@@ -29,5 +29,6 @@ router.use(require('./controllers/auth-openid').initRouter({ authService, ensure
 // other routes must have an authenticated user
 router.use(require('./controllers/session').initRouter({ ensureAuthenticated, ensureUserCurrent, orgService }))
 router.use(require('./controllers/apiproxy').initRouter({ ensureAuthenticated, ensureUserCurrent, koreApi }))
+router.use(require('./controllers/process').initRouter({ ensureAuthenticated, ensureUserCurrent, koreApi }))
 
 module.exports = router
