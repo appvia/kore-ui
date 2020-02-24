@@ -135,7 +135,9 @@ describe('App', () => {
             staticProps: { myProp: 'myValue' },
             getInitialProps: jest.fn().mockResolvedValue(initialProps)
           },
-          ctx: {}
+          ctx: {
+            user
+          }
         }
         const props = await App.getInitialProps(params)
         expect(params.Component.getInitialProps).toHaveBeenCalledTimes(1)

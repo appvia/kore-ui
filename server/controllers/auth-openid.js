@@ -19,7 +19,10 @@ function getLogin(authService, embeddedAuth) {
 }
 
 function getLoginRefresh(req, res) {
-  const authProvider = req.session.authProvider
+  const { localUser, authProvider } = req.session
+  if (localUser) {
+    return res.redirect('/login/process')
+  }
   const authUrl = `/login/auth${authProvider ? `?provider=${authProvider}` : ''}`
   return res.redirect(authUrl)
 }
