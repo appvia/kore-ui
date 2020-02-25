@@ -9,6 +9,7 @@ const { Option } = Select
 import Breadcrumb from '../../lib/components/Breadcrumb'
 import Cluster from '../../lib/components/team/Cluster'
 import NamespaceClaim from '../../lib/components/team/NamespaceClaim'
+import InviteLink from '../../lib/components/team/InviteLink'
 import NamespaceClaimForm from '../../lib/components/forms/NamespaceClaimForm'
 import apiRequest from '../../lib/utils/api-request'
 import copy from '../../lib/utils/object-copy'
@@ -185,10 +186,6 @@ class TeamDashboard extends React.Component {
       return []
     }
 
-    const memberName = member => (
-      <Text>{member} {member === user.id ? <Tag>You</Tag>: null}</Text>
-    )
-
     const membersAvailableToAdd = allUsers.filter(user => !members.items.includes(user))
 
     return (
@@ -202,12 +199,13 @@ class TeamDashboard extends React.Component {
           title={<div><Text style={{ marginRight: '10px' }}>Team members</Text><Badge style={{ backgroundColor: '#1890ff' }} count={members.items.length} /></div>}
           style={{ marginBottom: '16px' }}
           className="team-members"
+          extra={<InviteLink team={team.metadata.name} />}
         >
           <List
             dataSource={teamMembers}
             renderItem={m => {
               if (m === 'ADD_USER') {
-                return <List.Item style={{ paddingTop: '0' }} actions={[<Button key="add" type="primary" onClick={this.addTeamMembers}>Add</Button>]}>
+                return <List.Item style={{ paddingTop: '0' }} actions={[<Button key="add" type="secondary" onClick={this.addTeamMembers}>Add</Button>]}>
                   <List.Item.Meta
                     title={
                       <Select
@@ -226,7 +224,7 @@ class TeamDashboard extends React.Component {
                 </List.Item>
               } else {
                 return <List.Item actions={memberActions(m)}>
-                  <List.Item.Meta avatar={<Avatar icon="user" />} title={memberName(m)} />
+                  <List.Item.Meta avatar={<Avatar icon="user" />} title={<Text>{m} {m === user.id ? <Tag>You</Tag>: null}</Text>} />
                 </List.Item>
               }
             }}
@@ -249,7 +247,7 @@ class TeamDashboard extends React.Component {
             renderItem={cluster => {
               const namespaceClaims = (this.state.namespaceClaims.items || []).filter(nc => nc.spec.cluster.name === cluster.metadata.name && !nc.deleted)
               return (
-                <Cluster team={this.props.team.metadata.name} cluster={cluster} namespaceClaims={namespaceClaims} handleDelete={this.handleClusterDeleted} />
+                <Cluster team={team.metadata.name} cluster={cluster} namespaceClaims={namespaceClaims} handleDelete={this.handleClusterDeleted} />
               )
             }}
           >
@@ -264,7 +262,7 @@ class TeamDashboard extends React.Component {
           <List
             dataSource={namespaceClaims.items}
             renderItem={namespaceClaim =>
-              <NamespaceClaim team={this.props.team.metadata.name} namespaceClaim={namespaceClaim} handleDelete={this.handleNamespaceDeleted} />
+              <NamespaceClaim team={team.metadata.name} namespaceClaim={namespaceClaim} handleDelete={this.handleNamespaceDeleted} />
             }
           >
           </List>

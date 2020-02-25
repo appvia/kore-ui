@@ -6,11 +6,11 @@ const { Title, Paragraph, Text } = Typography
 
 import NewTeamForm from '../../lib/components/forms/NewTeamForm'
 import ClusterBuildForm from '../../lib/components/forms/ClusterBuildForm'
+import InviteLink from '../../lib/components/team/InviteLink'
 import Breadcrumb from '../../lib/components/Breadcrumb'
 import copy from '../../lib/utils/object-copy'
 import apiRequest from '../../lib/utils/api-request'
 import asyncForEach from '../../lib/utils/async-foreach'
-import { kore } from '../../config'
 
 class NewTeamPage extends React.Component {
   static propTypes = {
@@ -23,10 +23,7 @@ class NewTeamPage extends React.Component {
     members: [],
     membersToAdd: [],
     providers: [],
-    plans: { items: [] },
-    inviteLinkCopyTooltipText: 'Copy',
-    inviteLinkCopyIcon: 'copy',
-    inviteLinkCopyIconColor: '#555'
+    plans: { items: [] }
   }
 
   static staticProps = {
@@ -52,11 +49,9 @@ class NewTeamPage extends React.Component {
 
   handleTeamCreated = async (team) => {
     this.props.teamAdded(team)
-    const inviteLink = await apiRequest(null, 'get', `/teams/${team.metadata.name}/invites/generate`)
     const state = copy(this.state)
     state.members.push(this.props.user.id)
     state.team = team
-    state.inviteLink = `${kore.baseUrl}/process${inviteLink}`
     this.setState(state)
   }
 
@@ -96,28 +91,9 @@ class NewTeamPage extends React.Component {
     }
   }
 
-  copyInviteLink = () => {
-    clearInterval(this.interval)
-    this.inviteLinkInput.select()
-    document.execCommand('copy')
-    const state = copy(this.state)
-    state.inviteLinkCopyTooltipText = 'Copied!'
-    state.inviteLinkCopyIcon = 'check'
-    state.inviteLinkCopyIconColor = '#52c41a'
-    this.setState(state)
-    this.interval = setInterval(() => {
-      const state = copy(this.state)
-      state.inviteLinkCopyTooltipText = 'Copy'
-      state.inviteLinkCopyIcon = 'copy'
-      state.inviteLinkCopyIconColor = '#555'
-      this.setState(state)
-      clearInterval(this.interval)
-    }, 2500)
-  }
-
   render() {
     const { user } = this.props
-    const { team, members, membersToAdd, allUsers, inviteLink, inviteLinkCopyTooltipText, inviteLinkCopyIcon, inviteLinkCopyIconColor } = this.state
+    const { team, members, membersToAdd, allUsers } = this.state
 
     const membersAvailableToAdd = (allUsers || []).filter(user => !members.includes(user))
 
@@ -169,11 +145,7 @@ class NewTeamPage extends React.Component {
                       />
                     </List.Item>
                     <List.Item>
-                      <Input
-                        addonBefore="Invite link"
-                        addonAfter={<Tooltip title={inviteLinkCopyTooltipText}><Icon style={{ color: inviteLinkCopyIconColor }} type={inviteLinkCopyIcon} onClick={this.copyInviteLink} /></Tooltip>}
-                        ref={inst => this.inviteLinkInput = inst}
-                        value={inviteLink} />
+                      <InviteLink team={team.metadata.name} />
                     </List.Item>
                   </List>
                 </Col>
