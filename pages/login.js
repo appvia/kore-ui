@@ -9,7 +9,8 @@ class LoginPage extends React.Component {
     form: PropTypes.object.isRequired,
     authProvider: PropTypes.object,
     connectorId: PropTypes.string,
-    embeddedAuth: PropTypes.bool
+    embeddedAuth: PropTypes.bool,
+    loginError: PropTypes.number
   }
 
   static staticProps = ({ req }) => {
@@ -22,7 +23,8 @@ class LoginPage extends React.Component {
       unrestrictedPage: true,
       authProvider: req.authProvider,
       connectorId,
-      embeddedAuth: req.embeddedAuth || false
+      embeddedAuth: req.embeddedAuth || false,
+      loginError: req.loginError
     }
   }
 
@@ -34,7 +36,7 @@ class LoginPage extends React.Component {
   state = {
     showLoginForm: !this.props.authProvider && this.props.embeddedAuth,
     submitting: false,
-    localLoginErrorCode: false
+    localLoginErrorCode: this.props.loginError || false
   }
 
   showLoginForm = () => {
@@ -73,16 +75,16 @@ class LoginPage extends React.Component {
 
   render() {
     const { authProvider, connectorId, embeddedAuth } = this.props
+    const { localLoginErrorCode, showLoginForm, submitting }  = this.state
     const { getFieldDecorator, getFieldsError, getFieldError, isFieldTouched } = this.props.form
 
     const formErrorMessage = () => {
-      if (this.state.localLoginErrorCode) {
+      if (localLoginErrorCode) {
         return (
           <Alert
-            message={LoginPage.errorCodeMessages[this.state.localLoginErrorCode]}
+            message={LoginPage.errorCodeMessages[localLoginErrorCode]}
             type="error"
             showIcon
-            closable
             style={{ marginBottom: '20px' }}
           />
         )
@@ -98,6 +100,7 @@ class LoginPage extends React.Component {
         <Row type="flex" justify="center">
           <Col>
             <Card title="Login" style={{ textAlign: 'center' }}>
+              <div>{formErrorMessage()}</div>
               {authProvider || !embeddedAuth ? (
                 <div>
                   <p>Login using the configured Identity Provider below</p>
@@ -108,9 +111,8 @@ class LoginPage extends React.Component {
                   <Button style={{ marginLeft: '10px' }} onClick={this.showLoginForm}>Local user login</Button>
                 </div>
               ) : null}
-              {this.state.showLoginForm ? (
+              {showLoginForm ? (
                 <Form layout="inline" onSubmit={this.handleSubmit} style={{ marginTop: '20px' }}>
-                  <div>{formErrorMessage()}</div>
                   <Form.Item validateStatus={usernameError ? 'error' : ''} help={usernameError || ''}>
                     {getFieldDecorator('login', {
                       rules: [{ required: true, message: 'Please input your username!' }],
@@ -133,7 +135,7 @@ class LoginPage extends React.Component {
                     )}
                   </Form.Item>
                   <Form.Item>
-                    <Button type="primary" htmlType="submit" loading={this.state.submitting} disabled={this.disableButton(getFieldsError())}>
+                    <Button type="primary" htmlType="submit" loading={submitting} disabled={this.disableButton(getFieldsError())}>
                       Log in
                     </Button>
                   </Form.Item>
