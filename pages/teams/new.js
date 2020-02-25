@@ -1,7 +1,7 @@
 import React from 'react'
 import PropTypes from 'prop-types'
 import Link from 'next/link'
-import { Typography, Button, Card, List, Row, Col, Input, Icon, Alert, message, Select, Tooltip } from 'antd'
+import { Typography, Button, Card, List, Row, Col, Icon, Alert, message, Select, Tooltip } from 'antd'
 const { Title, Paragraph, Text } = Typography
 
 import NewTeamForm from '../../lib/components/forms/NewTeamForm'
@@ -158,7 +158,7 @@ class NewTeamPage extends React.Component {
                     split={false}
                     dataSource={members}
                     renderItem={m => {
-                      const actions = m !== user.id ? [<Tooltip title="Remove member"><Icon type="delete" onClick={this.deleteTeamMember(m)} /></Tooltip>] : []
+                      const actions = m !== user.id ? [<Tooltip key="remove_member" title="Remove member"><Icon type="delete" onClick={this.deleteTeamMember(m)} /></Tooltip>] : []
                       return <List.Item actions={actions}>{m}</List.Item>
                     }}>
                   </List>

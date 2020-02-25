@@ -165,6 +165,7 @@ class TeamDashboard extends React.Component {
 
   render() {
     const { members, namespaceClaims, allUsers, membersToAdd, createNamespace, clusters } = this.state
+    const { team, user, available } = this.props
     const { team, user } = this.props
     const teamMembers = ['ADD_USER', ...members.items]
 
