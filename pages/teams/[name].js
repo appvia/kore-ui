@@ -189,7 +189,10 @@ class TeamDashboard extends React.Component {
     return (
       <div>
         <Breadcrumb items={[{text: team.spec.summary}]} />
-        <Paragraph strong>{team.spec.description}</Paragraph>
+        <Paragraph>
+          <Text strong>{team.spec.description}</Text>
+          <Text style={{ float: 'right' }}><Text strong>Short name: </Text>{team.metadata.name}</Text>
+        </Paragraph>
         <Card
           title={<div><Text style={{ marginRight: '10px' }}>Team members</Text><Badge style={{ backgroundColor: '#1890ff' }} count={members.items.length} /></div>}
           style={{ marginBottom: '16px' }}
