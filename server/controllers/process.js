@@ -22,17 +22,14 @@ function processTeamInvitation(koreApi) {
   }
 }
 
-function persistRequestedPath(req, res, next) {
-  const requestedPath = req.path
-  if (requestedPath) {
-    req.session.requestedPath = req.path
-  }
+function persistPath(req, res, next) {
+  req.session.requestedPath = req.path
   next()
 }
 
 function initRouter({ ensureAuthenticated, ensureUserCurrent, koreApi }) {
   const router = Router()
-  router.get('/process/teams/invitation/:token', persistRequestedPath, ensureAuthenticated, ensureUserCurrent, processTeamInvitation(koreApi))
+  router.get('/process/teams/invitation/:token', persistPath, ensureAuthenticated, ensureUserCurrent, processTeamInvitation(koreApi))
   return router
 }
 
