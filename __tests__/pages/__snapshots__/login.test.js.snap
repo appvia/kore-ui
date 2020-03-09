@@ -44,6 +44,7 @@ exports[`Snapshot testing shows login not using embedded auth 1`] = `
           className="ant-card-body"
           style={Object {}}
         >
+          <div />
           <div>
             <p>
               Login using the configured Identity Provider below
@@ -130,6 +131,7 @@ exports[`Snapshot testing shows login using embedded auth 1`] = `
           className="ant-card-body"
           style={Object {}}
         >
+          <div />
           <div>
             <p>
               Login using the configured Identity Provider below

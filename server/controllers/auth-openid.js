@@ -10,6 +10,10 @@ function getLogin(authService, embeddedAuth) {
         /* eslint-disable-next-line require-atomic-updates */
         req.authProvider = authProvider
       }
+      if (req.session.loginError) {
+        req.loginError = req.session.loginError
+        delete req.session.loginError
+      }
       req.embeddedAuth = embeddedAuth
       return app.render(req, res, '/login', req.query)
     } catch (err) {
