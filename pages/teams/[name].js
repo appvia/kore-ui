@@ -140,6 +140,13 @@ class TeamDashboard extends React.Component {
     }
   }
 
+  handleClusterDeleted = name => {
+    const state = copy(this.state)
+    const deletedCluster = state.clusters.items.find(c => c.metadata.name === name)
+    deletedCluster.deleted = true
+    this.setState(state)
+  }
+
   handleNamespaceCreated = namespaceClaim => {
     const state = copy(this.state)
     state.createNamespace = false
@@ -148,18 +155,16 @@ class TeamDashboard extends React.Component {
     message.loading(`Namespace "${namespaceClaim.spec.name}" requested on cluster "${namespaceClaim.spec.cluster.name}"`)
   }
 
-  handleNamespaceDeleted = namespaceClaim => {
+  handleNamespaceDeleted = name => {
     const state = copy(this.state)
-    const deletedNc = state.namespaceClaims.items.find(nc => nc.metadata.name === namespaceClaim.metadata.name)
+    const deletedNc = state.namespaceClaims.items.find(nc => nc.metadata.name === name)
     deletedNc.deleted = true
     this.setState(state)
   }
 
   render() {
     const { members, namespaceClaims, allUsers, membersToAdd, createNamespace, clusters } = this.state
-    namespaceClaims.items = namespaceClaims.items.filter(nc => !nc.deleted)
-    clusters.items = clusters.items.filter(c => !c.deleted)
-    const { team, user, available } = this.props
+    const { team, user } = this.props
     const teamMembers = ['ADD_USER', ...members.items]
 
     const memberActions = member => {
@@ -229,7 +234,7 @@ class TeamDashboard extends React.Component {
           </List>
         </Card>
         <Card
-          title={<div><Text style={{ marginRight: '10px' }}>Clusters</Text><Badge style={{ backgroundColor: '#1890ff' }} count={clusters.items.length} /></div>}
+          title={<div><Text style={{ marginRight: '10px' }}>Clusters</Text><Badge style={{ backgroundColor: '#1890ff' }} count={clusters.items.filter(c => !c.deleted).length} /></div>}
           style={{ marginBottom: '20px' }}
           extra={
             <Button type="primary">
@@ -242,10 +247,9 @@ class TeamDashboard extends React.Component {
           <List
             dataSource={clusters.items}
             renderItem={cluster => {
-              const provider = available.items.find(a => a.metadata.name === cluster.spec.provider.name)
               const namespaceClaims = (this.state.namespaceClaims.items || []).filter(nc => nc.spec.cluster.name === cluster.metadata.name && !nc.deleted)
               return (
-                <Cluster team={this.props.team.metadata.name} cluster={cluster} provider={provider} namespaceClaims={namespaceClaims} handleDelete={this.handleClusterDeleted} />
+                <Cluster team={this.props.team.metadata.name} cluster={cluster} namespaceClaims={namespaceClaims} handleDelete={this.handleClusterDeleted} />
               )
             }}
           >
@@ -253,12 +257,12 @@ class TeamDashboard extends React.Component {
         </Card>
 
         <Card
-          title={<div><Text style={{ marginRight: '10px' }}>Namespaces</Text><Badge style={{ backgroundColor: '#1890ff' }} count={namespaceClaims.items.length} /></div>}
+          title={<div><Text style={{ marginRight: '10px' }}>Namespaces</Text><Badge style={{ backgroundColor: '#1890ff' }} count={namespaceClaims.items.filter(c => !c.deleted).length} /></div>}
           style={{ marginBottom: '20px' }}
           extra={clusters.items.length > 0 ? <Button type="primary" onClick={this.createNamespace(true)}>+ New</Button> : null}
         >
           <List
-            dataSource={namespaceClaims.items.filter(nc => !nc.deleted)}
+            dataSource={namespaceClaims.items}
             renderItem={namespaceClaim =>
               <NamespaceClaim team={this.props.team.metadata.name} namespaceClaim={namespaceClaim} handleDelete={this.handleNamespaceDeleted} />
             }
