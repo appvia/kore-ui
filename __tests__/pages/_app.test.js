@@ -108,11 +108,13 @@ describe('App', () => {
         App.getUserSession.mockResolvedValue(false)
         const params = {
           Component: {},
-          ctx: {}
+          ctx: {
+            asPath: '/requested/path'
+          }
         }
         await App.getInitialProps(params)
         expect(redirect).toHaveBeenCalledTimes(1)
-        expect(redirect).toHaveBeenCalledWith(undefined, '/login/refresh', true)
+        expect(redirect).toHaveBeenCalledWith(undefined, '/login/refresh?requestedPath=/requested/path', true)
       })
 
       it('returns props, including pageProps, user and userTeams', async () => {

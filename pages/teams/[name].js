@@ -2,13 +2,14 @@ import React from 'react'
 import PropTypes from 'prop-types'
 import axios from 'axios'
 import Link from 'next/link'
-import { Typography, Card, List, Tag, Button, Avatar, Popconfirm, message, Select, Drawer, Badge } from 'antd'
+import { Typography, Card, List, Tag, Button, Avatar, Popconfirm, message, Select, Drawer, Badge, Alert } from 'antd'
 const { Paragraph, Text } = Typography
 const { Option } = Select
 
 import Breadcrumb from '../../lib/components/Breadcrumb'
 import Cluster from '../../lib/components/team/Cluster'
 import NamespaceClaim from '../../lib/components/team/NamespaceClaim'
+import InviteLink from '../../lib/components/team/InviteLink'
 import NamespaceClaimForm from '../../lib/components/forms/NamespaceClaimForm'
 import apiRequest from '../../lib/utils/api-request'
 import copy from '../../lib/utils/object-copy'
@@ -16,6 +17,7 @@ import asyncForEach from '../../lib/utils/async-foreach'
 
 class TeamDashboard extends React.Component {
   static propTypes = {
+    invitation: PropTypes.bool,
     team: PropTypes.object.isRequired,
     members: PropTypes.object.isRequired,
     user: PropTypes.object.isRequired,
@@ -59,7 +61,10 @@ class TeamDashboard extends React.Component {
   }
 
   static getInitialProps = async ctx => {
-    const teamDetails = await TeamDashboard.getTeamDetails(ctx, ctx.query.name)
+    const teamDetails = await TeamDashboard.getTeamDetails(ctx)
+    if (ctx.query.invitation === 'true') {
+      teamDetails.invitation = true
+    }
     return teamDetails
   }
 
@@ -124,10 +129,10 @@ class TeamDashboard extends React.Component {
         const members = state.members
         members.items = members.items.filter(m => m !== member)
         this.setState(state)
-        message.success(`Team member deleted: ${member}`)
+        message.success(`Team member removed: ${member}`)
       } catch (err) {
-        console.error('Error deleting team member', err)
-        message.error('Error deleting team member, please try again.')
+        console.error('Error removing team member', err)
+        message.error('Error removing team member, please try again.')
       }
     }
   }
@@ -164,14 +169,14 @@ class TeamDashboard extends React.Component {
 
   render() {
     const { members, namespaceClaims, allUsers, membersToAdd, createNamespace, clusters } = this.state
-    const { team, user } = this.props
+    const { team, user, invitation } = this.props
     const teamMembers = ['ADD_USER', ...members.items]
 
     const memberActions = member => {
       const deleteAction = (
         <Popconfirm
           key="delete"
-          title="Are you sure you want to delete this user?"
+          title="Are you sure you want to remove this user?"
           onConfirm={this.deleteTeamMember(member)}
           okText="Yes"
           cancelText="No"
@@ -179,15 +184,11 @@ class TeamDashboard extends React.Component {
           <a>Remove</a>
         </Popconfirm>
       )
-      if (member !== user.username) {
+      if (member !== user.id) {
         return [deleteAction]
       }
       return []
     }
-
-    const memberName = member => (
-      <Text>{member} {member === user.username ? <Tag>You</Tag>: null}</Text>
-    )
 
     const membersAvailableToAdd = allUsers.filter(user => !members.items.includes(user))
 
@@ -198,16 +199,25 @@ class TeamDashboard extends React.Component {
           <Text strong>{team.spec.description}</Text>
           <Text style={{ float: 'right' }}><Text strong>Short name: </Text>{team.metadata.name}</Text>
         </Paragraph>
+        {invitation ? (
+          <Alert
+            message="You have joined this team from an invitation"
+            type="info"
+            showIcon
+            style={{ marginBottom: '20px' }}
+          />
+        ) : null}
         <Card
           title={<div><Text style={{ marginRight: '10px' }}>Team members</Text><Badge style={{ backgroundColor: '#1890ff' }} count={members.items.length} /></div>}
           style={{ marginBottom: '16px' }}
           className="team-members"
+          extra={<InviteLink team={team.metadata.name} />}
         >
           <List
             dataSource={teamMembers}
             renderItem={m => {
               if (m === 'ADD_USER') {
-                return <List.Item style={{ paddingTop: '0' }} actions={[<Button key="add" type="primary" onClick={this.addTeamMembers}>Add</Button>]}>
+                return <List.Item style={{ paddingTop: '0' }} actions={[<Button key="add" type="secondary" onClick={this.addTeamMembers}>Add</Button>]}>
                   <List.Item.Meta
                     title={
                       <Select
@@ -226,7 +236,7 @@ class TeamDashboard extends React.Component {
                 </List.Item>
               } else {
                 return <List.Item actions={memberActions(m)}>
-                  <List.Item.Meta avatar={<Avatar icon="user" />} title={memberName(m)} />
+                  <List.Item.Meta avatar={<Avatar icon="user" />} title={<Text>{m} {m === user.id ? <Tag>You</Tag>: null}</Text>} />
                 </List.Item>
               }
             }}
@@ -249,7 +259,7 @@ class TeamDashboard extends React.Component {
             renderItem={cluster => {
               const namespaceClaims = (this.state.namespaceClaims.items || []).filter(nc => nc.spec.cluster.name === cluster.metadata.name && !nc.deleted)
               return (
-                <Cluster team={this.props.team.metadata.name} cluster={cluster} namespaceClaims={namespaceClaims} handleDelete={this.handleClusterDeleted} />
+                <Cluster team={team.metadata.name} cluster={cluster} namespaceClaims={namespaceClaims} handleDelete={this.handleClusterDeleted} />
               )
             }}
           >
@@ -264,7 +274,7 @@ class TeamDashboard extends React.Component {
           <List
             dataSource={namespaceClaims.items}
             renderItem={namespaceClaim =>
-              <NamespaceClaim team={this.props.team.metadata.name} namespaceClaim={namespaceClaim} handleDelete={this.handleNamespaceDeleted} />
+              <NamespaceClaim team={team.metadata.name} namespaceClaim={namespaceClaim} handleDelete={this.handleNamespaceDeleted} />
             }
           >
           </List>

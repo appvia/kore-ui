@@ -23,9 +23,9 @@ function getLogin(authService, embeddedAuth) {
 }
 
 function getLoginRefresh(req, res) {
-  const { localUser, authProvider } = req.session
-  if (localUser) {
-    return res.redirect('/login/process')
+  const { localUser, authProvider, passport } = req.session
+  if (!passport || localUser) {
+    return res.redirect('/login')
   }
   const authUrl = `/login/auth${authProvider ? `?provider=${authProvider}` : ''}`
   return res.redirect(authUrl)
@@ -56,10 +56,10 @@ function persistProviderUsed(req, res, next) {
   })
 }
 
-function initRouter({ authService, ensureOpenIdClient, embeddedAuth, authCallback }) {
+function initRouter({ authService, ensureOpenIdClient, persistRequestedPath, embeddedAuth, authCallback }) {
   const router = Router()
   router.get('/login', ensureOpenIdClient, getLogin(authService, embeddedAuth))
-  router.get('/login/refresh', ensureOpenIdClient, getLoginRefresh)
+  router.get('/login/refresh', ensureOpenIdClient, persistRequestedPath, getLoginRefresh)
   router.get('/login/auth', ensureOpenIdClient, persistProviderUsed, (req, res) => passport.authenticate(req.strategyName, { connector_id: req.query.provider })(req, res))
   router.get('/auth/callback', ensureOpenIdClient, (req, res, next) => passport.authenticate(req.strategyName, { failureRedirect: '/login' })(req, res, next), authCallback)
   // for configuring auth provider

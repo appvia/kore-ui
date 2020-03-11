@@ -72,7 +72,7 @@ class ConfigureUsersPage extends React.Component {
         <List
           dataSource={this.state.users}
           renderItem={user => {
-            const isUser = user.spec.username === this.props.user.username
+            const isUser = user.spec.username === this.props.user.id
             const isAdmin = this.state.admins.includes(user.spec.username)
             const actions = []
             if (isAdmin && !isUser) {

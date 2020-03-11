@@ -102,10 +102,9 @@ describe('NewTeamForm', () => {
       apiRequest.mockResolvedValueOnce({}).mockResolvedValueOnce(team).mockResolvedValue({})
       props.form.validateFields = jest.fn(cb => cb(null, { teamName: 'ABC', teamDescription: 'ABC team' }))
       await newTeamForm.handleSubmit(event)
-      expect(apiRequest).toHaveBeenCalledTimes(3)
+      expect(apiRequest).toHaveBeenCalledTimes(2)
       expect(apiRequest.mock.calls[0]).toEqual([ null, 'get', '/teams/abc' ])
       expect(apiRequest.mock.calls[1]).toEqual([ null, 'put', '/teams/abc', team ])
-      expect(apiRequest.mock.calls[2]).toEqual([ null, 'put', '/teams/abc/members/jbloggs' ])
       expect(newTeamForm.state).toEqual({
         submitting: false,
         formErrorMessage: false

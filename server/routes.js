@@ -6,6 +6,7 @@ const OrgService = require('./services/org')
 const OpenIdClient = require('./lib/openid-client')
 const ensureAuthenticated = require('./middleware/ensure-authenticated')
 const ensureUserCurrent = require('./middleware/ensure-user-current')
+const persistRequestedPath = require('./middleware/persist-requested-path')
 
 const koreConfig = config.kore
 const koreApi = config.koreApi
@@ -24,10 +25,11 @@ openIdClient.init()
   })
 const ensureOpenIdClient = require('./middleware/ensure-openid-client')(openIdClient)
 router.use(require('./controllers/auth-local').initRouter({ authService, ensureAuthenticated, authCallback }))
-router.use(require('./controllers/auth-openid').initRouter({ authService, ensureOpenIdClient, embeddedAuth, authCallback }))
+router.use(require('./controllers/auth-openid').initRouter({ authService, ensureOpenIdClient, persistRequestedPath, embeddedAuth, authCallback }))
 
 // other routes must have an authenticated user
-router.use(require('./controllers/session').initRouter({ ensureAuthenticated, ensureUserCurrent, orgService }))
+router.use(require('./controllers/session').initRouter({ ensureAuthenticated, ensureUserCurrent, persistRequestedPath, orgService }))
 router.use(require('./controllers/apiproxy').initRouter({ ensureAuthenticated, ensureUserCurrent, koreApi }))
+router.use(require('./controllers/process').initRouter({ ensureAuthenticated, ensureUserCurrent, koreApi }))
 
 module.exports = router

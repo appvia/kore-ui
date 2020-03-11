@@ -1,13 +1,5 @@
 const Router = require('express').Router
 
-function persistRequestedPath(req, res, next) {
-  const requestedPath = req.query.requestedPath
-  if (requestedPath) {
-    req.session.requestedPath = requestedPath
-  }
-  next()
-}
-
 function getSessionUser(orgService) {
   return async(req, res) => {
     const user = req.session.passport.user
@@ -16,9 +8,9 @@ function getSessionUser(orgService) {
   }
 }
 
-function initRouter({ ensureAuthenticated, ensureUserCurrent, orgService }) {
+function initRouter({ ensureAuthenticated, ensureUserCurrent, persistRequestedPath, orgService }) {
   const router = Router()
-  router.get('/session/user', ensureAuthenticated, persistRequestedPath, ensureUserCurrent, getSessionUser(orgService))
+  router.get('/session/user', ensureAuthenticated, ensureUserCurrent, persistRequestedPath, getSessionUser(orgService))
   return router
 }
 
