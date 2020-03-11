@@ -33,7 +33,6 @@ class TeamDashboard extends React.Component {
   constructor(props) {
     super(props)
     this.state = {
-      teamName: props.team.metadata.name,
       members: props.members,
       allUsers: [],
       membersToAdd: [],
@@ -85,13 +84,12 @@ class TeamDashboard extends React.Component {
       })
   }
 
-  componentDidUpdate(props, state) {
-    if (this.props.team.metadata.name !== state.teamName) {
+  componentDidUpdate(prevProps) {
+    if (this.props.team.metadata.name !== prevProps.team.metadata.name) {
       const state = copy(this.state)
-      state.teamName = this.props.team.metadata.name
-      state.members = props.members
-      state.clusters = props.clusters
-      state.namespaceClaims = props.namespaceClaims
+      state.members = this.props.members
+      state.clusters = this.props.clusters
+      state.namespaceClaims = this.props.namespaceClaims
       this.getAllUsers()
         .then(users => {
           state.allUsers = users
