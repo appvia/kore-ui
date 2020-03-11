@@ -2,7 +2,7 @@ import React from 'react'
 import PropTypes from 'prop-types'
 import axios from 'axios'
 import Link from 'next/link'
-import { Typography, Card, List, Tag, Button, Avatar, Popconfirm, message, Select, Drawer, Badge } from 'antd'
+import { Typography, Card, List, Tag, Button, Avatar, Popconfirm, message, Select, Drawer, Badge, Alert } from 'antd'
 const { Paragraph, Text } = Typography
 const { Option } = Select
 
@@ -17,6 +17,7 @@ import asyncForEach from '../../lib/utils/async-foreach'
 
 class TeamDashboard extends React.Component {
   static propTypes = {
+    invitation: PropTypes.bool,
     team: PropTypes.object.isRequired,
     members: PropTypes.object.isRequired,
     user: PropTypes.object.isRequired,
@@ -60,7 +61,10 @@ class TeamDashboard extends React.Component {
   }
 
   static getInitialProps = async ctx => {
-    const teamDetails = await TeamDashboard.getTeamDetails(ctx, ctx.query.name)
+    const teamDetails = await TeamDashboard.getTeamDetails(ctx)
+    if (ctx.query.invitation === 'true') {
+      teamDetails.invitation = true
+    }
     return teamDetails
   }
 
@@ -165,8 +169,7 @@ class TeamDashboard extends React.Component {
 
   render() {
     const { members, namespaceClaims, allUsers, membersToAdd, createNamespace, clusters } = this.state
-    const { team, user, available } = this.props
-    const { team, user } = this.props
+    const { team, user, invitation } = this.props
     const teamMembers = ['ADD_USER', ...members.items]
 
     const memberActions = member => {
@@ -196,6 +199,14 @@ class TeamDashboard extends React.Component {
           <Text strong>{team.spec.description}</Text>
           <Text style={{ float: 'right' }}><Text strong>Short name: </Text>{team.metadata.name}</Text>
         </Paragraph>
+        {invitation ? (
+          <Alert
+            message="You have joined this team from an invitation"
+            type="info"
+            showIcon
+            style={{ marginBottom: '20px' }}
+          />
+        ) : null}
         <Card
           title={<div><Text style={{ marginRight: '10px' }}>Team members</Text><Badge style={{ backgroundColor: '#1890ff' }} count={members.items.length} /></div>}
           style={{ marginBottom: '16px' }}

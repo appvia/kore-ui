@@ -11,8 +11,12 @@ function processTeamInvitation(koreApi) {
       }
     }
     try {
-      await axios.put(`${koreApi.url}/teams/invitation/${token}`, undefined, options)
-      return res.redirect('/')
+      const invitationResponse = await axios.put(`${koreApi.url}/teams/invitation/${token}`, undefined, options)
+      let redirectTo = '/'
+      if (invitationResponse.data.team) {
+        redirectTo = `/teams/${invitationResponse.data.team}?invitation=true`
+      }
+      return res.redirect(redirectTo)
     } catch (err) {
       const status = (err.response && err.response.status) || 500
       const message = (err.response && err.response.data && err.response.data.message) || err.message
