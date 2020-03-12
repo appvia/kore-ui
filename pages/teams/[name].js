@@ -158,11 +158,34 @@ class TeamDashboard extends React.Component {
     message.loading(`Namespace "${namespaceClaim.spec.name}" requested on cluster "${namespaceClaim.spec.cluster.name}"`)
   }
 
-  handleNamespaceDeleted = name => {
+  handleNamespaceDeleted = (name, done) => {
     const state = copy(this.state)
     const deletedNc = state.namespaceClaims.items.find(nc => nc.metadata.name === name)
     deletedNc.deleted = true
-    this.setState(state)
+    this.setState(state, done)
+  }
+
+  handleNamespaceUpdated = (updatedNamespaceClaim, done) => {
+    const state = copy(this.state)
+    const namespaceClaim = state.namespaceClaims.items.find(nc => nc.metadata.name === updatedNamespaceClaim.metadata.name)
+    namespaceClaim.status = updatedNamespaceClaim.status
+    this.setState(state, done)
+  }
+
+  deleteNamespace = async (name, done) => {
+    const team = this.props.team.metadata.name
+    try {
+      const state = copy(this.state)
+      const namespaceClaim = state.namespaceClaims.items.find(nc => nc.metadata.name === name)
+      await apiRequest(null, 'delete', `/teams/${team}/namespaceclaims/${name}`)
+      namespaceClaim.status.status = 'Deleting'
+      namespaceClaim.metadata.deletionTimestamp = new Date()
+      this.setState(state, done)
+      message.loading(`Namespace deletion requested: ${namespaceClaim.spec.name}`)
+    } catch (err) {
+      console.error('Error deleting namespace', err)
+      message.error('Error deleting namespace, please try again.')
+    }
   }
 
   render() {
@@ -283,8 +306,10 @@ class TeamDashboard extends React.Component {
               <NamespaceClaim
                 team={team.metadata.name}
                 namespaceClaim={namespaceClaim}
+                deleteNamespace={this.deleteNamespace}
+                handleUpdate={this.handleNamespaceUpdated}
                 handleDelete={this.handleNamespaceDeleted}
-                refreshMs={1000}
+                refreshMs={15000}
                 stateResourceDataKey="namespaceClaim"
                 resourceApiPath={`/teams/${team.metadata.name}/namespaceclaims/${namespaceClaim.metadata.name}`}
               />
