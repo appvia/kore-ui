@@ -257,7 +257,15 @@ class TeamDashboard extends React.Component {
             renderItem={cluster => {
               const namespaceClaims = (this.state.namespaceClaims.items || []).filter(nc => nc.spec.cluster.name === cluster.metadata.name && !nc.deleted)
               return (
-                <Cluster team={team.metadata.name} cluster={cluster} namespaceClaims={namespaceClaims} handleDelete={this.handleClusterDeleted} />
+                <Cluster
+                  team={team.metadata.name}
+                  cluster={cluster}
+                  namespaceClaims={namespaceClaims}
+                  handleDelete={this.handleClusterDeleted}
+                  refreshMs={10000}
+                  stateResourceDataKey="cluster"
+                  resourceApiPath={`/teams/${team.metadata.name}/clusters/${cluster.metadata.name}`}
+                />
               )
             }}
           >
@@ -272,7 +280,14 @@ class TeamDashboard extends React.Component {
           <List
             dataSource={namespaceClaims.items}
             renderItem={namespaceClaim =>
-              <NamespaceClaim team={team.metadata.name} namespaceClaim={namespaceClaim} handleDelete={this.handleNamespaceDeleted} />
+              <NamespaceClaim
+                team={team.metadata.name}
+                namespaceClaim={namespaceClaim}
+                handleDelete={this.handleNamespaceDeleted}
+                refreshMs={1000}
+                stateResourceDataKey="namespaceClaim"
+                resourceApiPath={`/teams/${team.metadata.name}/namespaceclaims/${namespaceClaim.metadata.name}`}
+              />
             }
           >
           </List>
