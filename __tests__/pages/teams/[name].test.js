@@ -39,8 +39,10 @@ describe('TeamPage', () => {
 
     describe('#constructor', () => {
       it('sets props on state', () => {
-        expect(teamPage.state.teamName).toBe('a-team')
-        expect(teamPage.state.members).toEqual({ items: ['jbloggs', 'fflintstone'] })
+        expect(teamPage.state.members).toEqual(props.members)
+        expect(teamPage.state.clusters).toEqual(props.clusters)
+        expect(teamPage.state.namespaceClaims).toEqual(props.namespaceClaims)
+        expect(teamPage.state.createNamespace).toEqual(false)
       })
     })
 
