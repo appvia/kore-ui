@@ -27,7 +27,7 @@ export ENABLE_DEX="true"
 export KORE_HMAC="bdT2Qg6DybsLIwc0TbYWrkGC4auovscg"
 export KORE_API_PUBLIC_URL="http://127.0.0.1:10080"
 export KORE_CLIENT_SCOPES="email,profile,offline_access"
-export KORE_DISCOVERY_URL="http://localhost:5556/"
+export KORE_IDP_SERVER_URL="http://localhost:5556/"
 export USERS_DB_URL="root:pass@tcp(localhost:3306)/kore?parseTime=true"
 # run kore
 bin/kore-apiserver --verbose --kube-api-server http://127.0.0.1:8080
@@ -41,7 +41,7 @@ Once this is complete, you can install and run the Kore UI as follows
 # run dependencies
 make compose
 # set environment variables
-export KORE_DISCOVERY_URL=https://<your-openid-domain>
+export KORE_IDP_SERVER_URL=https://<your-openid-domain>
 export KORE_CLIENT_ID=<your-openid-client-id>
 export KORE_CLIENT_SECRET=<your-openid-client-secret>
 # install and run the UI
