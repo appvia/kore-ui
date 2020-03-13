@@ -135,18 +135,22 @@ class TeamDashboard extends React.Component {
     }
   }
 
-  handleClusterDeleted = (name, done) => {
-    const state = copy(this.state)
-    const deletedCluster = state.clusters.items.find(c => c.metadata.name === name)
-    deletedCluster.deleted = true
-    this.setState(state, done)
+  handleResourceUpdated = resourceType => {
+    return (updatedResource, done) => {
+      const state = copy(this.state)
+      const resource = state[resourceType].items.find(r => r.metadata.name === updatedResource.metadata.name)
+      resource.status = updatedResource.status
+      this.setState(state, done)
+    }
   }
 
-  handleClusterUpdated = (updatedCluster, done) => {
-    const state = copy(this.state)
-    const cluster = state.clusters.items.find(c => c.metadata.name === updatedCluster.metadata.name)
-    cluster.status = updatedCluster.status
-    this.setState(state, done)
+  handleResourceDeleted = resourceType => {
+    return (name, done) => {
+      const state = copy(this.state)
+      const resource = state[resourceType].items.find(r => r.metadata.name === name)
+      resource.deleted = true
+      this.setState(state, done)
+    }
   }
 
   deleteCluster = async (name, done) => {
@@ -179,20 +183,6 @@ class TeamDashboard extends React.Component {
     state.namespaceClaims.items.push(namespaceClaim)
     this.setState(state)
     message.loading(`Namespace "${namespaceClaim.spec.name}" requested on cluster "${namespaceClaim.spec.cluster.name}"`)
-  }
-
-  handleNamespaceDeleted = (name, done) => {
-    const state = copy(this.state)
-    const deletedNc = state.namespaceClaims.items.find(nc => nc.metadata.name === name)
-    deletedNc.deleted = true
-    this.setState(state, done)
-  }
-
-  handleNamespaceUpdated = (updatedNamespaceClaim, done) => {
-    const state = copy(this.state)
-    const namespaceClaim = state.namespaceClaims.items.find(nc => nc.metadata.name === updatedNamespaceClaim.metadata.name)
-    namespaceClaim.status = updatedNamespaceClaim.status
-    this.setState(state, done)
   }
 
   deleteNamespace = async (name, done) => {
@@ -308,8 +298,8 @@ class TeamDashboard extends React.Component {
                   cluster={cluster}
                   namespaceClaims={namespaceClaims}
                   deleteCluster={this.deleteCluster}
-                  handleUpdate={this.handleClusterUpdated}
-                  handleDelete={this.handleClusterDeleted}
+                  handleUpdate={this.handleResourceUpdated('clusters')}
+                  handleDelete={this.handleResourceDeleted('clusters')}
                   refreshMs={10000}
                   stateResourceDataKey="cluster"
                   resourceApiPath={`/teams/${team.metadata.name}/clusters/${cluster.metadata.name}`}
@@ -332,8 +322,8 @@ class TeamDashboard extends React.Component {
                 team={team.metadata.name}
                 namespaceClaim={namespaceClaim}
                 deleteNamespace={this.deleteNamespace}
-                handleUpdate={this.handleNamespaceUpdated}
-                handleDelete={this.handleNamespaceDeleted}
+                handleUpdate={this.handleResourceUpdated('namespaceClaims')}
+                handleDelete={this.handleResourceDeleted('namespaceClaims')}
                 refreshMs={15000}
                 stateResourceDataKey="namespaceClaim"
                 resourceApiPath={`/teams/${team.metadata.name}/namespaceclaims/${namespaceClaim.metadata.name}`}
