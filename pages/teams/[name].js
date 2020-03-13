@@ -2,6 +2,7 @@ import React from 'react'
 import PropTypes from 'prop-types'
 import axios from 'axios'
 import Link from 'next/link'
+import Error from 'next/error'
 import { Typography, Card, List, Tag, Button, Avatar, Popconfirm, message, Select, Drawer, Badge, Alert } from 'antd'
 const { Paragraph, Text } = Typography
 const { Option } = Select
@@ -61,6 +62,10 @@ class TeamDashboard extends React.Component {
 
   static getInitialProps = async ctx => {
     const teamDetails = await TeamDashboard.getTeamDetails(ctx)
+    if (Object.keys(teamDetails.team).length === 0 && ctx.res) {
+      /* eslint-disable-next-line require-atomic-updates */
+      ctx.res.statusCode = 404
+    }
     if (ctx.query.invitation === 'true') {
       teamDetails.invitation = true
     }
@@ -85,7 +90,9 @@ class TeamDashboard extends React.Component {
   }
 
   componentDidUpdate(prevProps) {
-    if (this.props.team.metadata.name !== prevProps.team.metadata.name) {
+    const teamFound = Object.keys(this.props.team).length
+    const prevTeamName = prevProps.team.metadata && prevProps.team.metadata.name
+    if (teamFound && this.props.team.metadata.name !== prevTeamName) {
       const state = copy(this.state)
       state.members = this.props.members
       state.clusters = this.props.clusters
@@ -202,8 +209,13 @@ class TeamDashboard extends React.Component {
   }
 
   render() {
-    const { members, namespaceClaims, allUsers, membersToAdd, createNamespace, clusters } = this.state
     const { team, user, invitation } = this.props
+
+    if (Object.keys(team).length === 0) {
+      return <Error statusCode={404} />
+    }
+
+    const { members, namespaceClaims, allUsers, membersToAdd, createNamespace, clusters } = this.state
     const teamMembers = ['ADD_USER', ...members.items]
 
     const memberActions = member => {
