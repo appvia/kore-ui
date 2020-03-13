@@ -135,19 +135,42 @@ class TeamDashboard extends React.Component {
     }
   }
 
+  handleClusterDeleted = (name, done) => {
+    const state = copy(this.state)
+    const deletedCluster = state.clusters.items.find(c => c.metadata.name === name)
+    deletedCluster.deleted = true
+    this.setState(state, done)
+  }
+
+  handleClusterUpdated = (updatedCluster, done) => {
+    const state = copy(this.state)
+    const cluster = state.clusters.items.find(c => c.metadata.name === updatedCluster.metadata.name)
+    cluster.status = updatedCluster.status
+    this.setState(state, done)
+  }
+
+  deleteCluster = async (name, done) => {
+    const team = this.props.team.metadata.name
+    try {
+      const state = copy(this.state)
+      const cluster = state.clusters.items.find(c => c.metadata.name === name)
+      await apiRequest(null, 'delete', `/teams/${team}/clusters/${cluster.metadata.name}`)
+      cluster.status.status = 'Deleting'
+      cluster.metadata.deletionTimestamp = new Date()
+      this.setState(state, done)
+      message.loading(`Cluster deletion requested: ${cluster.metadata.name}`)
+    } catch (err) {
+      console.error('Error deleting cluster', err)
+      message.error('Error deleting cluster, please try again.')
+    }
+  }
+
   createNamespace = value => {
     return () => {
       const state = copy(this.state)
       state.createNamespace = value
       this.setState(state)
     }
-  }
-
-  handleClusterDeleted = name => {
-    const state = copy(this.state)
-    const deletedCluster = state.clusters.items.find(c => c.metadata.name === name)
-    deletedCluster.deleted = true
-    this.setState(state)
   }
 
   handleNamespaceCreated = namespaceClaim => {
@@ -284,6 +307,8 @@ class TeamDashboard extends React.Component {
                   team={team.metadata.name}
                   cluster={cluster}
                   namespaceClaims={namespaceClaims}
+                  deleteCluster={this.deleteCluster}
+                  handleUpdate={this.handleClusterUpdated}
                   handleDelete={this.handleClusterDeleted}
                   refreshMs={10000}
                   stateResourceDataKey="cluster"
