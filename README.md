@@ -20,14 +20,14 @@ export KORE_ADMIN_PASS="password"
 export KORE_ADMIN_TOKEN=password
 export KORE_CERTIFICATE_AUTHORITY_KEY=hack/ca/ca-key.pem
 export KORE_CERTIFICATE_AUTHORITY=hack/ca/ca.pem
-export KORE_CLIENT_ID=broker
-export KORE_CLIENT_SECRET=2a959c78-134f-4daa-bfef-5cfd96d45948
+export KORE_IDP_SERVER_URL="http://localhost:5556/"
+export KORE_IDP_CLIENT_ID=broker
+export KORE_IDP_CLIENT_SECRET=2a959c78-134f-4daa-bfef-5cfd96d45948
+export KORE_IDP_CLIENT_SCOPES="email,profile,offline_access"
 export KORE_AUTHENTICATION_PLUGINS=basicauth,openid,admintoken
 export ENABLE_DEX="true"
 export KORE_HMAC="bdT2Qg6DybsLIwc0TbYWrkGC4auovscg"
 export KORE_API_PUBLIC_URL="http://127.0.0.1:10080"
-export KORE_CLIENT_SCOPES="email,profile,offline_access"
-export KORE_IDP_SERVER_URL="http://localhost:5556/"
 export USERS_DB_URL="root:pass@tcp(localhost:3306)/kore?parseTime=true"
 # run kore
 bin/kore-apiserver --verbose --kube-api-server http://127.0.0.1:8080
@@ -42,8 +42,8 @@ Once this is complete, you can install and run the Kore UI as follows
 make compose
 # set environment variables
 export KORE_IDP_SERVER_URL=https://<your-openid-domain>
-export KORE_CLIENT_ID=<your-openid-client-id>
-export KORE_CLIENT_SECRET=<your-openid-client-secret>
+export KORE_IDP_CLIENT_ID=<your-openid-client-id>
+export KORE_IDP_CLIENT_SECRET=<your-openid-client-secret>
 # install and run the UI
 npm install
 npm run dev
