@@ -7,6 +7,7 @@ const { Text, Title } = Typography
 import apiRequest from '../../lib/utils/api-request'
 import copy from '../../lib/utils/object-copy'
 import Breadcrumb from '../../lib/components/Breadcrumb'
+import ResourceVerificationStatus from '../../lib/components/ResourceVerificationStatus'
 import GKECredentialsForm from '../../lib/components/forms/GKECredentialsForm'
 
 import { kore } from '../../config'
@@ -122,7 +123,10 @@ class ConfigureIntegrationsPage extends React.Component {
                 <Text>{gke.metadata.name}</Text>
               )
               return (
-                <List.Item key={gke.metadata.name} actions={[<Text key="show_creds"><a onClick={this.editIntegration(gke)}><Icon type="eye" theme="filled"/> Edit</a></Text>]}>
+                <List.Item key={gke.metadata.name} actions={[
+                  <ResourceVerificationStatus key="verification_status" resourceStatus={gke.status} />,
+                  <Text key="show_creds"><a onClick={this.editIntegration(gke)}><Icon type="eye" theme="filled"/> Edit</a></Text>
+                ]}>
                   <List.Item.Meta
                     avatar={<Avatar icon="cloud" />}
                     title={displayName}
