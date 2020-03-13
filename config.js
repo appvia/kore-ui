@@ -12,9 +12,9 @@ module.exports = {
     openid: {
       url: process.env.KORE_IDP_SERVER_URL || 'https://my-openid-domain.com',
       callbackURL: process.env.KORE_CALLBACK_URL || 'http://localhost:3000/auth/callback',
-      clientID: process.env.KORE_CLIENT_ID || 'my-openid-client-id',
-      clientSecret: process.env.KORE_CLIENT_SECRET || 'my-openid-client-secret',
-      userClaimsOrder: process.env.KORE_USER_CLAIMS || 'preferred_username,email,name,username'
+      clientID: process.env.KORE_IDP_CLIENT_ID || 'my-openid-client-id',
+      clientSecret: process.env.KORE_IDP_CLIENT_SECRET || 'my-openid-client-secret',
+      userClaimsOrder: process.env.KORE_IDP_USER_CLAIMS || 'preferred_username,email,name,username'
     }
   },
   kore: {
