@@ -135,19 +135,46 @@ class TeamDashboard extends React.Component {
     }
   }
 
+  handleResourceUpdated = resourceType => {
+    return (updatedResource, done) => {
+      const state = copy(this.state)
+      const resource = state[resourceType].items.find(r => r.metadata.name === updatedResource.metadata.name)
+      resource.status = updatedResource.status
+      this.setState(state, done)
+    }
+  }
+
+  handleResourceDeleted = resourceType => {
+    return (name, done) => {
+      const state = copy(this.state)
+      const resource = state[resourceType].items.find(r => r.metadata.name === name)
+      resource.deleted = true
+      this.setState(state, done)
+    }
+  }
+
+  deleteCluster = async (name, done) => {
+    const team = this.props.team.metadata.name
+    try {
+      const state = copy(this.state)
+      const cluster = state.clusters.items.find(c => c.metadata.name === name)
+      await apiRequest(null, 'delete', `/teams/${team}/clusters/${cluster.metadata.name}`)
+      cluster.status.status = 'Deleting'
+      cluster.metadata.deletionTimestamp = new Date()
+      this.setState(state, done)
+      message.loading(`Cluster deletion requested: ${cluster.metadata.name}`)
+    } catch (err) {
+      console.error('Error deleting cluster', err)
+      message.error('Error deleting cluster, please try again.')
+    }
+  }
+
   createNamespace = value => {
     return () => {
       const state = copy(this.state)
       state.createNamespace = value
       this.setState(state)
     }
-  }
-
-  handleClusterDeleted = name => {
-    const state = copy(this.state)
-    const deletedCluster = state.clusters.items.find(c => c.metadata.name === name)
-    deletedCluster.deleted = true
-    this.setState(state)
   }
 
   handleNamespaceCreated = namespaceClaim => {
@@ -158,11 +185,20 @@ class TeamDashboard extends React.Component {
     message.loading(`Namespace "${namespaceClaim.spec.name}" requested on cluster "${namespaceClaim.spec.cluster.name}"`)
   }
 
-  handleNamespaceDeleted = name => {
-    const state = copy(this.state)
-    const deletedNc = state.namespaceClaims.items.find(nc => nc.metadata.name === name)
-    deletedNc.deleted = true
-    this.setState(state)
+  deleteNamespace = async (name, done) => {
+    const team = this.props.team.metadata.name
+    try {
+      const state = copy(this.state)
+      const namespaceClaim = state.namespaceClaims.items.find(nc => nc.metadata.name === name)
+      await apiRequest(null, 'delete', `/teams/${team}/namespaceclaims/${name}`)
+      namespaceClaim.status.status = 'Deleting'
+      namespaceClaim.metadata.deletionTimestamp = new Date()
+      this.setState(state, done)
+      message.loading(`Namespace deletion requested: ${namespaceClaim.spec.name}`)
+    } catch (err) {
+      console.error('Error deleting namespace', err)
+      message.error('Error deleting namespace, please try again.')
+    }
   }
 
   render() {
@@ -257,7 +293,17 @@ class TeamDashboard extends React.Component {
             renderItem={cluster => {
               const namespaceClaims = (this.state.namespaceClaims.items || []).filter(nc => nc.spec.cluster.name === cluster.metadata.name && !nc.deleted)
               return (
-                <Cluster team={team.metadata.name} cluster={cluster} namespaceClaims={namespaceClaims} handleDelete={this.handleClusterDeleted} />
+                <Cluster
+                  team={team.metadata.name}
+                  cluster={cluster}
+                  namespaceClaims={namespaceClaims}
+                  deleteCluster={this.deleteCluster}
+                  handleUpdate={this.handleResourceUpdated('clusters')}
+                  handleDelete={this.handleResourceDeleted('clusters')}
+                  refreshMs={10000}
+                  stateResourceDataKey="cluster"
+                  resourceApiPath={`/teams/${team.metadata.name}/clusters/${cluster.metadata.name}`}
+                />
               )
             }}
           >
@@ -272,7 +318,16 @@ class TeamDashboard extends React.Component {
           <List
             dataSource={namespaceClaims.items}
             renderItem={namespaceClaim =>
-              <NamespaceClaim team={team.metadata.name} namespaceClaim={namespaceClaim} handleDelete={this.handleNamespaceDeleted} />
+              <NamespaceClaim
+                team={team.metadata.name}
+                namespaceClaim={namespaceClaim}
+                deleteNamespace={this.deleteNamespace}
+                handleUpdate={this.handleResourceUpdated('namespaceClaims')}
+                handleDelete={this.handleResourceDeleted('namespaceClaims')}
+                refreshMs={15000}
+                stateResourceDataKey="namespaceClaim"
+                resourceApiPath={`/teams/${team.metadata.name}/namespaceclaims/${namespaceClaim.metadata.name}`}
+              />
             }
           >
           </List>
