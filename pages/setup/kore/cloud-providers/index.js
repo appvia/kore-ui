@@ -1,15 +1,19 @@
 import React from 'react'
+import PropTypes from 'prop-types'
 import { Typography, Card } from 'antd'
 const { Title, Paragraph } = Typography
 
 import redirect from '../../../../lib/utils/redirect'
 import copy from '../../../../lib/utils/object-copy'
+import apiRequest from '../../../../lib/utils/api-request'
 import { kore } from '../../../../config'
 import GKECredentialsForm from '../../../../lib/components/forms/GKECredentialsForm'
 import CloudSelector from '../../../../lib/components/cluster-build/CloudSelector'
 
 class ConfigureCloudProvidersPage extends React.Component {
-  static propTypes = {}
+  static propTypes = {
+    allTeams: PropTypes.object.isRequired
+  }
 
   static staticProps = {
     title: 'Configure cluster providers',
@@ -19,6 +23,12 @@ class ConfigureCloudProvidersPage extends React.Component {
 
   state = {
     selectedCloud: ''
+  }
+
+  static getInitialProps = async ctx => {
+    const allTeams = await apiRequest(ctx, 'get', '/teams')
+    allTeams.items = allTeams.items.filter(t => !kore.ignoreTeams.includes(t.metadata.name))
+    return { allTeams }
   }
 
   handleSelectCloud = cloud => {
@@ -35,6 +45,7 @@ class ConfigureCloudProvidersPage extends React.Component {
 
   render() {
     const { selectedCloud } = this.state
+    const { allTeams } = this.props
 
     return (
       <div>
@@ -45,7 +56,7 @@ class ConfigureCloudProvidersPage extends React.Component {
         </div>
         { selectedCloud === 'GKE' ? (
           <Card title="Enter GKE credentials" style={{ paddingBottom: '0' }}>
-            <GKECredentialsForm team={kore.koreAdminTeamName} handleSubmit={this.handleFormSubmit} />
+            <GKECredentialsForm team={kore.koreAdminTeamName} allTeams={allTeams} handleSubmit={this.handleFormSubmit} saveButtonText="Save & Verify" inlineVerification={true} />
           </Card>
         ) : null }
       </div>
