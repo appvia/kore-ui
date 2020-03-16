@@ -1,12 +1,13 @@
 import React from 'react'
 import PropTypes from 'prop-types'
 import axios from 'axios'
-import { Typography, Card, List, Button, Avatar, Icon, Drawer, message, Tooltip } from 'antd'
+import { Typography, Card, List, Button, Drawer, message } from 'antd'
 const { Text, Title } = Typography
 
 import apiRequest from '../../lib/utils/api-request'
 import copy from '../../lib/utils/object-copy'
 import Breadcrumb from '../../lib/components/Breadcrumb'
+import Credentials from '../../lib/components/team/Credentials'
 import GKECredentialsForm from '../../lib/components/forms/GKECredentialsForm'
 
 import { kore } from '../../config'
@@ -53,16 +54,26 @@ class ConfigureIntegrationsPage extends React.Component {
     return data
   }
 
+  handleUpdated = resourceType => {
+    return (updatedResource, done) => {
+      const state = copy(this.state)
+      const resource = state[resourceType].items.find(r => r.metadata.name === updatedResource.metadata.name)
+      resource.status = updatedResource.status
+      this.setState(state, done)
+    }
+  }
+
   handleEditIntegrationSave = updatedIntegration => {
     const state = copy(this.state)
 
     const editedIntegration = state.gkeCredentials.items.find(c => c.metadata.name === state.editIntegration.integration.metadata.name)
     editedIntegration.spec = updatedIntegration.spec
     editedIntegration.allocation = updatedIntegration.allocation
+    editedIntegration.status.status = 'Pending'
 
     this.setState(state)
     this.clearEditIntegration()
-    message.success('Integration updated')
+    message.success('GKE credentials updated successfully')
   }
 
   editIntegration = gkeCredentials => {
@@ -96,18 +107,12 @@ class ConfigureIntegrationsPage extends React.Component {
     state.gkeCredentials.items.push(createdIntegration)
     state.addNewIntegration = false
     this.setState(state)
-    message.success('Integration created')
+    message.success('GKE credentials created successfully')
   }
 
   render() {
     const { gkeCredentials, editIntegration, addNewIntegration } = this.state
-    const getCredentialsAllocations = allocation => {
-      if (!allocation) {
-        return <Text>No teams <Tooltip title="These credentials are not allocated to any teams, click edit to fix this."><Icon type="warning" theme="twoTone" twoToneColor="orange" /></Tooltip> </Text>
-      }
-      const allocatedTeams = this.props.allTeams.items.filter(team => allocation.spec.teams.includes(team.metadata.name)).map(team => team.spec.summary)
-      return allocatedTeams.length > 0 ? allocatedTeams.join(', ') : 'All teams'
-    }
+    const { allTeams } = this.props
 
     return (
       <div>
@@ -115,22 +120,17 @@ class ConfigureIntegrationsPage extends React.Component {
         <Card title="GKE credentials" extra={<Button type="primary" onClick={this.addNewIntegration}>+ New</Button>}>
           <List
             dataSource={gkeCredentials.items}
-            renderItem={gke => {
-              const displayName = gke.allocation ? (
-                <Text>{gke.allocation.spec.name} <Text type="secondary">{gke.allocation.spec.summary}</Text></Text>
-              ): (
-                <Text>{gke.metadata.name}</Text>
-              )
-              return (
-                <List.Item key={gke.metadata.name} actions={[<Text key="show_creds"><a onClick={this.editIntegration(gke)}><Icon type="eye" theme="filled"/> Edit</a></Text>]}>
-                  <List.Item.Meta
-                    avatar={<Avatar icon="cloud" />}
-                    title={displayName}
-                    description={<span>Allocated to: {getCredentialsAllocations(gke.allocation)}</span>}
-                  />
-                </List.Item>
-              )
-            }}
+            renderItem={gke =>
+              <Credentials
+                gke={gke}
+                allTeams={allTeams.items}
+                editGKECredential={this.editIntegration}
+                handleUpdate={this.handleUpdated('gkeCredentials')}
+                refreshMs={2000}
+                stateResourceDataKey="gke"
+                resourceApiPath={`/teams/${kore.koreAdminTeamName}/gkecredentials/${gke.metadata.name}`}
+              />
+            }
           >
           </List>
           {editIntegration ? (
@@ -150,7 +150,7 @@ class ConfigureIntegrationsPage extends React.Component {
               width={700}
             >
               {editIntegration.type === 'GKE' ?
-                <GKECredentialsForm team={kore.koreAdminTeamName} allTeams={this.props.allTeams} data={editIntegration.integration} handleSubmit={this.handleEditIntegrationSave} />
+                <GKECredentialsForm team={kore.koreAdminTeamName} allTeams={allTeams} data={editIntegration.integration} handleSubmit={this.handleEditIntegrationSave} />
                 : null}
             </Drawer>
           ) : null}
@@ -162,7 +162,7 @@ class ConfigureIntegrationsPage extends React.Component {
               width={700}
             >
               {addNewIntegration === 'GKE' ?
-                <GKECredentialsForm team={kore.koreAdminTeamName} allTeams={this.props.allTeams} handleSubmit={this.handleNewIntegrationSave} />
+                <GKECredentialsForm team={kore.koreAdminTeamName} allTeams={allTeams} handleSubmit={this.handleNewIntegrationSave} />
                 : null}
             </Drawer>
           ) : null}
