@@ -243,7 +243,7 @@ class TeamDashboard extends React.Component {
         <Breadcrumb items={[{text: team.spec.summary}]} />
         <Paragraph>
           <Text strong>{team.spec.description}</Text>
-          <Text style={{ float: 'right' }}><Text strong>Short name: </Text>{team.metadata.name}</Text>
+          <Text style={{ float: 'right' }}><Text strong>Team ID: </Text>{team.metadata.name}</Text>
         </Paragraph>
         {invitation ? (
           <Alert

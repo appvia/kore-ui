@@ -108,17 +108,20 @@ class NewTeamPage extends React.Component {
         />
         {team ? (
           <div>
-            <Alert message={
-              <div>
-                <Text>Configure your team and create a cluster below</Text>
-                <Text strong> OR </Text>
-                <Button type="secondary" style={{ marginLeft: '2px', paddingLeft: '10px', paddingRight: '10px' }}>
-                  <Link href="/teams/[name]" as={`/teams/${team.metadata.name}`}>
-                    <a>Skip to team dashboard</a>
-                  </Link>
-                </Button>
-              </div>
-            } type="info" />
+            <Alert
+              message={
+                <div>
+                  <Text>Configure your team and create a cluster below</Text>
+                  <Text strong> OR </Text>
+                  <Button type="secondary" style={{ marginLeft: '2px', paddingLeft: '10px', paddingRight: '10px' }}>
+                    <Link href="/teams/[name]" as={`/teams/${team.metadata.name}`}>
+                      <a>Skip to team dashboard</a>
+                    </Link>
+                  </Button>
+                </div>
+              }
+              type="info"
+            />
 
             <Card title="Add people to your team" style={{ marginBottom: '30px', marginTop: '20px' }}>
               <Row gutter={30}>
