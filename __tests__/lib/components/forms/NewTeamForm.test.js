@@ -18,6 +18,7 @@ describe('NewTeamForm', () => {
         getFieldDecorator: jest.fn(() => c => c),
         getFieldsError: () => () => {},
         getFieldError: () => {},
+        getFieldValue: () => {},
         validateFields: jest.fn()
       },
       handleTeamCreated: jest.fn(),
