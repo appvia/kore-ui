@@ -2,7 +2,7 @@ const axios = require('axios')
 const Router = require('express').Router
 
 function processTeamInvitation(koreApi) {
-  return async (req, res, next) => {
+  return async (req, res) => {
     const token = req.params.token
     const options = {
       headers: {
@@ -21,7 +21,8 @@ function processTeamInvitation(koreApi) {
       const status = (err.response && err.response.status) || 500
       const message = (err.response && err.response.data && err.response.data.message) || err.message
       console.error(`Error processing team invitation link with token ${token}`, status, message, err)
-      return next(err)
+      const invitationLink = req.protocol + '://' + req.get('host') + req.originalUrl
+      return res.redirect(`/invalid-team-invitation?link=${invitationLink}`)
     }
   }
 }
