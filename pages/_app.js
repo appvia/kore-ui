@@ -15,6 +15,7 @@ import { kore, koreApi, server } from '../config'
 import OrgService from '../server/services/org'
 import userExpired from '../server/lib/user-expired'
 import gtag from '../lib/utils/gtag'
+import '../assets/styles.less'
 
 Router.events.on('routeChangeComplete', url => {
   gtag.pageView(url)
