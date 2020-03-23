@@ -3,7 +3,7 @@ import PropTypes from 'prop-types'
 import axios from 'axios'
 import Link from 'next/link'
 import Error from 'next/error'
-import { Typography, Card, List, Tag, Button, Avatar, Popconfirm, message, Select, Drawer, Badge, Alert } from 'antd'
+import { Typography, Card, List, Tag, Button, Avatar, Popconfirm, message, Select, Drawer, Badge, Alert, Icon, Modal } from 'antd'
 const { Paragraph, Text } = Typography
 const { Option } = Select
 
@@ -208,6 +208,22 @@ class TeamDashboard extends React.Component {
     }
   }
 
+  clusterAccess = () => {
+    Modal.info({
+      title: 'Cluster access',
+      content: (
+        <div style={{ marginTop: '20px' }}>
+          <Paragraph>You can use the Kore CLI to setup access to your team&apos;s clusters</Paragraph>
+          <Paragraph className="copy-command" style={{ marginRight: '40px' }} copyable>korectl clusters auth -t {this.props.team.metadata.name}</Paragraph>
+          <Paragraph>This will add local kubernetes configuration to allow you to use <Text style={{ fontFamily: 'monospace' }}>kubectl</Text> to talk to the provisioned cluster(s).</Paragraph>
+          <Paragraph>See examples: <a href="https://kubernetes.io/docs/reference/kubectl/overview/" target="_blank" rel="noopener noreferrer">https://kubernetes.io/docs/reference/kubectl/overview/</a></Paragraph>
+        </div>
+      ),
+      width: 700,
+      onOk() {}
+    })
+  }
+
   render() {
     const { team, user, invitation } = this.props
 
@@ -237,6 +253,7 @@ class TeamDashboard extends React.Component {
     }
 
     const membersAvailableToAdd = allUsers.filter(user => !members.items.includes(user))
+    const hasActiveClusters = Boolean(clusters.items.filter(c => c.status && c.status.status === 'Success').length)
 
     return (
       <div>
@@ -293,11 +310,17 @@ class TeamDashboard extends React.Component {
           title={<div><Text style={{ marginRight: '10px' }}>Clusters</Text><Badge style={{ backgroundColor: '#1890ff' }} count={clusters.items.filter(c => !c.deleted).length} /></div>}
           style={{ marginBottom: '20px' }}
           extra={
-            <Button type="primary">
-              <Link href="/teams/[name]/clusters/new" as={`/teams/${team.metadata.name}/clusters/new`}>
-                <a>+ New</a>
-              </Link>
-            </Button>
+            <div>
+              {hasActiveClusters ?
+                <Text style={{ marginRight: '20px' }}><a onClick={this.clusterAccess}><Icon type="eye" theme="twoTone" /> Access</a></Text> :
+                null
+              }
+              <Button type="primary">
+                <Link href="/teams/[name]/clusters/new" as={`/teams/${team.metadata.name}/clusters/new`}>
+                  <a>+ New</a>
+                </Link>
+              </Button>
+            </div>
           }
         >
           <List
