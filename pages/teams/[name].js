@@ -209,12 +209,13 @@ class TeamDashboard extends React.Component {
   }
 
   clusterAccess = () => {
+    const command = `korectl clusters auth -t ${this.props.team.metadata.name}`
     Modal.info({
       title: 'Cluster access',
       content: (
         <div style={{ marginTop: '20px' }}>
           <Paragraph>You can use the Kore CLI to setup access to your team&apos;s clusters</Paragraph>
-          <Paragraph className="copy-command" style={{ marginRight: '40px' }} copyable>korectl clusters auth -t {this.props.team.metadata.name}</Paragraph>
+          <Paragraph className="copy-command" style={{ marginRight: '40px' }} copyable>{command}</Paragraph>
           <Paragraph>This will add local kubernetes configuration to allow you to use <Text style={{ fontFamily: 'monospace' }}>kubectl</Text> to talk to the provisioned cluster(s).</Paragraph>
           <Paragraph>See examples: <a href="https://kubernetes.io/docs/reference/kubectl/overview/" target="_blank" rel="noopener noreferrer">https://kubernetes.io/docs/reference/kubectl/overview/</a></Paragraph>
         </div>
