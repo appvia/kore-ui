@@ -15,6 +15,7 @@ import NamespaceClaimForm from '../../lib/components/forms/NamespaceClaimForm'
 import apiRequest from '../../lib/utils/api-request'
 import copy from '../../lib/utils/object-copy'
 import asyncForEach from '../../lib/utils/async-foreach'
+import apiPaths from '../../lib/utils/api-paths'
 
 class TeamDashboard extends React.Component {
   static propTypes = {
@@ -45,11 +46,11 @@ class TeamDashboard extends React.Component {
 
   static async getTeamDetails({ req, res, query }) {
     const name = query.name
-    const getTeam = () => apiRequest({ req, res }, 'get', `/teams/${name}`)
-    const getTeamMembers = () => apiRequest({ req, res }, 'get', `/teams/${name}/members`)
-    const getTeamClusters = () => apiRequest({ req, res }, 'get', `/teams/${name}/clusters`)
-    const getNamespaceClaims = () => apiRequest({ req, res }, 'get', `/teams/${name}/namespaceclaims`)
-    const getAvailable = () => apiRequest({ req, res }, 'get', `/teams/${name}/allocations?assigned=true`)
+    const getTeam = () => apiRequest({ req, res }, 'get', apiPaths.team(name).self)
+    const getTeamMembers = () => apiRequest({ req, res }, 'get', apiPaths.team(name).members)
+    const getTeamClusters = () => apiRequest({ req, res }, 'get', apiPaths.team(name).clusters)
+    const getNamespaceClaims = () => apiRequest({ req, res }, 'get', apiPaths.team(name).namespaceClaims)
+    const getAvailable = () => apiRequest({ req, res }, 'get', `${apiPaths.team(name).allocations}?assigned=true`)
 
     return axios.all([getTeam(), getTeamMembers(), getTeamClusters(), getNamespaceClaims(), getAvailable()])
       .then(axios.spread(function (team, members, clusters, namespaceClaims, available) {
@@ -73,7 +74,7 @@ class TeamDashboard extends React.Component {
   }
 
   getAllUsers = async () => {
-    const users = await apiRequest(null, 'get', '/users')
+    const users = await apiRequest(null, 'get', apiPaths.users)
     if (users.items) {
       return users.items.map(user => user.spec.username).filter(user => user !== 'admin')
     }
@@ -116,7 +117,7 @@ class TeamDashboard extends React.Component {
     const members = state.members
 
     await asyncForEach(this.state.membersToAdd, async member => {
-      await apiRequest(null, 'put', `/teams/${this.props.team.metadata.name}/members/${member}`)
+      await apiRequest(null, 'put', `${apiPaths.team(this.props.team.metadata.name).members}/${member}`)
       message.success(`Team member added: ${member}`)
       members.items.push(member)
     })
@@ -129,7 +130,7 @@ class TeamDashboard extends React.Component {
     return async () => {
       const team = this.props.team.metadata.name
       try {
-        await apiRequest(null, 'delete', `/teams/${team}/members/${member}`)
+        await apiRequest(null, 'delete', `${apiPaths.team(team).members}/${member}`)
         const state = copy(this.state)
         const members = state.members
         members.items = members.items.filter(m => m !== member)
@@ -165,7 +166,7 @@ class TeamDashboard extends React.Component {
     try {
       const state = copy(this.state)
       const cluster = state.clusters.items.find(c => c.metadata.name === name)
-      await apiRequest(null, 'delete', `/teams/${team}/clusters/${cluster.metadata.name}`)
+      await apiRequest(null, 'delete', `${apiPaths.team(team).clusters}/${cluster.metadata.name}`)
       cluster.status.status = 'Deleting'
       cluster.metadata.deletionTimestamp = new Date()
       this.setState(state, done)
@@ -197,7 +198,7 @@ class TeamDashboard extends React.Component {
     try {
       const state = copy(this.state)
       const namespaceClaim = state.namespaceClaims.items.find(nc => nc.metadata.name === name)
-      await apiRequest(null, 'delete', `/teams/${team}/namespaceclaims/${name}`)
+      await apiRequest(null, 'delete', `${apiPaths.team(team).namespaceClaims}/${name}`)
       namespaceClaim.status.status = 'Deleting'
       namespaceClaim.metadata.deletionTimestamp = new Date()
       this.setState(state, done)
@@ -338,7 +339,7 @@ class TeamDashboard extends React.Component {
                   handleDelete={this.handleResourceDeleted('clusters')}
                   refreshMs={10000}
                   stateResourceDataKey="cluster"
-                  resourceApiPath={`/teams/${team.metadata.name}/clusters/${cluster.metadata.name}`}
+                  resourceApiPath={`${apiPaths.team(team.metadata.name).clusters}/${cluster.metadata.name}`}
                 />
               )
             }}
@@ -362,7 +363,7 @@ class TeamDashboard extends React.Component {
                 handleDelete={this.handleResourceDeleted('namespaceClaims')}
                 refreshMs={15000}
                 stateResourceDataKey="namespaceClaim"
-                resourceApiPath={`/teams/${team.metadata.name}/namespaceclaims/${namespaceClaim.metadata.name}`}
+                resourceApiPath={`${apiPaths.team(team.metadata.name).namespaceClaims}/${namespaceClaim.metadata.name}`}
               />
             }
           >

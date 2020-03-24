@@ -6,6 +6,7 @@ const { Title, Paragraph } = Typography
 import redirect from '../../../../lib/utils/redirect'
 import copy from '../../../../lib/utils/object-copy'
 import apiRequest from '../../../../lib/utils/api-request'
+import apiPaths from '../../../../lib/utils/api-paths'
 import { kore } from '../../../../config'
 import GKECredentialsForm from '../../../../lib/components/forms/GKECredentialsForm'
 import CloudSelector from '../../../../lib/components/cluster-build/CloudSelector'
@@ -26,7 +27,7 @@ class ConfigureCloudProvidersPage extends React.Component {
   }
 
   static getInitialProps = async ctx => {
-    const allTeams = await apiRequest(ctx, 'get', '/teams')
+    const allTeams = await apiRequest(ctx, 'get', apiPaths.teams)
     allTeams.items = allTeams.items.filter(t => !kore.ignoreTeams.includes(t.metadata.name))
     return { allTeams }
   }
