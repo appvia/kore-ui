@@ -10,6 +10,7 @@ import InviteLink from '../../lib/components/team/InviteLink'
 import Breadcrumb from '../../lib/components/Breadcrumb'
 import copy from '../../lib/utils/object-copy'
 import apiRequest from '../../lib/utils/api-request'
+import apiPaths from '../../lib/utils/api-paths'
 import asyncForEach from '../../lib/utils/async-foreach'
 
 class NewTeamPage extends React.Component {
@@ -31,7 +32,7 @@ class NewTeamPage extends React.Component {
   }
 
   getAllUsers = async () => {
-    const users = await apiRequest(null, 'get', '/users')
+    const users = await apiRequest(null, 'get', apiPaths.users)
     if (users.items) {
       return users.items.map(user => user.spec.username).filter(user => user !== 'admin')
     }
@@ -56,11 +57,12 @@ class NewTeamPage extends React.Component {
   }
 
   addTeamMembers = async () => {
-    const state = copy(this.state)
+    const team = this.state.team.metadata.name
     const members = state.members
+    const state = copy(this.state)
 
     await asyncForEach(this.state.membersToAdd, async member => {
-      await apiRequest(null, 'put', `/teams/${this.state.team.metadata.name}/members/${member}`)
+      await apiRequest(null, 'put', `${apiPaths.team(team).members}/${member}`)
       message.success(`Team member added: ${member}`)
       members.push(member)
     })
@@ -79,7 +81,7 @@ class NewTeamPage extends React.Component {
     return async () => {
       const team = this.state.team.metadata.name
       try {
-        await apiRequest(null, 'delete', `/teams/${team}/members/${member}`)
+        await apiRequest(null, 'delete', `${apiPaths.team(team).members}/${member}`)
         const state = copy(this.state)
         state.members = state.members.filter(m => m !== member)
         this.setState(state)

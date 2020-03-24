@@ -5,6 +5,7 @@ import { Typography, Card, List, Button, Drawer, message } from 'antd'
 const { Text, Title } = Typography
 
 import apiRequest from '../../lib/utils/api-request'
+import apiPaths from '../../lib/utils/api-paths'
 import copy from '../../lib/utils/object-copy'
 import Breadcrumb from '../../lib/components/Breadcrumb'
 import Credentials from '../../lib/components/team/Credentials'
@@ -30,9 +31,9 @@ class ConfigureIntegrationsPage extends React.Component {
   }
 
   static async getPageData({ req, res }) {
-    const getTeams = () => apiRequest({ req, res }, 'get', '/teams')
-    const getGKECredentials = () => apiRequest({ req, res }, 'get', `/teams/${kore.koreAdminTeamName}/gkecredentials`)
-    const getAllocations = () => apiRequest({ req, res }, 'get', `/teams/${kore.koreAdminTeamName}/allocations`)
+    const getTeams = () => apiRequest({ req, res }, 'get', apiPaths.teams)
+    const getGKECredentials = () => apiRequest({ req, res }, 'get', apiPaths.team(kore.koreAdminTeamName).gkeCredentials)
+    const getAllocations = () => apiRequest({ req, res }, 'get',apiPaths.team(kore.koreAdminTeamName).allocations)
 
     return axios.all([getGKECredentials(), getTeams(), getAllocations()])
       .then(axios.spread(async function (gkeCredentials, allTeams, allAllocations) {

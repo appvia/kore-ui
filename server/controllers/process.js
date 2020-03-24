@@ -1,5 +1,6 @@
 const axios = require('axios')
 const Router = require('express').Router
+const apiPaths = require('../../lib/utils/api-paths')
 
 function processTeamInvitation(koreApi) {
   return async (req, res) => {
@@ -11,7 +12,8 @@ function processTeamInvitation(koreApi) {
       }
     }
     try {
-      const invitationResponse = await axios.put(`${koreApi.url}/teams/invitation/${token}`, undefined, options)
+      const url = koreApi.url + apiPaths.useTeamInvitation(token)
+      const invitationResponse = await axios.put(url, undefined, options)
       let redirectTo = '/'
       if (invitationResponse.data.team) {
         redirectTo = `/teams/${invitationResponse.data.team}?invitation=true`

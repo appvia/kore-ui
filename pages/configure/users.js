@@ -4,6 +4,7 @@ import { Typography, List, Avatar, Tag, message } from 'antd'
 const { Text } = Typography
 
 import apiRequest from '../../lib/utils/api-request'
+import apiPaths from '../../lib/utils/api-paths'
 import copy from '../../lib/utils/object-copy'
 import Breadcrumb from '../../lib/components/Breadcrumb'
 
@@ -27,8 +28,8 @@ class ConfigureUsersPage extends React.Component {
   }
 
   static getInitialProps = async (ctx) => {
-    const users = await apiRequest(ctx, 'get', '/users')
-    const adminTeamMembers = await apiRequest(ctx, 'get', `/teams/${kore.koreAdminTeamName}/members`)
+    const users = await apiRequest(ctx, 'get', apiPaths.users)
+    const adminTeamMembers = await apiRequest(ctx, 'get', apiPaths.team(kore.koreAdminTeamName).members)
     return {
       users: users.items,
       admins: adminTeamMembers.items
@@ -38,7 +39,7 @@ class ConfigureUsersPage extends React.Component {
   makeAdmin = (username) => {
     return async () => {
       try {
-        await apiRequest(null, 'put', `/teams/${kore.koreAdminTeamName}/members/${username}`)
+        await apiRequest(null, 'put', `${apiPaths.team(kore.koreAdminTeamName).members}/${username}`)
         const state = copy(this.state)
         state.admins.push(username)
         this.setState(state)
@@ -53,7 +54,7 @@ class ConfigureUsersPage extends React.Component {
   revokeAdmin = (username) => {
     return async () => {
       try {
-        await apiRequest(null, 'delete', `/teams/${kore.koreAdminTeamName}/members/${username}`)
+        await apiRequest(null, 'delete', `${apiPaths.team(kore.koreAdminTeamName).members}/${username}`)
         const state = copy(this.state)
         state.admins = state.admins.filter(m => m !== username)
         this.setState(state)

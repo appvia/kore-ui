@@ -5,6 +5,7 @@ import { Typography, Statistic, Icon, Row, Col, Card, Alert, Button } from 'antd
 const { Title, Paragraph } = Typography
 
 import apiRequest from '../lib/utils/api-request'
+import apiPaths from '../lib/utils/api-paths'
 import { kore } from '../config'
 
 class IndexPage extends React.Component {
@@ -29,15 +30,15 @@ class IndexPage extends React.Component {
 
     if (user.isAdmin) {
       [ allTeams, allUsers, adminMembers, gkeCredentials ] = await Promise.all([
-        apiRequest(ctx, 'get', '/teams'),
-        apiRequest(ctx, 'get', '/users'),
-        apiRequest(ctx, 'get', `/teams/${kore.koreAdminTeamName}/members`),
-        apiRequest(ctx, 'get', `/teams/${kore.koreAdminTeamName}/gkecredentials`)
+        apiRequest(ctx, 'get', apiPaths.teams),
+        apiRequest(ctx, 'get', apiPaths.users),
+        apiRequest(ctx, 'get', apiPaths.team(kore.koreAdminTeamName).members),
+        apiRequest(ctx, 'get', apiPaths.team(kore.koreAdminTeamName).gkeCredentials)
       ])
     } else {
       [ allTeams, allUsers ] = await Promise.all([
-        apiRequest(ctx, 'get', '/teams'),
-        apiRequest(ctx, 'get', '/users')
+        apiRequest(ctx, 'get', apiPaths.teams),
+        apiRequest(ctx, 'get', apiPaths.users)
       ])
     }
 

@@ -7,6 +7,7 @@ const { Title } = Typography
 import Breadcrumb from '../../../../lib/components/Breadcrumb'
 import ClusterBuildForm from '../../../../lib/components/forms/ClusterBuildForm'
 import apiRequest from '../../../../lib/utils/api-request'
+import apiPaths from '../../../../lib/utils/api-paths'
 
 class NewTeamClusterPage extends React.Component {
   static propTypes = {
@@ -21,8 +22,8 @@ class NewTeamClusterPage extends React.Component {
 
   static async getPageData({ req, res, query }) {
     const name = query.name
-    const getTeam = () => apiRequest({ req, res }, 'get', `/teams/${name}`)
-    const getTeamClusters = () => apiRequest({ req, res }, 'get', `/teams/${name}/clusters`)
+    const getTeam = () => apiRequest({ req, res }, 'get', apiPaths.team(name).self)
+    const getTeamClusters = () => apiRequest({ req, res }, 'get', apiPaths.team(name).clusters)
 
     return axios.all([getTeam(), getTeamClusters()])
       .then(axios.spread(function (team, clusters) {
