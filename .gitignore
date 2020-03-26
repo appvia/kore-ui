@@ -1,6 +1,0 @@
-node_modules
-.next
-
-# config
-dev.env
-demo.env
